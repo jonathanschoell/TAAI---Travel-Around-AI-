@@ -44,7 +44,7 @@ export async function signUp(_: FormState, fd: FormData): Promise<FormState> {
   if (fd.get("age") !== "on")
     return { error: "You need to be 16 or older to create an account.", email };
   if (fd.get("privacy") !== "on")
-    return { error: "Please accept the privacy policy to continue.", email };
+    return { error: "Please accept the terms of use and the privacy policy to continue.", email };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({

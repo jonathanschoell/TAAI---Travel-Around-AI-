@@ -5,7 +5,6 @@ import { getProfile, requireUser } from "@/lib/auth";
 import { CURRENCIES } from "@/lib/options";
 import { generatePlan, PlannerError } from "@/lib/planner/ai";
 import {
-  DAILY_PLAN_LIMIT,
   INTERESTS,
   LEVELS,
   LODGING,
@@ -15,6 +14,7 @@ import {
   TRAVEL_MODES,
   type TripInput,
 } from "@/lib/planner/options";
+import { getQuota, TIERS } from "@/lib/billing";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -38,7 +38,7 @@ function parse(fd: FormData): { input?: TripInput; error?: string } {
     return { error: "The end date must be on or after the start date." };
   const days = Math.round((end - start) / DAY) + 1;
   if (days > MAX_TRIP_DAYS)
-    return { error: `Trips can be up to ${MAX_TRIP_DAYS} days long for now. Please shorten the dates.` };
+    return { error: `Trips can be up to ${MAX_TRIP_DAYS} days long. Please shorten the dates.` };
 
   const travelers = Math.min(20, Math.max(1, Math.round(Number(fd.get("travelers")) || 1)));
   const children = Math.min(travelers - 1, Math.max(0, Math.round(Number(fd.get("children")) || 0)));
@@ -106,21 +106,34 @@ export async function createTrip(_: PlanFormState, fd: FormData): Promise<PlanFo
   const { input, error } = parse(fd);
   if (!input) return { error, values };
 
+  const quota = await getQuota(user);
+  const limits = TIERS[quota.tier];
+  if (input.days > limits.maxDays)
+    return {
+      error:
+        quota.tier === "free"
+          ? `Free accounts can plan trips of up to ${limits.maxDays} days. Shorten the dates, or see Pricing for longer trips.`
+          : `Trips can be up to ${limits.maxDays} days long. Please shorten the dates.`,
+      values,
+    };
+  if (quota.leftThisMonth <= 0)
+    return {
+      error:
+        quota.tier === "free"
+          ? `You have used your ${limits.plansPerMonth} free itineraries for this month. See Pricing for more.`
+          : `You have reached this month's limit of ${limits.plansPerMonth} itineraries.`,
+      values,
+    };
+  if (quota.leftToday <= 0)
+    return { error: "You have reached today's limit. Please try again tomorrow.", values };
   const admin = createAdminClient();
-  if (admin) {
-    const since = new Date(new Date().setUTCHours(0, 0, 0, 0)).toISOString();
-    const { count } = await admin.from("ai_usage").select("*", { count: "exact", head: true })
-      .eq("user_id", user.id).gte("created_at", since);
-    if ((count ?? 0) >= DAILY_PLAN_LIMIT)
-      return { error: `You have reached today's limit of ${DAILY_PLAN_LIMIT} plans. Please try again tomorrow.`, values };
-  }
 
   const profile = await getProfile(user.id);
   const context = await loadPersonalContext(user.id, profile?.personalization_enabled ?? false);
 
   let result;
   try {
-    result = await generatePlan(input, context);
+    result = await generatePlan(input, context, quota.tier);
   } catch (e) {
     const kind = e instanceof PlannerError ? e.kind : "failed";
     const messages: Record<string, string> = {

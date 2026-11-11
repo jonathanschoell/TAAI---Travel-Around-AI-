@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { createTrip, type PlanFormState } from "@/app/(app)/plan/actions";
 import { AGE_GROUPS, CURRENCIES } from "@/lib/options";
 import {
-  INTERESTS, LEVELS, LODGING, MAX_TRIP_DAYS, PACES, PARTY_TYPES, TRAVEL_MODES,
+  INTERESTS, LEVELS, LODGING, PACES, PARTY_TYPES, TRAVEL_MODES,
 } from "@/lib/planner/options";
 
 const empty: PlanFormState = {};
@@ -29,8 +29,10 @@ function Choice({
 
 export function PlanForm({
   defaults,
+  maxDays,
 }: {
   defaults: { currency: string; travelers: number; ageGroup: string };
+  maxDays: number;
 }) {
   const [state, action, pending] = useActionState(createTrip, empty);
   const v = (key: string, fallback = "") => {
@@ -63,7 +65,7 @@ export function PlanForm({
         <div className="field">
           <label htmlFor="pl-end">End date</label>
           <input id="pl-end" name="end_date" type="date" className="input" required defaultValue={v("end_date")} />
-          <span className="hint">Up to {MAX_TRIP_DAYS} days for now.</span>
+          <span className="hint">Up to {maxDays} days on your plan.</span>
         </div>
         <div className="field">
           <label htmlFor="pl-budget">Total budget</label>

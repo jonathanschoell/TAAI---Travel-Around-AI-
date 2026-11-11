@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { TierForm } from "@/components/app-forms";
 import { requireAdmin } from "@/lib/auth";
 import { loadAdminOverview } from "@/lib/admin-stats";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -69,6 +70,14 @@ export default async function AdminPage() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section className="card">
+        <h2 className="text-xl font-bold">Give or remove Premium</h2>
+        <p className="mt-1 mb-4 text-sm text-muted">
+          Sets an account&apos;s plan by hand. Use this until online payment is connected.
+        </p>
+        <TierForm />
       </section>
 
       <p className="text-sm text-muted">

@@ -62,7 +62,6 @@ export const BUDGET_PARTS: [string, string][] = [
 ];
 
 export const MAX_TRIP_DAYS = 10;
-export const DAILY_PLAN_LIMIT = 8;
 
 export type TripInput = {
   destination: string;

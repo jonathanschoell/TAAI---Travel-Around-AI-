@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/auth";
+import { requireAdmin, requireUser } from "@/lib/auth";
 import { PRIVACY_VERSION } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -100,4 +100,32 @@ export async function reportTrip(fd: FormData) {
     reason: "reported_from_trip_page",
   });
   redirect(`/trips/${id}?notice=reported`);
+}
+
+/** Admin only: give or remove Premium by hand, until online payment is connected. */
+export async function setUserTier(_: AppFormState, fd: FormData): Promise<AppFormState> {
+  const me = await requireAdmin();
+  const email = String(fd.get("email") ?? "").trim().toLowerCase();
+  const tier = fd.get("tier") === "premium" ? "premium" : "free";
+  if (!email) return { error: "Enter the email address of the account." };
+  const admin = createAdminClient();
+  if (!admin) return { error: "The secret key is missing on the server." };
+
+  let userId: string | null = null;
+  for (let page = 1; page <= 10 && !userId; page++) {
+    const { data } = await admin.auth.admin.listUsers({ page, perPage: 200 });
+    const users = data?.users ?? [];
+    userId = users.find((u) => u.email?.toLowerCase() === email)?.id ?? null;
+    if (users.length < 200) break;
+  }
+  if (!userId) return { error: "No account with that email address was found." };
+
+  const { error } = await admin.from("subscriptions").upsert({
+    user_id: userId, tier, status: "active", source: "manual", current_period_end: null,
+  });
+  if (error)
+    return { error: "Could not save. Has supabase/migrations/0002_subscriptions.sql been run in Supabase?" };
+  await admin.from("admin_audit_log").insert({ admin_user_id: me.id, action: `set_tier_${tier}`, target: userId });
+  revalidatePath("/admin");
+  return { notice: `${email} is now on the ${tier === "premium" ? "Premium" : "Free"} plan.` };
 }
