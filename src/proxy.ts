@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { supabaseEnv } from "@/lib/env";
 
 const PROTECTED = ["/dashboard", "/plan", "/trips", "/profile", "/my-data", "/admin"];
 const GUEST_ONLY = ["/login", "/register", "/forgot-password"];
@@ -10,11 +11,10 @@ const GUEST_ONLY = ["/login", "/register", "/forgot-password"];
  */
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const { url, key } = supabaseEnv();
   if (!url || !key) return response;
 
-  const supabase = createServerClient(url, key, {
+  const supabase = createServerClient(url.value, key.value, {
     cookies: {
       getAll() {
         return request.cookies.getAll();

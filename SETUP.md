@@ -36,6 +36,9 @@ Der eingebaute E-Mail-Versand von Supabase ist stark begrenzt und nur zum Testen
 | `NEXT_PUBLIC_SITE_URL` | Adresse der Seite ohne Schrägstrich am Ende |
 
 3. **Deploy** klicken. Nach jeder Änderung an den Variablen einmal **Redeploy**.
+4. Zur Kontrolle `https://deine-adresse/setup-check` öffnen. Die Seite zeigt, welche Werte die Website findet und ob Supabase antwortet. Werte selbst werden dort nie angezeigt.
+
+Die Variablen müssen für die Umgebung **Production** gesetzt sein. Namen exakt so schreiben wie in der Tabelle, ohne Leerzeichen und ohne Anführungszeichen.
 
 ## 4. Admin-Konten
 

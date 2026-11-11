@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LoginForm } from "@/components/auth-forms";
-import { AuthShell, SetupNotice } from "@/components/site";
-import { isSupabaseConfigured } from "@/lib/env";
+import { AuthShell } from "@/components/site";
 
 export const metadata: Metadata = { title: "Log in" };
 
@@ -18,7 +17,6 @@ export default function LoginPage() {
         </p>
       }
     >
-      {isSupabaseConfigured ? null : <div className="mb-4"><SetupNotice /></div>}
       <Suspense fallback={<p className="text-muted">Loading…</p>}>
         <LoginForm />
       </Suspense>

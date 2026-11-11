@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 
 /** The signed-in user, verified against Supabase on every request. */
 export const getUser = cache(async (): Promise<User | null> => {
-  if (!isSupabaseConfigured) return null;
+  if (!isSupabaseConfigured()) return null;
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
   return data.user ?? null;

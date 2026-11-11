@@ -90,12 +90,3 @@ export function AuthShell({
     </>
   );
 }
-
-export function SetupNotice() {
-  return (
-    <p className="notice">
-      Sign-in is not connected yet. Add the Supabase keys to the hosting environment as
-      described in SETUP.md, then redeploy.
-    </p>
-  );
-}

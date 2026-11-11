@@ -2,14 +2,19 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { isSupabaseConfigured, PRIVACY_VERSION } from "@/lib/env";
+import { isSupabaseConfigured, missingSettings, PRIVACY_VERSION } from "@/lib/env";
 import { safeNext } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
 export type FormState = { error?: string; notice?: string; email?: string };
 
-const NOT_CONFIGURED =
-  "Sign-in is not connected yet. The site owner still has to add the Supabase keys.";
+function notConfigured() {
+  return (
+    "Sign-in is not connected yet. Missing on the server: " +
+    missingSettings().join(", ") +
+    ". Open /setup-check on this site for details."
+  );
+}
 const MIN_PASSWORD = 10;
 
 async function siteOrigin() {
@@ -24,7 +29,7 @@ function text(fd: FormData, key: string) {
 }
 
 export async function signUp(_: FormState, fd: FormData): Promise<FormState> {
-  if (!isSupabaseConfigured) return { error: NOT_CONFIGURED };
+  if (!isSupabaseConfigured()) return { error: notConfigured() };
   const email = text(fd, "email").toLowerCase();
   const name = text(fd, "name").slice(0, 60);
   const password = String(fd.get("password") ?? "");
@@ -55,7 +60,15 @@ export async function signUp(_: FormState, fd: FormData): Promise<FormState> {
       return { error: "That password is too easy to guess. Choose a longer or less common one.", email };
     if (error.code === "over_email_send_rate_limit" || error.status === 429)
       return { error: "Too many attempts. Wait a minute and try again.", email };
-    return { error: "We could not create the account. Please try again.", email };
+    if (!error.status)
+      return {
+        error: "The sign-in service could not be reached. Open /setup-check on this site to see why.",
+        email,
+      };
+    return {
+      error: `We could not create the account (${error.code ?? error.status}). Please try again.`,
+      email,
+    };
   }
   // Same message whether or not the address was already registered.
   return {
@@ -68,7 +81,7 @@ export async function signUp(_: FormState, fd: FormData): Promise<FormState> {
 }
 
 export async function signIn(_: FormState, fd: FormData): Promise<FormState> {
-  if (!isSupabaseConfigured) return { error: NOT_CONFIGURED };
+  if (!isSupabaseConfigured()) return { error: notConfigured() };
   const email = text(fd, "email").toLowerCase();
   const password = String(fd.get("password") ?? "");
   if (!email || !password) return { error: "Enter your email and password.", email };
@@ -84,13 +97,18 @@ export async function signIn(_: FormState, fd: FormData): Promise<FormState> {
       };
     if (error.status === 429)
       return { error: "Too many attempts. Wait a minute and try again.", email };
+    if (!error.status)
+      return {
+        error: "The sign-in service could not be reached. Open /setup-check on this site to see why.",
+        email,
+      };
     return { error: "Email or password is incorrect.", email };
   }
   redirect(safeNext(fd.get("next")));
 }
 
 export async function resendConfirmation(_: FormState, fd: FormData): Promise<FormState> {
-  if (!isSupabaseConfigured) return { error: NOT_CONFIGURED };
+  if (!isSupabaseConfigured()) return { error: notConfigured() };
   const email = text(fd, "email").toLowerCase();
   if (!email) return { error: "Enter your email address first." };
   const supabase = await createClient();
@@ -103,7 +121,7 @@ export async function resendConfirmation(_: FormState, fd: FormData): Promise<Fo
 }
 
 export async function requestPasswordReset(_: FormState, fd: FormData): Promise<FormState> {
-  if (!isSupabaseConfigured) return { error: NOT_CONFIGURED };
+  if (!isSupabaseConfigured()) return { error: notConfigured() };
   const email = text(fd, "email").toLowerCase();
   if (!email) return { error: "Enter your email address." };
   const supabase = await createClient();
@@ -117,7 +135,7 @@ export async function requestPasswordReset(_: FormState, fd: FormData): Promise<
 }
 
 export async function updatePassword(_: FormState, fd: FormData): Promise<FormState> {
-  if (!isSupabaseConfigured) return { error: NOT_CONFIGURED };
+  if (!isSupabaseConfigured()) return { error: notConfigured() };
   const password = String(fd.get("password") ?? "");
   const confirm = String(fd.get("confirm") ?? "");
   if (password.length < MIN_PASSWORD)
@@ -140,7 +158,7 @@ export async function updatePassword(_: FormState, fd: FormData): Promise<FormSt
 }
 
 export async function signOut() {
-  if (isSupabaseConfigured) {
+  if (isSupabaseConfigured()) {
     const supabase = await createClient();
     await supabase.auth.signOut();
   }
