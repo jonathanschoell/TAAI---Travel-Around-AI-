@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { deleteAccount, updateProfile, type AppFormState } from "@/app/(app)/actions";
+import { deleteAccount, setUserTier, updateProfile, type AppFormState } from "@/app/(app)/actions";
 import { AGE_GROUPS, CURRENCIES } from "@/lib/options";
 
 const empty: AppFormState = {};
@@ -75,6 +75,29 @@ export function DeleteAccountForm() {
       <button type="submit" className="btn btn-danger sm:w-fit" disabled={pending}>
         {pending ? "Deleting…" : "Delete my account and all data"}
       </button>
+    </form>
+  );
+}
+
+export function TierForm() {
+  const [state, action, pending] = useActionState(setUserTier, empty);
+  return (
+    <form action={action} className="grid gap-3 sm:grid-cols-[2fr_1fr_auto] sm:items-end">
+      <div className="field">
+        <label htmlFor="tier-email">Account email</label>
+        <input id="tier-email" name="email" type="email" required className="input" />
+      </div>
+      <div className="field">
+        <label htmlFor="tier-tier">Plan</label>
+        <select id="tier-tier" name="tier" className="input" defaultValue="premium">
+          <option value="premium">Premium</option>
+          <option value="free">Free</option>
+        </select>
+      </div>
+      <button type="submit" className="btn btn-primary" disabled={pending}>
+        {pending ? "Saving…" : "Set plan"}
+      </button>
+      <div className="sm:col-span-3"><Messages state={state} /></div>
     </form>
   );
 }

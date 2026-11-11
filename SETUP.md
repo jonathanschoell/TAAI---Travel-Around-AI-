@@ -56,7 +56,9 @@ Admin ist nur, wer in `ADMIN_EMAILS` steht und seine E-Mail bestätigt hat. Ein 
 4. In Vercel als Umgebungsvariable `ANTHROPIC_API_KEY` eintragen (Production) und **Redeploy** klicken.
 5. `/setup-check` zeigt danach bei «AI planner key» ein OK.
 
-Jedes Konto kann pro Tag höchstens 8 Reisepläne erstellen, Reisen sind vorerst bis 10 Tage lang.
+6. In Supabase im **SQL Editor** zusätzlich die Datei `supabase/migrations/0002_subscriptions.sql` ausführen. Sie legt die Tabelle für Free und Premium an.
+
+**Stufen:** Free = 2 Pläne pro Monat, bis 5 Tage, günstiges Modell (`claude-haiku-5-5`). Premium = 60 Pläne pro Monat, bis 10 Tage, stärkeres Modell (`claude-sonnet-5-5`). Die Zahlen stehen in `src/lib/billing.ts`. Admin-Konten zählen immer als Premium. Im Admin-Bereich lässt sich Premium von Hand vergeben, bis eine Online-Bezahlung angebunden ist. Die Modelle lassen sich in Vercel mit `ANTHROPIC_MODEL_FREE` und `ANTHROPIC_MODEL` überschreiben.
 
 ## Was schon funktioniert
 

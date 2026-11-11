@@ -198,11 +198,16 @@ export type Usage = { input_tokens: number | null; output_tokens: number | null 
 export async function generatePlan(
   input: TripInput,
   personalContext: string,
-): Promise<{ plan: Plan; usage: Usage }> {
+  tier: "free" | "premium" = "premium",
+): Promise<{ plan: Plan; usage: Usage; model: string }> {
   const apiKey = process.env["ANTHROPIC_API_KEY"]?.trim();
   if (!apiKey) throw new PlannerError("not_configured", "ANTHROPIC_API_KEY is missing.");
   const base = (process.env["ANTHROPIC_BASE_URL"]?.trim() || "https://api.anthropic.com").replace(/\/+$/, "");
-  const model = process.env["ANTHROPIC_MODEL"]?.trim() || "claude-sonnet-5-5";
+  // Free accounts use the small, inexpensive model; premium accounts the stronger one.
+  const model =
+    tier === "premium"
+      ? process.env["ANTHROPIC_MODEL"]?.trim() || "claude-sonnet-5-5"
+      : process.env["ANTHROPIC_MODEL_FREE"]?.trim() || "claude-haiku-5-5";
 
   // Current Claude models do not accept a forced tool call, so the tool is offered with
   // "auto" and a strict schema. If a model rejects one of the newer options, the request
@@ -263,6 +268,7 @@ export async function generatePlan(
     throw new PlannerError("incomplete", "The plan came back incomplete.");
   }
   return {
+    model,
     plan: normalizePlan(block.input, input.days),
     usage: {
       input_tokens: data.usage?.input_tokens ?? null,
