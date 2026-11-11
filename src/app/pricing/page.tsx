@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicHeader, SiteFooter } from "@/components/site";
+import { PREMIUM_PRICE } from "@/lib/operator";
 
 export const metadata: Metadata = { title: "Pricing" };
 
@@ -11,7 +12,7 @@ const FREE = [
   "Saved trips in your dashboard",
 ];
 const PREMIUM = [
-  "60 AI itineraries per month",
+  "30 AI itineraries per month",
   "Trips of up to 10 days",
   "Our most capable AI model for richer, better-reasoned plans",
   "New features first as they launch",
@@ -51,7 +52,9 @@ export default function PricingPage() {
               <h2 className="text-2xl font-extrabold">Premium</h2>
               <span className="pill pill-signal">Coming soon</span>
             </div>
-            <p className="mt-1 font-display text-4xl font-extrabold">Price to be announced</p>
+            <p className="mt-1 font-display text-4xl font-extrabold">
+              {PREMIUM_PRICE} <span className="text-base font-semibold text-muted">per month</span>
+            </p>
             <List items={PREMIUM} />
             <button type="button" className="btn btn-primary mt-6 sm:w-fit" disabled>
               Not available yet

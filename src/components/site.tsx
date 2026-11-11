@@ -48,6 +48,7 @@ export function SiteFooter() {
         <p>Jovia · AI travel planner</p>
         <nav className="flex gap-4" aria-label="Legal">
           <Link href="/pricing" className="underline">Pricing</Link>
+          <Link href="/terms" className="underline">Terms</Link>
           <Link href="/privacy" className="underline">Privacy</Link>
           <Link href="/imprint" className="underline">Imprint</Link>
         </nav>
