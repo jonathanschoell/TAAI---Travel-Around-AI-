@@ -1,0 +1,182 @@
+@import "tailwindcss";
+
+/* Layout idea: calm petrol ink on cool paper, one signal-yellow accent borrowed
+   from airport wayfinding; content left-aligned, mobile-first, generous tap targets. */
+:root {
+  --bg: #f2f6f5;
+  --surface: #ffffff;
+  --ink: #0f2a2e;
+  --muted: #55686b;
+  --line: #d2dedb;
+  --brand: #0b6e6a;
+  --brand-ink: #ffffff;
+  --signal: #f2b705;
+  --danger: #b3261e;
+  --ok: #1d7a46;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b191c;
+    --surface: #12272b;
+    --ink: #e7f1ef;
+    --muted: #93a9aa;
+    --line: #254348;
+    --brand: #41c7ba;
+    --brand-ink: #06211f;
+    --signal: #f5c531;
+    --danger: #ff8a80;
+    --ok: #6fd39a;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-signal: var(--signal);
+  --color-danger: var(--danger);
+  --color-ok: var(--ok);
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  text-wrap: balance;
+  letter-spacing: -0.01em;
+}
+
+:focus-visible {
+  outline: 3px solid var(--signal);
+  outline-offset: 2px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 1.25rem;
+  border-radius: 999px;
+  font-weight: 600;
+  border: 1.5px solid transparent;
+  transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn[disabled],
+.btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+.btn-ghost {
+  border-color: var(--line);
+  color: var(--ink);
+  background: transparent;
+}
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.field label,
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.input {
+  min-height: 48px;
+  width: 100%;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0 0.875rem;
+  font-size: 1rem;
+}
+.input:focus-visible {
+  border-color: var(--brand);
+}
+.hint {
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 1.25rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 999px;
+  padding: 0.125rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+.pill-signal {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: #2a2000;
+}
+
+.notice {
+  border-radius: 12px;
+  padding: 0.75rem 0.875rem;
+  font-size: 0.9375rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.notice-error {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.notice-ok {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

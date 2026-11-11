@@ -1,0 +1,80 @@
+"use client";
+
+import { useActionState } from "react";
+import { deleteAccount, updateProfile, type AppFormState } from "@/app/(app)/actions";
+import { AGE_GROUPS, CURRENCIES } from "@/lib/options";
+
+const empty: AppFormState = {};
+
+function Messages({ state }: { state: AppFormState }) {
+  return (
+    <div aria-live="polite">
+      {state.error ? <p className="notice notice-error">{state.error}</p> : null}
+      {state.notice ? <p className="notice notice-ok">{state.notice}</p> : null}
+    </div>
+  );
+}
+
+export function ProfileForm({
+  profile,
+}: {
+  profile: { display_name: string; age_group: string | null; currency: string; default_travelers: number };
+}) {
+  const [state, action, pending] = useActionState(updateProfile, empty);
+  return (
+    <form action={action} className="grid gap-4 sm:grid-cols-2">
+      <div className="field sm:col-span-2">
+        <label htmlFor="pf-name">Profile name</label>
+        <input id="pf-name" name="display_name" className="input" maxLength={60} required
+          defaultValue={profile.display_name} autoComplete="given-name" />
+      </div>
+      <div className="field">
+        <label htmlFor="pf-age">Age group</label>
+        <select id="pf-age" name="age_group" className="input" defaultValue={profile.age_group ?? ""}>
+          <option value="">Prefer not to say</option>
+          {AGE_GROUPS.map((a) => <option key={a} value={a}>{a}</option>)}
+        </select>
+        <span className="hint">Optional. Helps suggest activities that fit.</span>
+      </div>
+      <div className="field">
+        <label htmlFor="pf-currency">Currency</label>
+        <select id="pf-currency" name="currency" className="input" defaultValue={profile.currency}>
+          {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+      </div>
+      <div className="field">
+        <label htmlFor="pf-travelers">Usual number of travellers</label>
+        <input id="pf-travelers" name="default_travelers" type="number" min={1} max={20}
+          inputMode="numeric" className="input" defaultValue={profile.default_travelers} />
+      </div>
+      <div className="field">
+        <label htmlFor="pf-language">Language</label>
+        <input id="pf-language" className="input" value="English" disabled readOnly />
+        <span className="hint">More languages will follow.</span>
+      </div>
+      <div className="sm:col-span-2 flex flex-col gap-3">
+        <Messages state={state} />
+        <button type="submit" className="btn btn-primary sm:w-fit" disabled={pending}>
+          {pending ? "Saving…" : "Save profile"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+export function DeleteAccountForm() {
+  const [state, action, pending] = useActionState(deleteAccount, empty);
+  return (
+    <form action={action} className="flex flex-col gap-3">
+      <div className="field">
+        <label htmlFor="del-password">Enter your password to confirm</label>
+        <input id="del-password" name="password" type="password" autoComplete="current-password"
+          required className="input sm:max-w-sm" />
+      </div>
+      <Messages state={state} />
+      <button type="submit" className="btn btn-danger sm:w-fit" disabled={pending}>
+        {pending ? "Deleting…" : "Delete my account and all data"}
+      </button>
+    </form>
+  );
+}
