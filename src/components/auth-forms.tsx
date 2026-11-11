@@ -104,16 +104,18 @@ export function RegisterForm() {
         <input id="reg-email" name="email" type="email" autoComplete="email" inputMode="email"
           required className="input" defaultValue={state.email} />
       </div>
+      <div className="grid gap-4 sm:grid-cols-2">
       <div className="field">
         <label htmlFor="reg-password">Password</label>
         <input id="reg-password" name="password" type="password" autoComplete="new-password"
           required minLength={10} className="input" />
-        <span className="hint">At least 10 characters. A short sentence works well.</span>
       </div>
       <div className="field">
         <label htmlFor="reg-confirm">Confirm password</label>
         <input id="reg-confirm" name="confirm" type="password" autoComplete="new-password"
           required minLength={10} className="input" />
+      </div>
+      <span className="hint sm:col-span-2">At least 10 characters. A short sentence works well.</span>
       </div>
       <label className="flex items-start gap-3 text-sm">
         <input id="reg-age" name="age" type="checkbox" required className="mt-0.5 size-5 shrink-0" />

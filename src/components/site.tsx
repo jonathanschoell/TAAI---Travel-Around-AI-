@@ -40,6 +40,12 @@ export function SiteFooter() {
   );
 }
 
+const AUTH_POINTS = [
+  "Day-by-day itineraries built around the people travelling.",
+  "Only you can see your trips and preferences.",
+  "You decide what TAAI remembers, and can delete it at any time.",
+];
+
 export function AuthShell({
   title,
   lead,
@@ -56,11 +62,29 @@ export function AuthShell({
       <header className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6">
         <Logo />
       </header>
-      <main className="mx-auto w-full max-w-md flex-1 px-4 py-8 sm:px-6">
-        <h1 className="text-3xl font-extrabold">{title}</h1>
-        <p className="mt-2 text-muted">{lead}</p>
-        <div className="card mt-6">{children}</div>
-        {footer ? <div className="mt-4 text-sm text-muted">{footer}</div> : null}
+      <main className="mx-auto grid w-full max-w-6xl flex-1 items-start gap-8 px-4 py-6 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-16 lg:py-10">
+        <section className="order-2 hidden rounded-[28px] bg-brand p-10 text-brand-ink lg:order-1 lg:block">
+          <p className="font-display text-sm font-bold uppercase tracking-widest opacity-80">
+            Travel Around AI
+          </p>
+          <p className="mt-4 font-display text-4xl font-extrabold leading-tight">
+            Your trips, your taste, one private place.
+          </p>
+          <ul className="mt-8 flex flex-col gap-4 text-lg">
+            {AUTH_POINTS.map((t) => (
+              <li key={t} className="flex gap-3">
+                <span className="mt-2 size-2.5 shrink-0 rounded-full bg-signal" aria-hidden="true" />
+                <span>{t}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section className="order-1 mx-auto w-full max-w-md lg:order-2 lg:mx-0 lg:max-w-none">
+          <h1 className="text-3xl font-extrabold lg:text-4xl">{title}</h1>
+          <p className="mt-2 text-muted">{lead}</p>
+          <div className="card mt-6">{children}</div>
+          {footer ? <div className="mt-4 text-sm text-muted">{footer}</div> : null}
+        </section>
       </main>
       <SiteFooter />
     </>

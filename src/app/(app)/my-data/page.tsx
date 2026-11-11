@@ -22,8 +22,8 @@ export default async function MyDataPage() {
   const on = profile?.personalization_enabled ?? false;
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6">
-      <div>
+    <div className="grid items-start gap-6 lg:grid-cols-2">
+      <div className="lg:col-span-2">
         <h1 className="text-3xl font-extrabold sm:text-4xl">My data</h1>
         <p className="mt-2 text-muted">
           Everything TAAI stores about you, and the controls to change or remove it.
@@ -82,7 +82,7 @@ export default async function MyDataPage() {
         )}
       </section>
 
-      <section className="card border-danger">
+      <section className="card border-danger lg:col-span-2">
         <h2 className="text-xl font-bold">Delete account</h2>
         <p className="mt-2 text-sm text-muted">
           This permanently removes your account, profile, trips, feedback and AI memory. It
