@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   const to = request.nextUrl.clone();
   to.search = "";
 
-  if (isSupabaseConfigured && code) {
+  if (isSupabaseConfigured() && code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {

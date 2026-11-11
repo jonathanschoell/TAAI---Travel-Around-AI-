@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { RegisterForm } from "@/components/auth-forms";
-import { AuthShell, SetupNotice } from "@/components/site";
-import { isSupabaseConfigured } from "@/lib/env";
+import { AuthShell } from "@/components/site";
 
 export const metadata: Metadata = { title: "Create account" };
 
@@ -17,7 +16,6 @@ export default function RegisterPage() {
         </p>
       }
     >
-      {isSupabaseConfigured ? null : <div className="mb-4"><SetupNotice /></div>}
       <RegisterForm />
     </AuthShell>
   );

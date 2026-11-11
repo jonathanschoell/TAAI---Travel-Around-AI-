@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   const to = request.nextUrl.clone();
   to.search = "";
 
-  if (isSupabaseConfigured && tokenHash && type) {
+  if (isSupabaseConfigured() && tokenHash && type) {
     const supabase = await createClient();
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     if (!error) {
