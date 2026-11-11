@@ -48,13 +48,23 @@ Die Variablen müssen für die Umgebung **Production** gesetzt sein. Namen exakt
 
 Admin ist nur, wer in `ADMIN_EMAILS` steht und seine E-Mail bestätigt hat. Ein zweiter Anmeldefaktor für Admin-Konten folgt in einem späteren Schritt.
 
+## 5. KI-Reiseplanung einschalten (Anthropic)
+
+1. Auf https://console.anthropic.com ein Konto anlegen und ein Zahlungsmittel hinterlegen. Die KI wird nach Nutzung abgerechnet.
+2. Unter **Limits** ein monatliches Ausgabenlimit setzen, damit die Kosten gedeckelt sind.
+3. Unter **API Keys** einen Schlüssel erstellen und kopieren.
+4. In Vercel als Umgebungsvariable `ANTHROPIC_API_KEY` eintragen (Production) und **Redeploy** klicken.
+5. `/setup-check` zeigt danach bei «AI planner key» ein OK.
+
+Jedes Konto kann pro Tag höchstens 8 Reisepläne erstellen, Reisen sind vorerst bis 10 Tage lang.
+
 ## Was schon funktioniert
 
-Startseite, Registrierung, E-Mail-Bestätigung, Login, Passwort vergessen und zurücksetzen, Abmelden, geschützte Bereiche, Profil bearbeiten, «My data» mit Einwilligung zur Personalisierung und Kontolöschung, Admin-Übersicht mit Nutzungszahlen.
+Startseite, Registrierung, E-Mail-Bestätigung, Login, Passwort vergessen und zurücksetzen, Abmelden, geschützte Bereiche, Profil bearbeiten, «My data» mit Einwilligung zur Personalisierung und Kontolöschung, Admin-Übersicht mit Nutzungszahlen, Eingabemaske, KI-Reiseplanung, gespeicherte Reisepläne mit Tagesplanung und Budgetübersicht, Reise löschen, KI-Inhalt melden.
 
 ## Was als Nächstes kommt
 
-Eingabemaske und KI-Reiseplanung (dafür wird später `ANTHROPIC_API_KEY` benötigt), Ergebnisseite mit Karte und Budget, Bearbeiten, Feedback und KI-Gedächtnis.
+Interaktive Karte und Bilder, Aktivitäten tauschen und entfernen, Tag neu planen, PDF-Export, Feedback und KI-Gedächtnis.
 
 ## Lokal starten (optional)
 

@@ -40,7 +40,7 @@ export default function HomePage() {
               <Link href="/login" className="btn btn-ghost">Log in</Link>
             </div>
             <p className="mt-4 text-sm text-muted">
-              Early access: accounts and profiles are live. AI trip planning is being built next.
+              Early access: all prices in itineraries are estimates. Maps, photos and plan editing are being built next.
             </p>
           </div>
 

@@ -158,6 +158,31 @@ h3 {
   color: #2a2000;
 }
 
+.chip span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 1rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.chip input:checked + span {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--brand-ink);
+}
+.chip input:focus-visible + span {
+  outline: 3px solid var(--signal);
+  outline-offset: 2px;
+}
+textarea.input {
+  min-height: 96px;
+}
+
 .notice {
   border-radius: 12px;
   padding: 0.75rem 0.875rem;
