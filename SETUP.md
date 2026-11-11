@@ -14,11 +14,13 @@ Diese Anleitung bringt die Seite online. Du brauchst dafür dein Supabase-Projek
 - **URL Configuration:**
   - *Site URL*: die Adresse deiner Seite, z. B. `https://dein-projekt.vercel.app`
   - *Redirect URLs*: `https://dein-projekt.vercel.app/auth/callback` und `https://dein-projekt.vercel.app/auth/confirm`
-- **Emails → Templates** (empfohlen, damit Links auf jedem Gerät funktionieren):
-  - *Confirm signup*, Link ersetzen durch:
-    `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/dashboard`
-  - *Reset password*, Link ersetzen durch:
-    `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password`
+
+Diese beiden Einstellungen sind kostenlos und zwingend nötig. Ohne sie führt der Link in der Bestätigungs-E-Mail auf `localhost` und lässt sich nicht öffnen.
+
+Die E-Mail-Vorlagen (**Emails → Templates**) lassen sich bei neuen kostenlosen Projekten nicht bearbeiten. Das ist nicht nötig: Die Standardvorlagen funktionieren mit TAAI. Wer später einen eigenen E-Mail-Dienst einträgt, kann die Vorlagen anpassen und dann diese Links verwenden, damit sie auf jedem Gerät funktionieren:
+
+- *Confirm signup*: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/dashboard`
+- *Reset password*: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password`
 
 Der eingebaute E-Mail-Versand von Supabase ist stark begrenzt und nur zum Testen gedacht. Vor dem Start mit echten Nutzern unter **Emails → SMTP Settings** einen eigenen Dienst (z. B. Resend) mit eigener Domain eintragen.
 
