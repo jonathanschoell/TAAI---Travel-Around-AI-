@@ -46,10 +46,11 @@ const activitySchema = {
     description: { type: "string", description: "At most 30 words, why it fits these travellers" },
     duration_minutes: { type: "integer" },
     cost: { type: "number", description: "Estimated total for the whole group in the trip currency, 0 if free" },
-    latitude: { type: "number" },
-    longitude: { type: "number" },
+    latitude: { type: "number", description: "0 if you are not reasonably sure" },
+    longitude: { type: "number", description: "0 if you are not reasonably sure" },
   },
-  required: ["slot", "name", "category", "description", "duration_minutes", "cost"],
+  required: ["slot", "name", "category", "description", "duration_minutes", "cost", "latitude", "longitude"],
+  additionalProperties: false,
 };
 
 const TOOL = {
@@ -71,6 +72,7 @@ const TOOL = {
             activities: { type: "array", items: activitySchema },
           },
           required: ["day_number", "theme", "transit_notes", "activities"],
+          additionalProperties: false,
         },
       },
       budget: {
@@ -78,10 +80,12 @@ const TOOL = {
         description: "Estimated totals for the whole trip and group, in the trip currency",
         properties: Object.fromEntries(BUDGET_PARTS.map(([k]) => [k, { type: "number" }])),
         required: BUDGET_PARTS.map(([k]) => k),
+        additionalProperties: false,
       },
       tips: { type: "array", items: { type: "string" }, description: "Up to 4 practical tips or hidden gems" },
     },
     required: ["title", "summary", "days", "budget", "tips"],
+    additionalProperties: false,
   },
 };
 
@@ -125,9 +129,9 @@ export function buildPrompt(input: TripInput, personalContext: string) {
     "- Keep stops of one day close together and order them so the route makes sense. The first and last day leave time for arrival and departure.",
     "- Respect the pace and the budget. Include one or two lesser-known places, not only the famous sights.",
     "- Only suggest places you are confident exist. Never invent opening hours or exact prices: all costs are your best estimates for the whole group.",
-    "- Give latitude and longitude when you know them reasonably well; leave them out otherwise.",
+    "- Give latitude and longitude when you know them reasonably well; use 0 for both otherwise.",
     "- Write everything in English.",
-    "Call the save_itinerary tool with the finished plan.",
+    "Do not answer in text. Call the save_itinerary tool exactly once with the finished plan.",
   ].join("\n");
 }
 
@@ -151,7 +155,8 @@ export function normalizePlan(raw: unknown, days: number): Plan {
           const x = (a ?? {}) as Record<string, unknown>;
           const lat = num(x.latitude);
           const lng = num(x.longitude);
-          const okCoords = lat !== null && lng !== null && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+          const okCoords =
+            lat !== null && lng !== null && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && !(lat === 0 && lng === 0);
           const cost = num(x.cost);
           const mins = num(x.duration_minutes);
           return {
@@ -199,28 +204,42 @@ export async function generatePlan(
   const base = (process.env["ANTHROPIC_BASE_URL"]?.trim() || "https://api.anthropic.com").replace(/\/+$/, "");
   const model = process.env["ANTHROPIC_MODEL"]?.trim() || "claude-sonnet-5-5";
 
-  let res: Response;
-  try {
-    res = await fetch(`${base}/v1/messages`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model,
-        max_tokens: 12000,
-        tools: [TOOL],
-        tool_choice: { type: "tool", name: TOOL.name },
-        messages: [{ role: "user", content: buildPrompt(input, personalContext) }],
-      }),
-      cache: "no-store",
-      signal: AbortSignal.timeout(280_000),
-    });
-  } catch {
-    throw new PlannerError("failed", "The AI service did not answer in time.");
+  // Current Claude models do not accept a forced tool call, so the tool is offered with
+  // "auto" and a strict schema. If a model rejects one of the newer options, the request
+  // is repeated once with fewer of them.
+  const base_body = {
+    model,
+    max_tokens: 16000,
+    tool_choice: { type: "auto" },
+    messages: [{ role: "user", content: buildPrompt(input, personalContext) }],
+  };
+  const variants = [
+    { ...base_body, tools: [{ ...TOOL, strict: true }], thinking: { type: "between_tools" }, output_config: { effort: "medium" } },
+    { ...base_body, tools: [{ ...TOOL, strict: true }] },
+    { ...base_body, tools: [TOOL] },
+  ];
+
+  let res: Response | null = null;
+  for (const body of variants) {
+    try {
+      res = await fetch(`${base}/v1/messages`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify(body),
+        cache: "no-store",
+        signal: AbortSignal.timeout(280_000),
+      });
+    } catch {
+      throw new PlannerError("failed", "The AI service did not answer in time.");
+    }
+    if (res.status !== 400) break;
+    console.error("Anthropic API rejected the request", (await res.clone().text().catch(() => "")).slice(0, 300));
   }
+  if (!res) throw new PlannerError("failed", "No request was sent.");
 
   if (res.status === 429 || res.status === 529) {
     throw new PlannerError("busy", `AI service busy (${res.status}).`);
