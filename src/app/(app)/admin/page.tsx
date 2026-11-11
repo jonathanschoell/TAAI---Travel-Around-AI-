@@ -26,7 +26,7 @@ export default async function AdminPage() {
       <div>
         <h1 className="text-3xl font-extrabold sm:text-4xl">Admin overview</h1>
         <p className="mt-2 max-w-2xl text-muted">
-          Usage figures for TAAI. Trip contents and AI memory of individual users are not shown
+          Usage figures for Jovia. Trip contents and AI memory of individual users are not shown
           here. Every visit to this page is recorded in the audit log.
         </p>
       </div>

@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Figtree } from "next/font/google";
+import { Figtree, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const display = Bricolage_Grotesque({
+const display = Plus_Jakarta_Sans({
   variable: "--font-display",
   subsets: ["latin"],
 });
@@ -14,13 +14,13 @@ const body = Figtree({
 
 export const metadata: Metadata = {
   title: {
-    default: "TAAI — Travel Around AI",
-    template: "%s · TAAI",
+    default: "Jovia",
+    template: "%s · Jovia",
   },
   description:
-    "TAAI is your personal AI travel agency. Tell us who is travelling and what you love, and get a day-by-day itinerary made for you.",
-  applicationName: "TAAI",
-  appleWebApp: { capable: true, title: "TAAI", statusBarStyle: "default" },
+    "Jovia is your personal AI travel agency. Tell us who is travelling and what you love, and get a day-by-day itinerary made for you.",
+  applicationName: "Jovia",
+  appleWebApp: { capable: true, title: "Jovia", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
@@ -28,8 +28,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f2f6f5" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b191c" },
+    { media: "(prefers-color-scheme: light)", color: "#f6f8fd" },
+    { media: "(prefers-color-scheme: dark)", color: "#091224" },
   ],
 };
 

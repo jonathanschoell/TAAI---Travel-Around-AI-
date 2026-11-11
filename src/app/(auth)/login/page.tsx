@@ -13,7 +13,7 @@ export default function LoginPage() {
       lead="Log in to plan trips and see your saved itineraries."
       footer={
         <p>
-          New to TAAI? <Link href="/register" className="underline">Create an account</Link>
+          New to Jovia? <Link href="/register" className="underline">Create an account</Link>
         </p>
       }
     >

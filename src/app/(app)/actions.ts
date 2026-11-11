@@ -74,3 +74,30 @@ export async function deleteAccount(_: AppFormState, fd: FormData): Promise<AppF
   await supabase.auth.signOut();
   redirect("/login?notice=deleted");
 }
+
+const isUuid = (v: string) => /^[0-9a-f-]{36}$/i.test(v);
+
+export async function deleteTrip(fd: FormData) {
+  const user = await requireUser();
+  const id = String(fd.get("trip_id") ?? "");
+  if (isUuid(id)) {
+    const supabase = await createClient();
+    await supabase.from("trips").delete().eq("id", id).eq("user_id", user.id);
+  }
+  revalidatePath("/dashboard");
+  redirect("/dashboard?notice=trip-deleted");
+}
+
+/** Lets people flag AI-generated content from inside the app. */
+export async function reportTrip(fd: FormData) {
+  const user = await requireUser();
+  const id = String(fd.get("trip_id") ?? "");
+  if (!isUuid(id)) redirect("/dashboard");
+  const supabase = await createClient();
+  await supabase.from("content_reports").insert({
+    user_id: user.id,
+    trip_id: id,
+    reason: "reported_from_trip_page",
+  });
+  redirect(`/trips/${id}?notice=reported`);
+}

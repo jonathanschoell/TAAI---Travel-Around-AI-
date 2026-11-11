@@ -8,7 +8,7 @@ const SECTIONS: [string, string[]][] = [
     "Account: your email address and a securely hashed password. We never store your password in readable form.",
     "Profile: the name, age group, currency and number of travellers you choose to enter.",
     "Consents: when you accepted this policy and when you turned personalisation on or off.",
-    "Usage: when your account was last active, so we can see how many people use TAAI.",
+    "Usage: when your account was last active, so we can see how many people use Jovia.",
   ]],
   ["What we use it for", [
     "To let you log in and keep your trips and preferences private to your account.",
@@ -39,7 +39,7 @@ export default function PrivacyPage() {
         <span className="pill pill-signal">Draft, not yet legally reviewed</span>
         <h1 className="mt-3 text-3xl font-extrabold sm:text-4xl">Privacy policy</h1>
         <p className="mt-2 text-muted">
-          This draft describes how TAAI handles personal data today. The operator&apos;s legal
+          This draft describes how Jovia handles personal data today. The operator&apos;s legal
           name and contact details, and a legal review under the Swiss FADP and the GDPR, are
           still to be added before public launch.
         </p>

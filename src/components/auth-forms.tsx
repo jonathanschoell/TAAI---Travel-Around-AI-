@@ -125,7 +125,7 @@ export function RegisterForm() {
         <input id="reg-privacy" name="privacy" type="checkbox" required className="mt-0.5 size-5 shrink-0" />
         <span>
           I have read the <Link href="/privacy" className="underline">privacy policy</Link> and
-          agree to TAAI storing my account data.
+          agree to Jovia storing my account data.
         </span>
       </label>
       <Messages state={state} />

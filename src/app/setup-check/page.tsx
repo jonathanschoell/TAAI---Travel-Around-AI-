@@ -88,6 +88,15 @@ async function Checks() {
     }
   }
 
+  const aiKey = Boolean(process.env["ANTHROPIC_API_KEY"]?.trim());
+  rows.push({
+    label: "AI planner key",
+    ok: aiKey,
+    detail: aiKey
+      ? "Found as ANTHROPIC_API_KEY."
+      : "Not found. Add ANTHROPIC_API_KEY in Vercel. Needed to create itineraries.",
+  });
+
   const admins = (process.env["ADMIN_EMAILS"] ?? "").split(",").filter((s) => s.trim()).length;
   rows.push({
     label: "Admin addresses",
