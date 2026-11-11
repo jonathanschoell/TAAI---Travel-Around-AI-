@@ -117,7 +117,7 @@ export function buildPrompt(input: TripInput, personalContext: string) {
   ].filter(Boolean);
 
   return [
-    "You are TAAI, an expert personal travel agent. Plan a complete, individual itinerary for the travellers below.",
+    "You are Jovia, an expert personal travel agent. Plan a complete, individual itinerary for the travellers below.",
     "",
     lines.join("\n"),
     personalContext ? `\nWhat we know about these travellers from earlier trips (the request above wins if they conflict):\n${personalContext}` : "",

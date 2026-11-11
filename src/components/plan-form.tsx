@@ -147,7 +147,7 @@ export function PlanForm({
         {state.error ? <p className="notice notice-error">{state.error}</p> : null}
         {pending ? (
           <p className="notice">
-            TAAI is planning your trip. This usually takes one to two minutes. Please keep this page open.
+            Jovia is planning your trip. This usually takes one to two minutes. Please keep this page open.
           </p>
         ) : null}
         <button type="submit" className="btn btn-primary sm:w-fit" disabled={pending}>

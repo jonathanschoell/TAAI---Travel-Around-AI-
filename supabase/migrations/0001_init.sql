@@ -1,4 +1,4 @@
--- TAAI — initial schema.
+-- Jovia — initial schema.
 -- Run once in the Supabase SQL editor (see SETUP.md).
 -- Every table has row level security. A signed-in person can only reach rows whose
 -- user_id is their own. Operational tables have no policies at all, so only the

@@ -1,31 +1,31 @@
 @import "tailwindcss";
 
-/* Layout idea: calm petrol ink on cool paper, one signal-yellow accent borrowed
-   from airport wayfinding; content left-aligned, mobile-first, generous tap targets. */
+/* Layout idea: plain white and one confident blue; lots of air, thin lines,
+   content left-aligned, mobile-first, generous tap targets. */
 :root {
-  --bg: #f2f6f5;
+  --bg: #f6f8fd;
   --surface: #ffffff;
-  --ink: #0f2a2e;
-  --muted: #55686b;
-  --line: #d2dedb;
-  --brand: #0b6e6a;
+  --ink: #0b1b3a;
+  --muted: #56637d;
+  --line: #dbe3f1;
+  --brand: #1d4fd8;
   --brand-ink: #ffffff;
-  --signal: #f2b705;
+  --signal: #4f9dff;
   --danger: #b3261e;
-  --ok: #1d7a46;
+  --ok: #17734a;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0b191c;
-    --surface: #12272b;
-    --ink: #e7f1ef;
-    --muted: #93a9aa;
-    --line: #254348;
-    --brand: #41c7ba;
-    --brand-ink: #06211f;
-    --signal: #f5c531;
+    --bg: #091224;
+    --surface: #101c36;
+    --ink: #e9effc;
+    --muted: #95a5c4;
+    --line: #22345c;
+    --brand: #6a97ff;
+    --brand-ink: #061233;
+    --signal: #8cc4ff;
     --danger: #ff8a80;
     --ok: #6fd39a;
     color-scheme: dark;
@@ -153,9 +153,9 @@ h3 {
   color: var(--muted);
 }
 .pill-signal {
-  background: var(--signal);
-  border-color: var(--signal);
-  color: #2a2000;
+  background: color-mix(in srgb, var(--brand) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--brand) 35%, var(--surface));
+  color: var(--brand);
 }
 
 .chip span {

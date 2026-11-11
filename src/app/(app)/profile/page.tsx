@@ -25,7 +25,7 @@ export default async function ProfilePage() {
         )}
       </div>
       <aside className="card">
-        <h2 className="text-lg font-bold">Why TAAI asks</h2>
+        <h2 className="text-lg font-bold">Why Jovia asks</h2>
         <p className="mt-2 text-sm text-muted">
           Currency and number of travellers pre-fill the trip planner. The age group helps
           suggest activities that fit. You can change or clear these at any time.

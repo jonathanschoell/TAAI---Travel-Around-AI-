@@ -2,13 +2,13 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "TAAI — Travel Around AI",
-    short_name: "TAAI",
+    name: "Jovia — AI travel planner",
+    short_name: "Jovia — AI travel planner",
     description: "Your personal AI travel agency.",
     start_url: "/dashboard",
     display: "standalone",
-    background_color: "#f2f6f5",
-    theme_color: "#0b6e6a",
+    background_color: "#f6f8fd",
+    theme_color: "#1d4fd8",
     icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
   };
 }

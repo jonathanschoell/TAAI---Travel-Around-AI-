@@ -1,4 +1,4 @@
-# TAAI einrichten
+# Jovia einrichten
 
 Diese Anleitung bringt die Seite online. Du brauchst dafür dein Supabase-Projekt (Zürich) und dein Vercel-Konto. Schlüssel gehören nur in Vercel, nie in den Code und nie in einen Chat.
 

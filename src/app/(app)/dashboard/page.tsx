@@ -29,7 +29,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
       <section>
         <h1 className="text-3xl font-extrabold sm:text-4xl">Welcome, {name}</h1>
         <p className="mt-2 max-w-2xl text-muted">
-          This is your private space. Your trips, preferences and everything TAAI learns about
+          This is your private space. Your trips, preferences and everything Jovia learns about
           how you like to travel will live here.
         </p>
       </section>
@@ -38,7 +38,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
         <article className="card flex flex-col gap-3 md:col-span-2">
           <h2 className="text-xl font-bold">Plan a trip</h2>
           <p className="text-muted">
-            Describe who is travelling, what you enjoy and your budget. TAAI builds a
+            Describe who is travelling, what you enjoy and your budget. Jovia builds a
             day-by-day itinerary and saves it here.
           </p>
           <Link href="/plan" className="btn btn-primary sm:w-fit">Plan a new trip</Link>

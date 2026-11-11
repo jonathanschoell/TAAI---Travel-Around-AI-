@@ -8,13 +8,13 @@ const SAMPLE_DAY = [
 ];
 
 const STEPS = [
-  ["Tell TAAI who is travelling", "Ages, interests, dates, budget and the kind of holiday you want. Most fields are optional."],
+  ["Tell Jovia who is travelling", "Ages, interests, dates, budget and the kind of holiday you want. Most fields are optional."],
   ["Get a plan made for you", "A full day-by-day itinerary with sensible routes, breaks, restaurants and a budget breakdown."],
   ["Change anything", "Swap an activity, replan a day, make it cheaper or calmer. The rest of your plan stays intact."],
 ];
 
 const PROMISES = [
-  ["You see what TAAI remembers", "Every remembered preference is listed in plain words. Edit or delete each one."],
+  ["You see what Jovia remembers", "Every remembered preference is listed in plain words. Edit or delete each one."],
   ["Personalisation is your choice", "Long-term memory only switches on when you agree, and you can turn it off at any time."],
   ["Estimates are labelled", "Prices and opening hours that are not verified are clearly marked as estimates."],
 ];
@@ -26,12 +26,12 @@ export default function HomePage() {
       <main className="flex-1">
         <section className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 pb-12 pt-6 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:pt-12">
           <div>
-            <p className="pill">Travel Around AI</p>
+            <p className="pill">AI travel planner</p>
             <h1 className="mt-4 text-4xl font-extrabold leading-[1.05] sm:text-6xl">
               A trip planned around <span className="text-brand">exactly who is going.</span>
             </h1>
             <p className="mt-5 max-w-xl text-lg text-muted">
-              TAAI is your personal AI travel agency. It builds a complete itinerary from your
+              Jovia is your personal AI travel agency. It builds a complete itinerary from your
               interests, your budget and the people you travel with, and it gets to know your
               taste over time.
             </p>
@@ -83,7 +83,7 @@ export default function HomePage() {
         <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
           <h2 className="text-2xl font-extrabold sm:text-3xl">Your data stays yours</h2>
           <p className="mt-2 max-w-2xl text-muted">
-            TAAI works better the more it knows about how you travel, so it is built to be open
+            Jovia works better the more it knows about how you travel, so it is built to be open
             about what it keeps.
           </p>
           <div className="mt-6 grid gap-4 md:grid-cols-3">

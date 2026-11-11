@@ -15,7 +15,7 @@ export default async function PlanPage() {
       <div>
         <h1 className="text-3xl font-extrabold sm:text-4xl">Plan a trip</h1>
         <p className="mt-2 max-w-2xl text-muted">
-          Only the destination and dates are required. The more you tell TAAI, the better the
+          Only the destination and dates are required. The more you tell Jovia, the better the
           plan fits. All prices in the itinerary are estimates.
         </p>
       </div>
