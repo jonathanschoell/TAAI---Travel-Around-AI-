@@ -94,15 +94,23 @@ function label(pairs: [string, string][], key: string) {
 }
 
 export function buildPrompt(input: TripInput, personalContext: string) {
+  const known = input.ages.filter((x): x is number => x !== null);
+  const children = known.filter((x) => x < 18);
   const lines = [
     `Destination: ${input.destination}`,
     input.origin ? `Departing from: ${input.origin}` : "",
     `Dates: ${input.startDate} to ${input.endDate} (${input.days} days)`,
     `Travellers: ${input.travelers} in total, travelling as: ${input.party}`,
-    input.adultAgeGroup ? `Age group of the adults: ${input.adultAgeGroup}` : "",
-    input.children > 0
-      ? `Children: ${input.children}${input.childrenAges ? `, ages: ${input.childrenAges}` : ""}`
-      : "No children",
+    known.length
+      ? `Ages of the travellers: ${known.join(", ")}${known.length < input.travelers ? " (others not given)" : ""}`
+      : "Ages not given",
+    children.length
+      ? `Of these, ${children.length} ${children.length === 1 ? "is a child" : "are children"} (ages ${children.join(", ")})`
+      : known.length === input.travelers ? "No children" : "",
+    input.stops.length
+      ? "Fixed stops (the travellers are in these places on these dates):\n" +
+        input.stops.map((st) => `  - ${st.place}: ${st.from} to ${st.to}`).join("\n")
+      : "",
     input.interests.length
       ? `Interests: ${input.interests.map((i) => label(INTERESTS, i)).join(", ")}`
       : "Interests: not specified, choose a balanced mix",
@@ -125,7 +133,14 @@ export function buildPrompt(input: TripInput, personalContext: string) {
     "Rules:",
     `- Plan exactly ${input.days} days, numbered from 1.`,
     "- Every day has activities for the morning, afternoon and evening, plus at least one restaurant suggestion (slot \"restaurant\").",
-    "- Match activities to the ages of everyone travelling. With children, mix things for parents and children and plan real breaks.",
+    "- Match activities to the exact ages of everyone travelling: consider what a toddler, a school child, a teenager or an older adult can do and enjoy. With children, mix things for adults and children and plan real breaks.",
+    ...(input.stops.length
+      ? [
+          "- Follow the fixed stops exactly: plan each day in the place where the travellers are on that date, and start that day's theme with the place name.",
+          "- On a day when they move from one stop to the next, plan the journey itself (how, roughly how long) and lighter activities around it.",
+          "- Days not covered by a stop are spent at the main destination or sensibly on the way.",
+        ]
+      : []),
     "- Keep stops of one day close together and order them so the route makes sense. The first and last day leave time for arrival and departure.",
     "- Respect the pace and the budget. Include one or two lesser-known places, not only the famous sights.",
     "- Only suggest places you are confident exist. Never invent opening hours or exact prices: all costs are your best estimates for the whole group.",

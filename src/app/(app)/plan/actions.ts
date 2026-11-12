@@ -2,18 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { getProfile, requireUser } from "@/lib/auth";
-import { CURRENCIES } from "@/lib/options";
 import { generatePlan, PlannerError } from "@/lib/planner/ai";
-import {
-  INTERESTS,
-  LEVELS,
-  LODGING,
-  MAX_TRIP_DAYS,
-  PACES,
-  PARTY_TYPES,
-  TRAVEL_MODES,
-  type TripInput,
-} from "@/lib/planner/options";
+import { parseTripForm } from "@/lib/planner/parse";
 import { getQuota, TIERS } from "@/lib/billing";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -21,60 +11,14 @@ import { createClient } from "@/lib/supabase/server";
 export type PlanFormState = { error?: string; values?: Record<string, string | string[]> };
 
 const DAY = 24 * 60 * 60 * 1000;
-const pick = (pairs: [string, string][], v: string, fallback: string) =>
-  pairs.some(([k]) => k === v) ? v : fallback;
-
-function parse(fd: FormData): { input?: TripInput; error?: string } {
-  const s = (k: string, max = 200) => String(fd.get(k) ?? "").trim().slice(0, max);
-  const destination = s("destination", 120);
-  const startDate = s("start_date", 10);
-  const endDate = s("end_date", 10);
-  if (!destination) return { error: "Tell us where you want to go." };
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate))
-    return { error: "Choose a start date and an end date." };
-  const start = Date.parse(startDate + "T00:00:00Z");
-  const end = Date.parse(endDate + "T00:00:00Z");
-  if (Number.isNaN(start) || Number.isNaN(end) || end < start)
-    return { error: "The end date must be on or after the start date." };
-  const days = Math.round((end - start) / DAY) + 1;
-  if (days > MAX_TRIP_DAYS)
-    return { error: `Trips can be up to ${MAX_TRIP_DAYS} days long. Please shorten the dates.` };
-
-  const travelers = Math.min(20, Math.max(1, Math.round(Number(fd.get("travelers")) || 1)));
-  const children = Math.min(travelers - 1, Math.max(0, Math.round(Number(fd.get("children")) || 0)));
-  const budgetRaw = Number(fd.get("budget"));
-  const allowed = INTERESTS.map(([k]) => k);
-  return {
-    input: {
-      destination,
-      origin: s("origin", 120),
-      startDate,
-      endDate,
-      days,
-      travelers,
-      party: pick(PARTY_TYPES, s("party"), travelers === 1 ? "solo" : "couple"),
-      adultAgeGroup: s("adult_age_group", 10),
-      children,
-      childrenAges: children > 0 ? s("children_ages", 60) : "",
-      interests: fd.getAll("interests").map(String).filter((i) => allowed.includes(i)),
-      budget: Number.isFinite(budgetRaw) && budgetRaw > 0 ? Math.round(budgetRaw) : null,
-      currency: CURRENCIES.includes(s("currency")) ? s("currency") : "CHF",
-      travelMode: pick(TRAVEL_MODES, s("travel_mode"), "any"),
-      lodging: pick(LODGING, s("lodging"), "any"),
-      level: pick(LEVELS, s("level"), "mid"),
-      pace: pick(PACES, s("pace"), "balanced"),
-      wishes: s("wishes", 600),
-      constraints: s("constraints", 600),
-    },
-  };
-}
+const LIST_FIELDS = ["interests", "ages", "stop_place", "stop_from", "stop_to"];
 
 function keep(fd: FormData): Record<string, string | string[]> {
   const out: Record<string, string | string[]> = {};
   for (const key of new Set(fd.keys())) {
     if (key.startsWith("$")) continue;
     const all = fd.getAll(key).map(String);
-    out[key] = key === "interests" ? all : (all[0] ?? "");
+    out[key] = LIST_FIELDS.includes(key) ? all : (all[0] ?? "");
   }
   return out;
 }
@@ -103,7 +47,7 @@ async function loadPersonalContext(userId: string, enabled: boolean): Promise<st
 export async function createTrip(_: PlanFormState, fd: FormData): Promise<PlanFormState> {
   const user = await requireUser();
   const values = keep(fd);
-  const { input, error } = parse(fd);
+  const { input, error } = parseTripForm(fd);
   if (!input) return { error, values };
 
   const quota = await getQuota(user);

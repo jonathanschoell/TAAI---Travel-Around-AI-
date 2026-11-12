@@ -33,11 +33,7 @@ export default async function PlanPage() {
       </p>
       <PlanForm
         maxDays={limits.maxDays}
-        defaults={{
-          currency: profile?.currency ?? "CHF",
-          travelers: profile?.default_travelers ?? 2,
-          ageGroup: profile?.age_group ?? "",
-        }}
+        defaults={{ currency: profile?.currency ?? "CHF" }}
       />
     </div>
   );
