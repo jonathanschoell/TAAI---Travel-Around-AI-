@@ -23,7 +23,6 @@ export function ProfileForm({
     display_name: string;
     age_group: string | null;
     currency: string;
-    default_travelers: number;
     home_canton?: string | null;
     home_place?: string | null;
   };
@@ -49,11 +48,6 @@ export function ProfileForm({
         <select id="pf-currency" name="currency" className="input" defaultValue={profile.currency}>
           {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
-      </div>
-      <div className="field">
-        <label htmlFor="pf-travelers">Usual number of travellers</label>
-        <input id="pf-travelers" name="default_travelers" type="number" min={1} max={20}
-          inputMode="numeric" className="input" defaultValue={profile.default_travelers} />
       </div>
       <div className="field">
         <label htmlFor="pf-place">Home town</label>
