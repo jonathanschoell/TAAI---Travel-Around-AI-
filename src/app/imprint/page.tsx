@@ -27,7 +27,10 @@ export default function ImprintPage() {
 
         <section className="mt-6">
           <h2 className="text-xl font-bold">Contact</h2>
-          <p className="mt-2">Email: {OPERATOR.email || missing}</p>
+          <p className="mt-2">
+            Email:{" "}
+            {OPERATOR.email ? <a href={`mailto:${OPERATOR.email}`} className="underline">{OPERATOR.email}</a> : missing}
+          </p>
         </section>
 
         <section className="mt-6">

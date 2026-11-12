@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import { PublicHeader, SiteFooter } from "@/components/site";
+import { OPERATOR } from "@/lib/operator";
 
 export const metadata: Metadata = { title: "Privacy policy" };
 
 const SECTIONS: [string, string[]][] = [
+  ["Who is responsible", [
+    `${OPERATOR.name}, ${OPERATOR.street}, ${OPERATOR.postalCodeAndCity}, ${OPERATOR.country}.`,
+    `For questions about your data, or to exercise your rights, write to ${OPERATOR.email}.`,
+  ]],
   ["What we store", [
     "Account: your email address and a securely hashed password. We never store your password in readable form.",
     "Profile: the name, age group, currency and number of travellers you choose to enter.",
@@ -22,7 +27,9 @@ const SECTIONS: [string, string[]][] = [
   ["Service providers", [
     "Database and sign-in: Supabase, hosted in Zurich, Switzerland.",
     "Website hosting: Vercel.",
-    "Further providers (AI, email, maps) will be listed here before those features go live.",
+    "AI trip planning: Anthropic, USA. What you enter in the trip planner (destination, dates, ages, interests, wishes) is sent to Anthropic to create your itinerary. Your email address and password are never sent.",
+    "Sign-up and password emails are sent through Supabase.",
+    "Holiday calendars and exchange rates are fetched from public services without any personal data.",
   ]],
   ["Your choices", [
     "See and edit your data under “My data” and “Profile”.",
@@ -39,9 +46,8 @@ export default function PrivacyPage() {
         <span className="pill pill-signal">Draft, not yet legally reviewed</span>
         <h1 className="mt-3 text-3xl font-extrabold sm:text-4xl">Privacy policy</h1>
         <p className="mt-2 text-muted">
-          This draft describes how Jovia handles personal data today. The operator&apos;s legal
-          name and contact details, and a legal review under the Swiss FADP and the GDPR, are
-          still to be added before public launch.
+          This draft describes how Jovia handles personal data today. A legal review under the
+          Swiss FADP and the GDPR is still to follow before public launch.
         </p>
         <div className="mt-8 flex flex-col gap-8">
           {SECTIONS.map(([title, items]) => (
