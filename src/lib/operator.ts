@@ -13,7 +13,7 @@ export const OPERATOR = {
 };
 
 export const PREMIUM_PRICE = "CHF 5.95";
-export const UNLIMITED_PRICE = "CHF 100";
+export const UNLIMITED_PRICE = "CHF 99.90";
 export const TERMS_VERSION = "draft-2026-11";
 
 export const operatorComplete = Boolean(
