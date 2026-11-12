@@ -48,15 +48,17 @@ export type Profile = {
   personalization_enabled: boolean;
   created_at: string;
   last_seen_at: string | null;
+  /** Added by migration 0003; undefined until it has been run. */
+  home_canton?: string | null;
+  home_place?: string | null;
 };
 
 export const getProfile = cache(async (userId: string): Promise<Profile | null> => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
-    .select(
-      "user_id, display_name, age_group, language, currency, default_travelers, personalization_enabled, created_at, last_seen_at",
-    )
+    // "*" keeps working whether or not the newer optional columns exist yet.
+    .select("*")
     .eq("user_id", userId)
     .maybeSingle();
   return (data as Profile | null) ?? null;

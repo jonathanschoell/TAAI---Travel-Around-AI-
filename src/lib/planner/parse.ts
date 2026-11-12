@@ -1,4 +1,5 @@
 import { CURRENCIES } from "@/lib/options";
+import { cantonByCode } from "@/lib/swiss";
 import {
   INTERESTS,
   LEVELS,
@@ -73,6 +74,8 @@ export function parseTripForm(fd: FormData): { input?: TripInput; error?: string
     input: {
       destination,
       origin: s("origin", 120),
+      homeCanton: cantonByCode(s("home_canton", 2))?.code ?? "",
+      homeCoords: coords(fd),
       startDate,
       endDate,
       days,
@@ -93,3 +96,12 @@ export function parseTripForm(fd: FormData): { input?: TripInput; error?: string
   };
 }
 
+
+/** Optional device location, only if both values are valid coordinates. */
+function coords(fd: FormData): { lat: number; lng: number } | null {
+  const lat = Number(fd.get("home_lat"));
+  const lng = Number(fd.get("home_lng"));
+  if (!fd.get("home_lat") || !fd.get("home_lng")) return null;
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  return { lat: Math.round(lat * 100) / 100, lng: Math.round(lng * 100) / 100 };
+}

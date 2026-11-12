@@ -68,6 +68,10 @@ export const MAX_STOPS = 8;
 export type TripInput = {
   destination: string;
   origin: string;
+  /** Two-letter canton code, or "" when not given. */
+  homeCanton: string;
+  /** Rounded device location for this trip only; never saved. */
+  homeCoords: { lat: number; lng: number } | null;
   startDate: string;
   endDate: string;
   days: number;

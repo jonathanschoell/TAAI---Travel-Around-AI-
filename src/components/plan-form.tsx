@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { createTrip, type PlanFormState } from "@/app/(app)/plan/actions";
 import { CURRENCIES } from "@/lib/options";
+import { CANTONS, cantonByCode, nearestAirports } from "@/lib/swiss";
 import {
   INTERESTS, LEVELS, LODGING, MAX_STOPS, MAX_TRAVELLERS, PACES, PARTY_TYPES, TRAVEL_MODES,
 } from "@/lib/planner/options";
@@ -46,12 +47,111 @@ const PARTY_SIZE: Record<string, [number, number]> = {
 };
 
 type Stop = { place: string; from: string; to: string };
+type Defaults = { currency: string; homePlace: string; homeCanton: string };
+
+/** Home town, canton and optional device location; shows the nearest airports as you type. */
+function HomeFields({ values, defaults }: { values: Values | undefined; defaults: Defaults }) {
+  const [canton, setCanton] = useState(text(values, "home_canton", defaults.homeCanton));
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(() => {
+    const lat = Number(text(values, "home_lat"));
+    const lng = Number(text(values, "home_lng"));
+    return text(values, "home_lat") && Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+  });
+  const [locating, setLocating] = useState(false);
+  const [locError, setLocError] = useState("");
+
+  const point = coords ?? (cantonByCode(canton) ? { lat: cantonByCode(canton)!.lat, lng: cantonByCode(canton)!.lng } : null);
+  const airports = point ? nearestAirports(point.lat, point.lng, 4) : [];
+
+  function locate() {
+    setLocError("");
+    if (!("geolocation" in navigator)) {
+      setLocError("Your browser does not offer location sharing.");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocating(false);
+        // Rounded to about one kilometre; used for this trip only and never stored.
+        setCoords({
+          lat: Math.round(pos.coords.latitude * 100) / 100,
+          lng: Math.round(pos.coords.longitude * 100) / 100,
+        });
+      },
+      () => {
+        setLocating(false);
+        setLocError("Location was not shared. Choose your canton instead.");
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
+    );
+  }
+
+  return (
+    <section className="card grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="md:col-span-2 lg:col-span-4">
+        <h2 className="text-xl font-bold">Where you start</h2>
+        <p className="mt-1 text-sm text-muted">
+          Optional. Jovia uses it to suggest the best departure airport and to check your
+          canton&apos;s school holidays.
+        </p>
+      </div>
+      <div className="field md:col-span-2">
+        <label htmlFor="pl-origin">Home town</label>
+        <input id="pl-origin" name="origin" className="input" maxLength={120} autoComplete="address-level2"
+          placeholder="e.g. Bern" defaultValue={text(values, "origin", defaults.homePlace)} />
+      </div>
+      <div className="field">
+        <label htmlFor="pl-canton">Canton</label>
+        <select id="pl-canton" name="home_canton" className="input" value={canton}
+          onChange={(e) => setCanton(e.target.value)}>
+          <option value="">Not in Switzerland / not set</option>
+          {CANTONS.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+        </select>
+      </div>
+      <div className="field">
+        <span className="label">Exact location</span>
+        {coords ? (
+          <button type="button" className="btn btn-ghost" onClick={() => setCoords(null)}>
+            Stop using my location
+          </button>
+        ) : (
+          <button type="button" className="btn btn-ghost" onClick={locate} disabled={locating}>
+            {locating ? "Locating…" : "Use my location"}
+          </button>
+        )}
+        <span className="hint">{locError || "Optional. Used for this trip only, never saved."}</span>
+      </div>
+      {coords ? (
+        <>
+          <input type="hidden" name="home_lat" value={coords.lat} />
+          <input type="hidden" name="home_lng" value={coords.lng} />
+        </>
+      ) : null}
+      {airports.length ? (
+        <div className="md:col-span-2 lg:col-span-4">
+          <p className="label">Nearest airports {coords ? "to your location" : `to ${cantonByCode(canton)?.capital}`}</p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {airports.map((a) => (
+              <li key={a.code} className="pill">
+                <span className="font-bold">{a.code}</span> {a.name} · {a.km} km
+              </li>
+            ))}
+          </ul>
+          <p className="hint mt-1.5">
+            Straight-line distance. Jovia weighs travel to the airport when it suggests where to fly from.
+          </p>
+        </div>
+      ) : null}
+    </section>
+  );
+}
 
 function Fields({
   values, defaults, maxDays, pending, error,
 }: {
   values: Values | undefined;
-  defaults: { currency: string };
+  defaults: Defaults;
   maxDays: number;
   pending: boolean;
   error?: string;
@@ -92,15 +192,10 @@ function Fields({
     <>
       <section className="card grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <h2 className="text-xl font-bold md:col-span-2 lg:col-span-4">Where and when</h2>
-        <div className="field md:col-span-2">
+        <div className="field md:col-span-2 lg:col-span-4">
           <label htmlFor="pl-destination">Destination</label>
           <input id="pl-destination" name="destination" className="input" required maxLength={120}
             placeholder="City, region or country" defaultValue={v("destination")} />
-        </div>
-        <div className="field md:col-span-2">
-          <label htmlFor="pl-origin">Departing from</label>
-          <input id="pl-origin" name="origin" className="input" maxLength={120}
-            placeholder="Optional" defaultValue={v("origin")} />
         </div>
         <div className="field">
           <label htmlFor="pl-start">Start date</label>
@@ -123,6 +218,8 @@ function Fields({
           </select>
         </div>
       </section>
+
+      <HomeFields values={values} defaults={defaults} />
 
       <section className="card flex flex-col gap-4">
         <div>
@@ -275,7 +372,7 @@ export function PlanForm({
   defaults,
   maxDays,
 }: {
-  defaults: { currency: string };
+  defaults: Defaults;
   maxDays: number;
 }) {
   const [state, action, pending] = useActionState(createTrip, empty);
