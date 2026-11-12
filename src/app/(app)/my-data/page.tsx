@@ -26,7 +26,7 @@ export default async function MyDataPage() {
       <div className="lg:col-span-2">
         <h1 className="text-3xl font-extrabold sm:text-4xl">My data</h1>
         <p className="mt-2 text-muted">
-          Everything TAAI stores about you, and the controls to change or remove it.
+          Everything Jovia stores about you, and the controls to change or remove it.
         </p>
       </div>
 
@@ -50,7 +50,7 @@ export default async function MyDataPage() {
           <span className="pill">{on ? "On" : "Off"}</span>
         </div>
         <p className="mt-2 text-sm text-muted">
-          When this is on, TAAI may remember lasting travel preferences from your trips and
+          When this is on, Jovia may remember lasting travel preferences from your trips and
           feedback to improve future suggestions. It never stores health, religious or political
           information. When it is off, the AI only uses what you enter for the current trip.
           Trip planning and memory are still being built, so nothing has been learned yet.

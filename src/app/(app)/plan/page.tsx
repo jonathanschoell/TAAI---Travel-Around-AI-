@@ -1,35 +1,72 @@
 import type { Metadata } from "next";
-import { requireUser } from "@/lib/auth";
+import { PlanForm } from "@/components/plan-form";
+import Link from "next/link";
+import { getProfile, requireUser } from "@/lib/auth";
+import { getQuota, TIERS } from "@/lib/billing";
+import { getUpcomingSchoolHolidays, HOLIDAY_SOURCE } from "@/lib/holidays";
+import { cantonByCode } from "@/lib/swiss";
 
 export const metadata: Metadata = { title: "Plan a trip" };
 
-const STEPS = [
-  ["Tell us about the trip", "Destination, dates, who is travelling, interests, budget and special wishes."],
-  ["TAAI builds your itinerary", "Mornings, afternoons and evenings for every day, with restaurants, travel hints and breaks."],
-  ["Adjust until it fits", "Swap or remove activities, replan a day, make it cheaper or more relaxed, then save or export as PDF."],
-];
+// Creating an itinerary can take a couple of minutes.
+export const maxDuration = 300;
 
 export default async function PlanPage() {
-  await requireUser();
+  const user = await requireUser();
+  const profile = await getProfile(user.id);
+  const quota = await getQuota(user);
+  const limits = TIERS[quota.tier];
+  const canton = cantonByCode(profile?.home_canton);
+  const school = canton ? await getUpcomingSchoolHolidays(canton.code) : null;
+  const day = (iso: string) =>
+    new Date(iso + "T00:00:00Z").toLocaleDateString("en-CH", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <span className="pill pill-signal">Coming next</span>
-        <h1 className="mt-3 text-3xl font-extrabold sm:text-4xl">Plan a trip</h1>
+        <h1 className="text-3xl font-extrabold sm:text-4xl">Plan a trip</h1>
         <p className="mt-2 max-w-2xl text-muted">
-          The planner is not available yet. It is the next part of TAAI being built. This is how
-          it will work:
+          Only the destination and dates are required. The more you tell Jovia, the better the
+          plan fits. All prices in the itinerary are estimates.
         </p>
       </div>
-      <ol className="grid gap-4 md:grid-cols-3">
-        {STEPS.map(([title, body], i) => (
-          <li key={title} className="card">
-            <p className="font-display text-sm font-bold text-brand">Step {i + 1}</p>
-            <h2 className="mt-1 text-lg font-bold">{title}</h2>
-            <p className="mt-2 text-sm text-muted">{body}</p>
-          </li>
-        ))}
-      </ol>
+      <p className="notice flex flex-wrap items-center justify-between gap-2">
+        <span>
+          <span className="pill pill-signal mr-2">{limits.label}</span>
+          {quota.leftThisMonth} of {limits.plansPerMonth} itineraries left this month. Trips of up
+          to {limits.maxDays} days.
+        </span>
+        {quota.tier === "free" ? <Link href="/pricing" className="underline">See Premium</Link> : null}
+      </p>
+      {canton && school?.length ? (
+        <details className="card">
+          <summary className="cursor-pointer font-semibold">
+            School holidays in {canton.name}, next 12 months
+          </summary>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {school.map((h) => (
+              <li key={h.name + h.start} className="text-sm">
+                <span className="font-semibold">{h.name}</span>
+                <span className="block text-muted">
+                  {day(h.start)} to {day(h.end)}{h.varies ? " · varies by municipality" : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="hint mt-3">
+            From the{" "}
+            <a href={HOLIDAY_SOURCE.url} className="underline" target="_blank" rel="noreferrer">{HOLIDAY_SOURCE.name}</a>.
+            The data can be incomplete. Check your school&apos;s calendar before booking.
+          </p>
+        </details>
+      ) : null}
+      <PlanForm
+        maxDays={limits.maxDays}
+        defaults={{
+          currency: profile?.currency ?? "CHF",
+          homePlace: profile?.home_place ?? "",
+          homeCanton: profile?.home_canton ?? "",
+        }}
+      />
     </div>
   );
 }

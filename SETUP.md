@@ -1,4 +1,4 @@
-# TAAI einrichten
+# Jovia einrichten
 
 Diese Anleitung bringt die Seite online. Du brauchst dafür dein Supabase-Projekt (Zürich) und dein Vercel-Konto. Schlüssel gehören nur in Vercel, nie in den Code und nie in einen Chat.
 
@@ -50,13 +50,25 @@ Die Variablen müssen für die Umgebung **Production** gesetzt sein. Namen exakt
 
 Admin ist nur, wer in `ADMIN_EMAILS` steht und seine E-Mail bestätigt hat. Ein zweiter Anmeldefaktor für Admin-Konten folgt in einem späteren Schritt.
 
+## 5. KI-Reiseplanung einschalten (Anthropic)
+
+1. Auf https://console.anthropic.com ein Konto anlegen und ein Zahlungsmittel hinterlegen. Die KI wird nach Nutzung abgerechnet.
+2. Unter **Limits** ein monatliches Ausgabenlimit setzen, damit die Kosten gedeckelt sind.
+3. Unter **API Keys** einen Schlüssel erstellen und kopieren.
+4. In Vercel als Umgebungsvariable `ANTHROPIC_API_KEY` eintragen (Production) und **Redeploy** klicken.
+5. `/setup-check` zeigt danach bei «AI planner key» ein OK.
+
+6. In Supabase im **SQL Editor** zusätzlich die Datei `supabase/migrations/0002_subscriptions.sql` ausführen. Sie legt die Tabelle für Free und Premium an.
+
+**Stufen:** Free = 2 Pläne pro Monat, bis 5 Tage, günstiges Modell (`claude-haiku-5-5`). Premium = 30 Pläne pro Monat (CHF 3.50 pro Monat, noch nicht kaufbar), bis 10 Tage, stärkeres Modell (`claude-sonnet-5-5`). Die Zahlen stehen in `src/lib/billing.ts`. Admin-Konten zählen immer als Premium. Im Admin-Bereich lässt sich Premium von Hand vergeben, bis eine Online-Bezahlung angebunden ist. Die Modelle lassen sich in Vercel mit `ANTHROPIC_MODEL_FREE` und `ANTHROPIC_MODEL` überschreiben.
+
 ## Was schon funktioniert
 
-Startseite, Registrierung, E-Mail-Bestätigung, Login, Passwort vergessen und zurücksetzen, Abmelden, geschützte Bereiche, Profil bearbeiten, «My data» mit Einwilligung zur Personalisierung und Kontolöschung, Admin-Übersicht mit Nutzungszahlen.
+Startseite, Registrierung, E-Mail-Bestätigung, Login, Passwort vergessen und zurücksetzen, Abmelden, geschützte Bereiche, Profil bearbeiten, «My data» mit Einwilligung zur Personalisierung und Kontolöschung, Admin-Übersicht mit Nutzungszahlen, Eingabemaske, KI-Reiseplanung, gespeicherte Reisepläne mit Tagesplanung und Budgetübersicht, Reise löschen, KI-Inhalt melden.
 
 ## Was als Nächstes kommt
 
-Eingabemaske und KI-Reiseplanung (dafür wird später `ANTHROPIC_API_KEY` benötigt), Ergebnisseite mit Karte und Budget, Bearbeiten, Feedback und KI-Gedächtnis.
+Interaktive Karte und Bilder, Aktivitäten tauschen und entfernen, Tag neu planen, PDF-Export, Feedback und KI-Gedächtnis.
 
 ## Lokal starten (optional)
 
@@ -65,3 +77,13 @@ cp .env.example .env.local   # Werte eintragen
 npm install
 npm run dev
 ```
+
+## Impressum und AGB
+
+Name, Adresse und Kontakt-E-Mail des Betreibers stehen in `src/lib/operator.ts`. Solange sie leer sind, zeigt das Impressum rote Platzhalter. AGB (`/terms`), Datenschutzerklärung (`/privacy`) und Impressum (`/imprint`) sind Entwürfe und sollten vor dem öffentlichen Start rechtlich geprüft werden.
+
+## Schweizer Funktionen (Wohnort, Flughäfen, Schulferien, Wechselkurse)
+
+1. In Supabase im **SQL Editor** die Datei `supabase/migrations/0003_home_location.sql` ausführen. Sie ergänzt das Profil um Wohnkanton und Wohnort.
+2. Sonst ist nichts einzurichten: Schulferien und Feiertage kommen von der freien OpenHolidays API, Wechselkurse von Frankfurter (Referenzkurse der Europäischen Zentralbank). Beide brauchen keinen Schlüssel.
+3. Der Standort des Geräts ist freiwillig, wird auf rund einen Kilometer gerundet und nur für die jeweilige Planung verwendet, nie gespeichert.

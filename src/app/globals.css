@@ -1,31 +1,31 @@
 @import "tailwindcss";
 
-/* Layout idea: calm petrol ink on cool paper, one signal-yellow accent borrowed
-   from airport wayfinding; content left-aligned, mobile-first, generous tap targets. */
+/* Layout idea: plain white and one confident blue; lots of air, thin lines,
+   content left-aligned, mobile-first, generous tap targets. */
 :root {
-  --bg: #f2f6f5;
+  --bg: #f6f8fd;
   --surface: #ffffff;
-  --ink: #0f2a2e;
-  --muted: #55686b;
-  --line: #d2dedb;
-  --brand: #0b6e6a;
+  --ink: #0b1b3a;
+  --muted: #56637d;
+  --line: #dbe3f1;
+  --brand: #1d4fd8;
   --brand-ink: #ffffff;
-  --signal: #f2b705;
+  --signal: #4f9dff;
   --danger: #b3261e;
-  --ok: #1d7a46;
+  --ok: #17734a;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0b191c;
-    --surface: #12272b;
-    --ink: #e7f1ef;
-    --muted: #93a9aa;
-    --line: #254348;
-    --brand: #41c7ba;
-    --brand-ink: #06211f;
-    --signal: #f5c531;
+    --bg: #16223f;
+    --surface: #1f2e52;
+    --ink: #eef3ff;
+    --muted: #a9b7d4;
+    --line: #34497a;
+    --brand: #6a97ff;
+    --brand-ink: #061233;
+    --signal: #8cc4ff;
     --danger: #ff8a80;
     --ok: #6fd39a;
     color-scheme: dark;
@@ -153,9 +153,34 @@ h3 {
   color: var(--muted);
 }
 .pill-signal {
-  background: var(--signal);
-  border-color: var(--signal);
-  color: #2a2000;
+  background: color-mix(in srgb, var(--brand) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--brand) 35%, var(--surface));
+  color: var(--brand);
+}
+
+.chip span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 1rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.chip input:checked + span {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--brand-ink);
+}
+.chip input:focus-visible + span {
+  outline: 3px solid var(--signal);
+  outline-offset: 2px;
+}
+textarea.input {
+  min-height: 96px;
 }
 
 .notice {
@@ -172,6 +197,60 @@ h3 {
 .notice-ok {
   border-color: var(--ok);
   color: var(--ok);
+}
+
+/* Plane intro: a plane crosses the top of the screen and drops the JOVIA letters. */
+.jw-plane {
+  display: none;
+}
+.jovia-intro .jw-plane {
+  display: flex;
+  align-items: center;
+  position: fixed;
+  left: 0;
+  top: var(--jw-top, 6px);
+  z-index: 60;
+  pointer-events: none;
+  animation: jw-fly 2600ms linear forwards;
+}
+.jw-plane-svg {
+  width: 40px;
+  height: 20px;
+  fill: var(--brand);
+}
+.jw-trail {
+  width: 140px;
+  height: 4px;
+  margin-right: 2px;
+  background-image: radial-gradient(circle, var(--brand) 1.3px, transparent 1.7px);
+  background-size: 9px 4px;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000);
+  mask-image: linear-gradient(to right, transparent, #000);
+  opacity: 0.6;
+}
+@keyframes jw-fly {
+  from {
+    transform: translateX(calc(var(--jw-from, -90px) - 182px));
+  }
+  to {
+    transform: translateX(calc(var(--jw-to, 100vw) - 182px));
+  }
+}
+.jovia-intro .jw-letter {
+  animation: jw-drop 700ms cubic-bezier(0.34, 1.45, 0.55, 1) var(--jw-delay, 400ms) both;
+}
+@keyframes jw-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--jw-drop, 30px))) rotate(-16deg) scale(0.6);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

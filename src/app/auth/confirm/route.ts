@@ -5,7 +5,7 @@ import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Target of the links in TAAI's own email templates (see SETUP.md):
+ * Target of the links in Jovia's own email templates (see SETUP.md):
  * /auth/confirm?token_hash=...&type=email|recovery&next=/dashboard
  * Works on any device, because it does not depend on a cookie from the sign-up browser.
  */

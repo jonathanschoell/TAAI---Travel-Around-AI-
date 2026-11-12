@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Figtree } from "next/font/google";
+import { Figtree, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const display = Bricolage_Grotesque({
+const display = Plus_Jakarta_Sans({
   variable: "--font-display",
   subsets: ["latin"],
 });
@@ -12,15 +12,18 @@ const body = Figtree({
   subsets: ["latin"],
 });
 
+/** Plays the plane intro on every page load, never for people who prefer reduced motion. */
+const INTRO_SCRIPT = `try{var d=document.documentElement;if(!matchMedia("(prefers-reduced-motion: reduce)").matches){d.classList.add("jovia-intro");setTimeout(function(){d.classList.remove("jovia-intro")},4200)}}catch(e){}`;
+
 export const metadata: Metadata = {
   title: {
-    default: "TAAI — Travel Around AI",
-    template: "%s · TAAI",
+    default: "Jovia",
+    template: "%s · Jovia",
   },
   description:
-    "TAAI is your personal AI travel agency. Tell us who is travelling and what you love, and get a day-by-day itinerary made for you.",
-  applicationName: "TAAI",
-  appleWebApp: { capable: true, title: "TAAI", statusBarStyle: "default" },
+    "Jovia is your personal AI travel agency. Tell us who is travelling and what you love, and get a day-by-day itinerary made for you.",
+  applicationName: "Jovia",
+  appleWebApp: { capable: true, title: "Jovia", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
@@ -28,8 +31,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f2f6f5" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b191c" },
+    { media: "(prefers-color-scheme: light)", color: "#f6f8fd" },
+    { media: "(prefers-color-scheme: dark)", color: "#16223f" },
   ],
 };
 
@@ -37,9 +40,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${display.variable} ${body.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
+        <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT }} />
         {children}
       </body>
     </html>

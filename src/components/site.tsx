@@ -1,17 +1,8 @@
 import Link from "next/link";
+import { Wordmark } from "@/components/wordmark";
 
 export function Logo({ href = "/" }: { href?: string }) {
-  return (
-    <Link href={href} className="inline-flex items-center gap-2" aria-label="TAAI home">
-      <span className="grid size-9 place-items-center rounded-xl bg-brand text-brand-ink font-display text-lg font-extrabold">
-        T
-      </span>
-      <span className="font-display text-xl font-extrabold tracking-tight">
-        TAAI
-        <span className="ml-1 inline-block size-2 rounded-full bg-signal align-baseline" aria-hidden="true" />
-      </span>
-    </Link>
-  );
+  return <Wordmark href={href} />;
 }
 
 export function PublicHeader() {
@@ -30,8 +21,10 @@ export function SiteFooter() {
   return (
     <footer className="mt-auto border-t border-line">
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-6 text-sm text-muted sm:px-6">
-        <p>TAAI — Travel Around AI</p>
+        <p>Jovia · AI travel planner</p>
         <nav className="flex gap-4" aria-label="Legal">
+          <Link href="/pricing" className="underline">Pricing</Link>
+          <Link href="/terms" className="underline">Terms</Link>
           <Link href="/privacy" className="underline">Privacy</Link>
           <Link href="/imprint" className="underline">Imprint</Link>
         </nav>
@@ -43,7 +36,7 @@ export function SiteFooter() {
 const AUTH_POINTS = [
   "Day-by-day itineraries built around the people travelling.",
   "Only you can see your trips and preferences.",
-  "You decide what TAAI remembers, and can delete it at any time.",
+  "You decide what Jovia remembers, and can delete it at any time.",
 ];
 
 export function AuthShell({
@@ -65,7 +58,7 @@ export function AuthShell({
       <main className="mx-auto grid w-full max-w-6xl flex-1 items-start gap-8 px-4 py-6 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-16 lg:py-10">
         <section className="order-2 hidden rounded-[28px] bg-brand p-10 text-brand-ink lg:order-1 lg:block">
           <p className="font-display text-sm font-bold uppercase tracking-widest opacity-80">
-            Travel Around AI
+            AI travel planner
           </p>
           <p className="mt-4 font-display text-4xl font-extrabold leading-tight">
             Your trips, your taste, one private place.
