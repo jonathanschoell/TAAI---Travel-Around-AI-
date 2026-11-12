@@ -71,133 +71,137 @@ h3 {
   outline-offset: 2px;
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  min-height: 48px;
-  padding: 0 1.25rem;
-  border-radius: 999px;
-  font-weight: 600;
-  border: 1.5px solid transparent;
-  transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
-  cursor: pointer;
-  text-decoration: none;
-}
-.btn:active {
-  transform: translateY(1px);
-}
-.btn[disabled],
-.btn[aria-disabled="true"] {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-.btn-primary {
-  background: var(--brand);
-  color: var(--brand-ink);
-}
-.btn-ghost {
-  border-color: var(--line);
-  color: var(--ink);
-  background: transparent;
-}
-.btn-danger {
-  background: var(--danger);
-  color: #fff;
-}
+/* Shared components. Inside a layer so Tailwind utilities (hidden, px-3, …) can override them. */
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 48px;
+    padding: 0 1.25rem;
+    border-radius: 999px;
+    font-weight: 600;
+    border: 1.5px solid transparent;
+    transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+  .btn[disabled],
+  .btn[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background: var(--brand);
+    color: var(--brand-ink);
+  }
+  .btn-ghost {
+    border-color: var(--line);
+    color: var(--ink);
+    background: transparent;
+  }
+  .btn-danger {
+    background: var(--danger);
+    color: #fff;
+  }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-.field label,
-.label {
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-.input {
-  min-height: 48px;
-  width: 100%;
-  border-radius: 12px;
-  border: 1.5px solid var(--line);
-  background: var(--surface);
-  color: var(--ink);
-  padding: 0 0.875rem;
-  font-size: 1rem;
-}
-.input:focus-visible {
-  border-color: var(--brand);
-}
-.hint {
-  font-size: 0.8125rem;
-  color: var(--muted);
-}
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+  .field label,
+  .label {
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .input {
+    min-height: 48px;
+    width: 100%;
+    border-radius: 12px;
+    border: 1.5px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    padding: 0 0.875rem;
+    font-size: 1rem;
+  }
+  .input:focus-visible {
+    border-color: var(--brand);
+  }
+  .hint {
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
 
-.card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 1.25rem;
-}
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 1.25rem;
+  }
 
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  border-radius: 999px;
-  padding: 0.125rem 0.625rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border: 1px solid var(--line);
-  color: var(--muted);
-}
-.pill-signal {
-  background: color-mix(in srgb, var(--brand) 12%, var(--surface));
-  border-color: color-mix(in srgb, var(--brand) 35%, var(--surface));
-  color: var(--brand);
-}
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid var(--line);
+    color: var(--muted);
+  }
+  .pill-signal {
+    background: color-mix(in srgb, var(--brand) 12%, var(--surface));
+    border-color: color-mix(in srgb, var(--brand) 35%, var(--surface));
+    color: var(--brand);
+  }
 
-.chip span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 1rem;
-  border-radius: 999px;
-  border: 1.5px solid var(--line);
-  background: var(--surface);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-.chip input:checked + span {
-  background: var(--brand);
-  border-color: var(--brand);
-  color: var(--brand-ink);
-}
-.chip input:focus-visible + span {
-  outline: 3px solid var(--signal);
-  outline-offset: 2px;
-}
-textarea.input {
-  min-height: 96px;
-}
+  .chip span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 1rem;
+    border-radius: 999px;
+    border: 1.5px solid var(--line);
+    background: var(--surface);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .chip input:checked + span {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--brand-ink);
+  }
+  .chip input:focus-visible + span {
+    outline: 3px solid var(--signal);
+    outline-offset: 2px;
+  }
+  textarea.input {
+    min-height: 96px;
+  }
 
-.notice {
-  border-radius: 12px;
-  padding: 0.75rem 0.875rem;
-  font-size: 0.9375rem;
-  border: 1px solid var(--line);
-  background: var(--surface);
-}
-.notice-error {
-  border-color: var(--danger);
-  color: var(--danger);
-}
-.notice-ok {
-  border-color: var(--ok);
-  color: var(--ok);
+  .notice {
+    border-radius: 12px;
+    padding: 0.75rem 0.875rem;
+    font-size: 0.9375rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .notice-error {
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+  .notice-ok {
+    border-color: var(--ok);
+    color: var(--ok);
+  }
 }
 
 /* Plane intro: a plane crosses the top of the screen and drops the JOVIA letters. */

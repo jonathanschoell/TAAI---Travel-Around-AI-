@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LanguageMenu } from "@/components/language-menu";
 import { Wordmark } from "@/components/wordmark";
 
 export function Logo({ href = "/" }: { href?: string }) {
@@ -10,6 +11,7 @@ export function PublicHeader() {
     <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
       <Logo />
       <nav className="flex items-center gap-2" aria-label="Account">
+        <LanguageMenu />
         <Link href="/login" className="btn btn-ghost">Log in</Link>
         <Link href="/register" className="btn btn-primary hidden sm:inline-flex">Create account</Link>
       </nav>

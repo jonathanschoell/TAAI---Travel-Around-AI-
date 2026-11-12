@@ -1,11 +1,6 @@
 import Link from "next/link";
+import { LANGUAGES } from "@/lib/languages";
 import { PublicHeader, SiteFooter } from "@/components/site";
-
-const SAMPLE_DAY = [
-  ["Morning", "Lake promenade walk and the old town lanes", "Free"],
-  ["Afternoon", "Cable car to the summit, picnic with a view", "est. CHF 96"],
-  ["Evening", "Fondue in a family-run cellar restaurant", "est. CHF 140"],
-];
 
 const STEPS = [
   ["Tell Jovia who is travelling", "Ages, interests, dates, budget and the kind of holiday you want. Most fields are optional."],
@@ -24,13 +19,13 @@ export default function HomePage() {
     <>
       <PublicHeader />
       <main className="flex-1">
-        <section className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 pb-12 pt-6 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:pt-12">
+        <section className="mx-auto w-full max-w-6xl px-4 pb-14 pt-6 sm:px-6 lg:pb-20 lg:pt-14">
           <div>
             <p className="pill">AI travel planner</p>
-            <h1 className="mt-4 text-4xl font-extrabold leading-[1.05] sm:text-6xl">
+            <h1 className="mt-4 max-w-4xl text-4xl font-extrabold leading-[1.05] sm:text-6xl lg:text-7xl">
               A trip planned around <span className="text-brand">exactly who is going.</span>
             </h1>
-            <p className="mt-5 max-w-xl text-lg text-muted">
+            <p className="mt-5 max-w-2xl text-lg text-muted">
               Jovia is your personal AI travel agency. It builds a complete itinerary from your
               interests, your budget and the people you travel with, and it gets to know your
               taste over time.
@@ -39,30 +34,19 @@ export default function HomePage() {
               <Link href="/register" className="btn btn-primary">Create your account</Link>
               <Link href="/login" className="btn btn-ghost">Log in</Link>
             </div>
+            <p className="mt-6 flex flex-wrap items-center gap-2 text-sm">
+              <span className="font-semibold">Languages:</span>
+              {LANGUAGES.map((l) => (
+                <span key={l.code} lang={l.code} className={l.ready ? "pill pill-signal" : "pill"}>
+                  {l.name}{l.ready ? "" : " · soon"}
+                </span>
+              ))}
+            </p>
             <p className="mt-4 text-sm text-muted">
               Early access: all prices in itineraries are estimates. Maps, photos and plan editing are being built next.
             </p>
           </div>
 
-          <aside className="card relative" aria-label="Example itinerary">
-            <span className="pill pill-signal absolute -top-3 right-5">Example</span>
-            <p className="text-sm font-semibold text-muted">Day 2 of 5 · Lucerne · 2 adults, 2 children</p>
-            <h2 className="mt-1 text-2xl font-extrabold">Lake, mountain, melted cheese</h2>
-            <ol className="mt-4 flex flex-col">
-              {SAMPLE_DAY.map(([slot, what, cost]) => (
-                <li key={slot} className="grid grid-cols-[5.5rem_1fr] gap-3 border-t border-line py-3">
-                  <span className="font-display text-sm font-bold text-brand">{slot}</span>
-                  <span>
-                    {what}
-                    <span className="mt-1 block text-sm text-muted">{cost}</span>
-                  </span>
-                </li>
-              ))}
-            </ol>
-            <p className="border-t border-line pt-3 text-sm text-muted">
-              Short walks between stops. A long lunch break is planned for the children.
-            </p>
-          </aside>
         </section>
 
         <section className="border-y border-line bg-surface">
