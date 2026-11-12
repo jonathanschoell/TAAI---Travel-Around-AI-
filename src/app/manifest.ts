@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Your personal AI travel agency.",
     start_url: "/dashboard",
     display: "standalone",
-    background_color: "#f6f8fd",
+    background_color: "#ffffff",
     theme_color: "#1d4fd8",
     icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
   };
