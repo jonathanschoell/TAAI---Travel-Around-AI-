@@ -7,13 +7,13 @@ export const metadata: Metadata = { title: "Pricing" };
 
 const FREE = [
   "2 AI itineraries per month",
-  "Trips of up to 5 days",
+  "Trips of up to 21 days",
   "Day-by-day plan with budget overview",
   "Saved trips in your dashboard",
 ];
 const PREMIUM = [
   "30 AI itineraries per month",
-  "Trips of up to 10 days",
+  "Trips of up to 21 days",
   "New features first as they launch",
 ];
 
