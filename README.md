@@ -5,3 +5,5 @@ Jovia is your intelligent, AI-powered travel agency. Plan, personalize, and disc
 
 Next.js 16 · TypeScript · Tailwind CSS · Supabase (Postgres, Auth, row level security).
 Setup instructions (German): [SETUP.md](SETUP.md). Database schema: `supabase/migrations/`.
+
+Every merge into `main` starts a new deployment on Vercel. A new deployment also picks up changed environment variables.
