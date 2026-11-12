@@ -48,7 +48,6 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
           <h2 className="text-xl font-bold">Your profile</h2>
           <dl className="grid grid-cols-2 gap-y-1 text-sm">
             <dt className="text-muted">Currency</dt><dd>{profile?.currency ?? "CHF"}</dd>
-            <dt className="text-muted">Travellers</dt><dd>{profile?.default_travelers ?? 1}</dd>
             <dt className="text-muted">Age group</dt><dd>{profile?.age_group ?? "Not set"}</dd>
           </dl>
           <Link href="/profile" className="btn btn-ghost sm:w-fit">Edit profile</Link>

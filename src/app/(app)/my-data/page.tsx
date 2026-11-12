@@ -38,7 +38,6 @@ export default async function MyDataPage() {
           <dt className="text-muted">Profile name</dt><dd>{profile?.display_name ?? "—"}</dd>
           <dt className="text-muted">Age group</dt><dd>{profile?.age_group ?? "Not set"}</dd>
           <dt className="text-muted">Currency</dt><dd>{profile?.currency ?? "—"}</dd>
-          <dt className="text-muted">Travellers</dt><dd>{profile?.default_travelers ?? "—"}</dd>
           <dt className="text-muted">Last active</dt><dd>{fmt(profile?.last_seen_at)}</dd>
         </dl>
         <Link href="/profile" className="btn btn-ghost mt-4 sm:w-fit">Edit profile</Link>
