@@ -1,18 +1,19 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { ForgotForm } from "@/components/auth-forms";
 import { AuthShell } from "@/components/site";
+import { getI18n, titleFor } from "@/lib/i18n/server";
 
-export const metadata: Metadata = { title: "Reset password" };
+export const generateMetadata = titleFor("forgot");
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage() {
+  const { t } = await getI18n();
   return (
     <AuthShell
-      title="Forgot your password?"
-      lead="Enter your email and we will send you a link to choose a new one."
+      title={t.auth.forgotTitle}
+      lead={t.auth.forgotLead}
       footer={
         <p>
-          Remembered it? <Link href="/login" className="underline">Back to log in</Link>
+          {t.auth.remembered} <Link href="/login" className="underline">{t.auth.backToLogin}</Link>
         </p>
       }
     >

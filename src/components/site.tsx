@@ -1,47 +1,44 @@
 import Link from "next/link";
 import { LanguageMenu } from "@/components/language-menu";
 import { Wordmark } from "@/components/wordmark";
+import { getI18n } from "@/lib/i18n/server";
 
 export function Logo({ href = "/" }: { href?: string }) {
   return <Wordmark href={href} />;
 }
 
-export function PublicHeader() {
+export async function PublicHeader() {
+  const { t } = await getI18n();
   return (
     <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
       <Logo />
-      <nav className="flex items-center gap-2" aria-label="Account">
+      <nav className="flex items-center gap-2" aria-label={t.site.accountNav}>
         <LanguageMenu />
-        <Link href="/login" className="btn btn-ghost">Log in</Link>
-        <Link href="/register" className="btn btn-primary hidden sm:inline-flex">Create account</Link>
+        <Link href="/login" className="btn btn-ghost">{t.site.logIn}</Link>
+        <Link href="/register" className="btn btn-primary hidden sm:inline-flex">{t.site.createAccount}</Link>
       </nav>
     </header>
   );
 }
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const { t } = await getI18n();
   return (
     <footer className="mt-auto border-t border-line">
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-6 text-sm text-muted sm:px-6">
-        <p>Jovia · AI travel planner</p>
-        <nav className="flex gap-4" aria-label="Legal">
-          <Link href="/pricing" className="underline">Pricing</Link>
-          <Link href="/terms" className="underline">Terms</Link>
-          <Link href="/privacy" className="underline">Privacy</Link>
-          <Link href="/imprint" className="underline">Imprint</Link>
+        <p>{t.site.tagline}</p>
+        <nav className="flex flex-wrap gap-4" aria-label={t.site.legalNav}>
+          <Link href="/pricing" className="underline">{t.site.pricing}</Link>
+          <Link href="/terms" className="underline">{t.site.terms}</Link>
+          <Link href="/privacy" className="underline">{t.site.privacy}</Link>
+          <Link href="/imprint" className="underline">{t.site.imprint}</Link>
         </nav>
       </div>
     </footer>
   );
 }
 
-const AUTH_POINTS = [
-  "Day-by-day itineraries built around the people travelling.",
-  "Only you can see your trips and preferences.",
-  "You decide what Jovia remembers, and can delete it at any time.",
-];
-
-export function AuthShell({
+export async function AuthShell({
   title,
   lead,
   children,
@@ -52,24 +49,24 @@ export function AuthShell({
   children: React.ReactNode;
   footer?: React.ReactNode;
 }) {
+  const { t } = await getI18n();
   return (
     <>
-      <header className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6">
+      <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
         <Logo />
+        <LanguageMenu />
       </header>
       <main className="mx-auto grid w-full max-w-6xl flex-1 items-start gap-8 px-4 py-6 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-16 lg:py-10">
         <section className="order-2 hidden rounded-[28px] bg-brand p-10 text-brand-ink lg:order-1 lg:block">
           <p className="font-display text-sm font-bold uppercase tracking-widest opacity-80">
-            AI travel planner
+            {t.site.authKicker}
           </p>
-          <p className="mt-4 font-display text-4xl font-extrabold leading-tight">
-            Your trips, your taste, one private place.
-          </p>
+          <p className="mt-4 font-display text-4xl font-extrabold leading-tight">{t.site.authHeadline}</p>
           <ul className="mt-8 flex flex-col gap-4 text-lg">
-            {AUTH_POINTS.map((t) => (
-              <li key={t} className="flex gap-3">
+            {t.site.authPoints.map((p) => (
+              <li key={p} className="flex gap-3">
                 <span className="mt-2 size-2.5 shrink-0 rounded-full bg-signal" aria-hidden="true" />
-                <span>{t}</span>
+                <span>{p}</span>
               </li>
             ))}
           </ul>

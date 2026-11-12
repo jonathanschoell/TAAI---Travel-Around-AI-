@@ -11,6 +11,7 @@ import {
   updatePassword,
   type FormState,
 } from "@/app/(auth)/actions";
+import { useI18n } from "@/lib/i18n/client";
 
 const empty: FormState = {};
 
@@ -24,25 +25,26 @@ function Messages({ state }: { state: FormState }) {
 }
 
 function Submit({ pending, children }: { pending: boolean; children: React.ReactNode }) {
+  const { t } = useI18n();
   return (
     <button type="submit" className="btn btn-primary w-full" disabled={pending}>
-      {pending ? "One moment…" : children}
+      {pending ? t.common.oneMoment : children}
     </button>
   );
 }
 
-const URL_NOTICES: Record<string, string> = {
-  confirmed: "Your email is confirmed. Log in to continue.",
-  "link-expired": "That link has expired or was already used. Log in, or request a new link.",
-  deleted: "Your account and all of its data have been deleted.",
-};
-
 export function LoginForm() {
+  const { t } = useI18n();
+  const urlNotices: Record<string, string> = {
+    confirmed: t.auth.urlConfirmed,
+    "link-expired": t.auth.urlExpired,
+    deleted: t.auth.urlDeleted,
+  };
   const params = useSearchParams();
   const [state, action, pending] = useActionState(signIn, empty);
   const [resend, resendAction, resending] = useActionState(resendConfirmation, empty);
-  const urlNotice = URL_NOTICES[params.get("notice") ?? ""];
-  const needsConfirm = state.error?.startsWith("Please confirm");
+  const urlNotice = urlNotices[params.get("notice") ?? ""];
+  const needsConfirm = Boolean(state.needsConfirm);
 
   return (
     <div className="flex flex-col gap-4">
@@ -50,43 +52,44 @@ export function LoginForm() {
       <form action={action} className="flex flex-col gap-4">
         <input type="hidden" name="next" value={params.get("next") ?? ""} />
         <div className="field">
-          <label htmlFor="login-email">Email</label>
+          <label htmlFor="login-email">{t.common.email}</label>
           <input id="login-email" name="email" type="email" autoComplete="email" inputMode="email"
             required className="input" defaultValue={state.email} />
         </div>
         <div className="field">
-          <label htmlFor="login-password">Password</label>
+          <label htmlFor="login-password">{t.common.password}</label>
           <input id="login-password" name="password" type="password" autoComplete="current-password"
             required className="input" />
         </div>
         <Messages state={state} />
-        <Submit pending={pending}>Log in</Submit>
+        <Submit pending={pending}>{t.auth.logIn}</Submit>
       </form>
       {needsConfirm ? (
         <form action={resendAction} className="flex flex-col gap-2">
           <input type="hidden" name="email" value={state.email ?? ""} />
           <button type="submit" className="btn btn-ghost w-full" disabled={resending}>
-            Send a new confirmation link
+            {t.auth.resend}
           </button>
           <Messages state={resend} />
         </form>
       ) : null}
       <p className="text-sm text-muted">
-        <Link href="/forgot-password" className="underline">Forgot your password?</Link>
+        <Link href="/forgot-password" className="underline">{t.auth.forgot}</Link>
       </p>
     </div>
   );
 }
 
 export function RegisterForm() {
+  const { t } = useI18n();
   const [state, action, pending] = useActionState(signUp, empty);
   if (state.notice) {
     return (
       <div className="flex flex-col gap-4">
         <Messages state={state} />
         <p className="text-sm text-muted">
-          Nothing arrived after a few minutes? Check your spam folder, then{" "}
-          <Link href="/login" className="underline">log in</Link> to request a new link.
+          {t.auth.nothingArrived}
+          <Link href="/login" className="underline">{t.auth.logInLower}</Link>{t.auth.toRequestNew}
         </p>
       </div>
     );
@@ -94,78 +97,81 @@ export function RegisterForm() {
   return (
     <form action={action} className="flex flex-col gap-4">
       <div className="field">
-        <label htmlFor="reg-name">What should we call you?</label>
+        <label htmlFor="reg-name">{t.auth.nameLabel}</label>
         <input id="reg-name" name="name" type="text" autoComplete="given-name" maxLength={60}
           className="input" />
-        <span className="hint">Optional. Shown in your dashboard greeting.</span>
+        <span className="hint">{t.auth.nameHint}</span>
       </div>
       <div className="field">
-        <label htmlFor="reg-email">Email</label>
+        <label htmlFor="reg-email">{t.common.email}</label>
         <input id="reg-email" name="email" type="email" autoComplete="email" inputMode="email"
           required className="input" defaultValue={state.email} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
       <div className="field">
-        <label htmlFor="reg-password">Password</label>
+        <label htmlFor="reg-password">{t.common.password}</label>
         <input id="reg-password" name="password" type="password" autoComplete="new-password"
           required minLength={10} className="input" />
       </div>
       <div className="field">
-        <label htmlFor="reg-confirm">Confirm password</label>
+        <label htmlFor="reg-confirm">{t.auth.confirmPassword}</label>
         <input id="reg-confirm" name="confirm" type="password" autoComplete="new-password"
           required minLength={10} className="input" />
       </div>
-      <span className="hint sm:col-span-2">At least 10 characters. A short sentence works well.</span>
+      <span className="hint sm:col-span-2">{t.auth.passwordHint}</span>
       </div>
       <label className="flex items-start gap-3 text-sm">
         <input id="reg-age" name="age" type="checkbox" required className="mt-0.5 size-5 shrink-0" />
-        <span>I am 16 or older.</span>
+        <span>{t.auth.age16}</span>
       </label>
       <label className="flex items-start gap-3 text-sm">
         <input id="reg-privacy" name="privacy" type="checkbox" required className="mt-0.5 size-5 shrink-0" />
         <span>
-          I accept the <Link href="/terms" className="underline">terms of use</Link> and have
-          read the <Link href="/privacy" className="underline">privacy policy</Link>.
+          {t.auth.acceptBefore}<Link href="/terms" className="underline">{t.auth.termsLink}</Link>
+          {t.auth.acceptMiddle}<Link href="/privacy" className="underline">{t.auth.privacyLink}</Link>
+          {t.auth.acceptAfter}
         </span>
       </label>
       <Messages state={state} />
-      <Submit pending={pending}>Create account</Submit>
+      <Submit pending={pending}>{t.auth.createAccount}</Submit>
     </form>
   );
 }
 
 export function ForgotForm() {
+  const { t } = useI18n();
   const [state, action, pending] = useActionState(requestPasswordReset, empty);
   return (
     <form action={action} className="flex flex-col gap-4">
       <div className="field">
-        <label htmlFor="forgot-email">Email</label>
+        <label htmlFor="forgot-email">{t.common.email}</label>
         <input id="forgot-email" name="email" type="email" autoComplete="email" inputMode="email"
           required className="input" />
       </div>
       <Messages state={state} />
-      <Submit pending={pending}>Send reset link</Submit>
+      <Submit pending={pending}>{t.auth.sendReset}</Submit>
     </form>
   );
 }
 
 export function ResetForm() {
+  const { t } = useI18n();
   const [state, action, pending] = useActionState(updatePassword, empty);
   return (
     <form action={action} className="flex flex-col gap-4">
       <div className="field">
-        <label htmlFor="reset-password">New password</label>
+        <label htmlFor="reset-password">{t.auth.newPassword}</label>
         <input id="reset-password" name="password" type="password" autoComplete="new-password"
           required minLength={10} className="input" />
-        <span className="hint">At least 10 characters.</span>
+        <span className="hint">{t.auth.newPasswordHint}</span>
       </div>
       <div className="field">
-        <label htmlFor="reset-confirm">Confirm new password</label>
+        <label htmlFor="reset-confirm">{t.auth.confirmNewPassword}</label>
         <input id="reset-confirm" name="confirm" type="password" autoComplete="new-password"
           required minLength={10} className="input" />
       </div>
       <Messages state={state} />
-      <Submit pending={pending}>Save new password</Submit>
+      <Submit pending={pending}>{t.auth.saveNewPassword}</Submit>
     </form>
   );
 }

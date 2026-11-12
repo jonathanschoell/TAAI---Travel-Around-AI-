@@ -90,4 +90,6 @@ export type TripInput = {
   pace: string;
   wishes: string;
   constraints: string;
+  /** Language the plan is written in, as an English name ("German"). Defaults to English. */
+  language?: string;
 };

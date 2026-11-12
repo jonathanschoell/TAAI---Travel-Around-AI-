@@ -1,4 +1,6 @@
 import { CURRENCIES } from "@/lib/options";
+import { f } from "@/lib/i18n/config";
+import { en } from "@/lib/i18n/en";
 import { cantonByCode } from "@/lib/swiss";
 import {
   INTERESTS,
@@ -18,34 +20,37 @@ const pick = (pairs: [string, string][], v: string, fallback: string) =>
   pairs.some(([k]) => k === v) ? v : fallback;
 
 /** Checks the planner form and turns it into a clean trip request. */
-export function parseTripForm(fd: FormData): { input?: TripInput; error?: string } {
+export function parseTripForm(
+  fd: FormData,
+  e: typeof en.plan.errors = en.plan.errors,
+): { input?: TripInput; error?: string } {
   const s = (k: string, max = 200) => String(fd.get(k) ?? "").trim().slice(0, max);
   const destination = s("destination", 120);
   const startDate = s("start_date", 10);
   const endDate = s("end_date", 10);
-  if (!destination) return { error: "Tell us where you want to go." };
+  if (!destination) return { error: e.destination };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate))
-    return { error: "Choose a start date and an end date." };
+    return { error: e.dates };
   const start = Date.parse(startDate + "T00:00:00Z");
   const end = Date.parse(endDate + "T00:00:00Z");
   if (Number.isNaN(start) || Number.isNaN(end) || end < start)
-    return { error: "The end date must be on or after the start date." };
+    return { error: e.endBeforeStart };
   const days = Math.round((end - start) / DAY) + 1;
   if (days > MAX_TRIP_DAYS)
-    return { error: `Trips can be up to ${MAX_TRIP_DAYS} days long. Please shorten the dates.` };
+    return { error: f(e.tooLong, { n: MAX_TRIP_DAYS }) };
 
   const party = pick(PARTY_TYPES, s("party"), "couple");
   const rawAges = fd.getAll("ages").map((x) => String(x).trim()).slice(0, MAX_TRAVELLERS);
   let ages: (number | null)[] = rawAges.map((x) => (x === "" ? null : Number(x)));
   if (ages.some((x) => x !== null && (!Number.isInteger(x) || x < 0 || x > 120)))
-    return { error: "Ages must be whole numbers between 0 and 120." };
+    return { error: e.ages };
   if (party === "solo") ages = [ages[0] ?? null];
   else if (party === "couple") ages = [ages[0] ?? null, ages[1] ?? null];
   else {
-    if (ages.length < 2) return { error: "Add at least two travellers for a group or family trip." };
-    if (ages.some((x) => x === null)) return { error: "Enter the age of every traveller, children included." };
+    if (ages.length < 2) return { error: e.groupSize };
+    if (ages.some((x) => x === null)) return { error: e.everyAge };
     if (!ages.some((x) => x !== null && x >= 18))
-      return { error: "At least one traveller must be an adult." };
+      return { error: e.adult };
   }
   const travelers = ages.length;
 
@@ -58,12 +63,12 @@ export function parseTripForm(fd: FormData): { input?: TripInput; error?: string
     const from = froms[i] ?? "";
     const to = tos[i] ?? "";
     if (!place && !from && !to) continue;
-    if (!place) return { error: `Stop ${i + 1} needs a place name.` };
+    if (!place) return { error: f(e.stopPlace, { n: i + 1 }) };
     if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to))
-      return { error: `Choose both dates for the stop in ${place}.` };
-    if (to < from) return { error: `For ${place}, the "until" date must be on or after the "from" date.` };
+      return { error: f(e.stopDates, { place }) };
+    if (to < from) return { error: f(e.stopOrder, { place }) };
     if (from < startDate || to > endDate)
-      return { error: `The dates for ${place} must lie within your trip (${startDate} to ${endDate}).` };
+      return { error: f(e.stopRange, { place, start: startDate, end: endDate }) };
     stops.push({ place, from, to });
   }
   stops.sort((x, y) => x.from.localeCompare(y.from));

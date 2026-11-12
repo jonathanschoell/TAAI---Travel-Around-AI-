@@ -1,4 +1,5 @@
 import "server-only";
+import { LANGUAGES } from "@/lib/i18n/config";
 import { BUDGET_PARTS, INTERESTS, type TripInput } from "@/lib/planner/options";
 
 const CATEGORY_KEYS = INTERESTS.map(([k]) => k);
@@ -210,7 +211,7 @@ function dayRules(input: TripInput) {
     "- Respect the pace and the budget. Include one or two lesser-known places, not only the famous sights.",
     "- Only suggest places you are confident exist. Never invent opening hours or exact prices: all costs are your best estimates for the whole group.",
     "- Give latitude and longitude when you know them reasonably well; use 0 for both otherwise.",
-    "- Write everything in English. Use Swiss francs (CHF) unless the travellers chose another currency.",
+    `- Write every text (title, summary, themes, activity names and descriptions, transit notes, tips, airport reason) in ${input.language ?? "English"}. Keep proper names of places as they are commonly written in that language. Use Swiss francs (CHF) unless the travellers chose another currency.`,
   ];
 }
 
@@ -499,7 +500,9 @@ export async function generatePlan(
   personalContext: string,
   tier: "free" | "premium" | "unlimited" = "premium",
   swiss: SwissContext | null = null,
+  locale: string = "en",
 ): Promise<{ plan: Plan; usage: Usage; model: string }> {
+  input = { ...input, language: LANGUAGES.find((l) => l.code === locale)?.english ?? "English" };
   const model = pickModel(tier);
   const airports = swiss?.airports.map((a) => a.code) ?? [];
   const blockDays = tier === "unlimited" ? LARGE_MODEL_BLOCK_DAYS : BLOCK_DAYS;

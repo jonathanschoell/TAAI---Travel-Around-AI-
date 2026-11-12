@@ -29,10 +29,10 @@ export type Holiday = {
   kind: "school" | "public";
 };
 
-async function load(path: "SchoolHolidays" | "PublicHolidays", canton: string, from: string, to: string) {
+async function load(path: "SchoolHolidays" | "PublicHolidays", canton: string, from: string, to: string, lang: string) {
   const qs = new URLSearchParams({
     countryIsoCode: "CH",
-    languageIsoCode: "EN",
+    languageIsoCode: lang,
     validFrom: from,
     validTo: to,
     subdivisionCode: `CH-${canton}`,
@@ -52,17 +52,17 @@ async function load(path: "SchoolHolidays" | "PublicHolidays", canton: string, f
   return data;
 }
 
-const nameOf = (h: RawHoliday) =>
-  h.name?.find((n) => n.language === "EN")?.text ?? h.name?.[0]?.text ?? "Holiday";
+const nameOf = (h: RawHoliday, lang: string) =>
+  h.name?.find((n) => n.language === lang)?.text ?? h.name?.find((n) => n.language === "EN")?.text ?? h.name?.[0]?.text ?? "—";
 const isDate = (s: unknown): s is string => typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s);
 
 /** Merges variants of the same holiday (different school groups) that overlap in time. */
-export function mergeHolidays(raw: RawHoliday[], kind: Holiday["kind"]): Holiday[] {
+export function mergeHolidays(raw: RawHoliday[], kind: Holiday["kind"], lang = "EN"): Holiday[] {
   const out: Holiday[] = [];
   for (const h of raw) {
     if (!isDate(h.startDate) || !isDate(h.endDate)) continue;
     if (kind === "public" && h.type !== "Public") continue;
-    const name = nameOf(h);
+    const name = nameOf(h, lang);
     const same = out.find((o) => o.name === name && h.startDate <= o.end && h.endDate >= o.start);
     if (same) {
       if (same.start !== h.startDate || same.end !== h.endDate) same.varies = true;
@@ -76,14 +76,15 @@ export function mergeHolidays(raw: RawHoliday[], kind: Holiday["kind"]): Holiday
 }
 
 /** School and public holidays in a canton between two dates. Returns null if the service is unavailable. */
-export async function getHolidays(canton: string, from: string, to: string): Promise<Holiday[] | null> {
+export async function getHolidays(canton: string, from: string, to: string, locale = "en"): Promise<Holiday[] | null> {
   if (!/^[A-Z]{2}$/.test(canton)) return null;
+  const lang = ["en", "de", "fr", "it"].includes(locale) ? locale.toUpperCase() : "EN";
   try {
     const [school, publicDays] = await Promise.all([
-      load("SchoolHolidays", canton, from, to),
-      load("PublicHolidays", canton, from, to),
+      load("SchoolHolidays", canton, from, to, lang),
+      load("PublicHolidays", canton, from, to, lang),
     ]);
-    return [...mergeHolidays(school, "school"), ...mergeHolidays(publicDays, "public")].sort((a, b) =>
+    return [...mergeHolidays(school, "school", lang), ...mergeHolidays(publicDays, "public", lang)].sort((a, b) =>
       a.start.localeCompare(b.start),
     );
   } catch (e) {
@@ -93,9 +94,9 @@ export async function getHolidays(canton: string, from: string, to: string): Pro
 }
 
 /** School holidays from today for the next twelve months. */
-export async function getUpcomingSchoolHolidays(canton: string) {
+export async function getUpcomingSchoolHolidays(canton: string, locale = "en") {
   const today = new Date();
   const from = today.toISOString().slice(0, 10);
   const to = new Date(today.getTime() + 365 * 86400000).toISOString().slice(0, 10);
-  return (await getHolidays(canton, from, to))?.filter((h) => h.kind === "school") ?? null;
+  return (await getHolidays(canton, from, to, locale))?.filter((h) => h.kind === "school") ?? null;
 }

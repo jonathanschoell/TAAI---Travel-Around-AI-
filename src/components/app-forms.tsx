@@ -3,7 +3,9 @@
 import { useActionState } from "react";
 import { deleteAccount, setUserTier, updateProfile, type AppFormState } from "@/app/(app)/actions";
 import { AGE_GROUPS, CURRENCIES } from "@/lib/options";
-import { CANTONS } from "@/lib/swiss";
+import { cantonsFor } from "@/lib/swiss";
+import { LANGUAGES } from "@/lib/i18n/config";
+import { useI18n } from "@/lib/i18n/client";
 
 const empty: AppFormState = {};
 
@@ -28,50 +30,54 @@ export function ProfileForm({
   };
 }) {
   const [state, action, pending] = useActionState(updateProfile, empty);
+  const { t: all, locale } = useI18n();
+  const t = all.profileForm;
   return (
     <form action={action} className="grid gap-4 sm:grid-cols-2">
       <div className="field sm:col-span-2">
-        <label htmlFor="pf-name">Profile name</label>
+        <label htmlFor="pf-name">{t.name}</label>
         <input id="pf-name" name="display_name" className="input" maxLength={60} required
           defaultValue={profile.display_name} autoComplete="given-name" />
       </div>
       <div className="field">
-        <label htmlFor="pf-age">Age group</label>
+        <label htmlFor="pf-age">{t.ageGroup}</label>
         <select id="pf-age" name="age_group" className="input" defaultValue={profile.age_group ?? ""}>
-          <option value="">Prefer not to say</option>
+          <option value="">{t.preferNot}</option>
           {AGE_GROUPS.map((a) => <option key={a} value={a}>{a}</option>)}
         </select>
-        <span className="hint">Optional. Helps suggest activities that fit.</span>
+        <span className="hint">{t.ageHint}</span>
       </div>
       <div className="field">
-        <label htmlFor="pf-currency">Currency</label>
+        <label htmlFor="pf-currency">{t.currency}</label>
         <select id="pf-currency" name="currency" className="input" defaultValue={profile.currency}>
           {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
       </div>
       <div className="field">
-        <label htmlFor="pf-place">Home town</label>
+        <label htmlFor="pf-place">{t.homeTown}</label>
         <input id="pf-place" name="home_place" className="input" maxLength={80} autoComplete="address-level2"
-          placeholder="e.g. Bern" defaultValue={profile.home_place ?? ""} />
-        <span className="hint">Optional. Used to suggest your departure airport.</span>
+          placeholder={t.homeTownPlaceholder} defaultValue={profile.home_place ?? ""} />
+        <span className="hint">{t.homeTownHint}</span>
       </div>
       <div className="field">
-        <label htmlFor="pf-canton">Home canton</label>
+        <label htmlFor="pf-canton">{t.canton}</label>
         <select id="pf-canton" name="home_canton" className="input" defaultValue={profile.home_canton ?? ""}>
-          <option value="">Not set</option>
-          {CANTONS.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+          <option value="">{t.notSet}</option>
+          {cantonsFor(locale).map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
         </select>
-        <span className="hint">Optional. Used for school holidays and nearby airports.</span>
+        <span className="hint">{t.cantonHint}</span>
       </div>
       <div className="field">
-        <label htmlFor="pf-language">Language</label>
-        <input id="pf-language" className="input" value="English" disabled readOnly />
-        <span className="hint">More languages will follow.</span>
+        <label htmlFor="pf-language">{t.language}</label>
+        <select id="pf-language" name="language" className="input" defaultValue={locale}>
+          {LANGUAGES.map((l) => <option key={l.code} value={l.code} lang={l.code}>{l.name}</option>)}
+        </select>
+        <span className="hint">{t.languageHint}</span>
       </div>
       <div className="sm:col-span-2 flex flex-col gap-3">
         <Messages state={state} />
         <button type="submit" className="btn btn-primary sm:w-fit" disabled={pending}>
-          {pending ? "Saving…" : "Save profile"}
+          {pending ? all.common.saving : t.save}
         </button>
       </div>
     </form>
@@ -80,16 +86,18 @@ export function ProfileForm({
 
 export function DeleteAccountForm() {
   const [state, action, pending] = useActionState(deleteAccount, empty);
+  const { t: all } = useI18n();
+  const t = all.profileForm;
   return (
     <form action={action} className="flex flex-col gap-3">
       <div className="field">
-        <label htmlFor="del-password">Enter your password to confirm</label>
+        <label htmlFor="del-password">{t.deleteConfirm}</label>
         <input id="del-password" name="password" type="password" autoComplete="current-password"
           required className="input sm:max-w-sm" />
       </div>
       <Messages state={state} />
       <button type="submit" className="btn btn-danger sm:w-fit" disabled={pending}>
-        {pending ? "Deleting…" : "Delete my account and all data"}
+        {pending ? t.deleting : t.deleteButton}
       </button>
     </form>
   );

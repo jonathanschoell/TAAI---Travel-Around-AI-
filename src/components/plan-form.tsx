@@ -3,7 +3,9 @@
 import { useActionState, useState } from "react";
 import { createTrip, type PlanFormState } from "@/app/(app)/plan/actions";
 import { CURRENCIES } from "@/lib/options";
-import { CANTONS, cantonByCode, nearestAirports } from "@/lib/swiss";
+import { cantonByCode, cantonsFor, nearestAirports } from "@/lib/swiss";
+import { f } from "@/lib/i18n/config";
+import { useI18n } from "@/lib/i18n/client";
 import {
   INTERESTS, LEVELS, LODGING, MAX_STOPS, MAX_TRAVELLERS, PACES, PARTY_TYPES, TRAVEL_MODES,
 } from "@/lib/planner/options";
@@ -51,6 +53,8 @@ type Defaults = { currency: string; homePlace: string; homeCanton: string; start
 
 /** Home town, canton and optional device location; shows the nearest airports as you type. */
 function HomeFields({ values, defaults }: { values: Values | undefined; defaults: Defaults }) {
+  const { t: all, locale } = useI18n();
+  const t = all.plan;
   const [canton, setCanton] = useState(text(values, "home_canton", defaults.homeCanton));
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(() => {
     const lat = Number(text(values, "home_lat"));
@@ -66,7 +70,7 @@ function HomeFields({ values, defaults }: { values: Values | undefined; defaults
   function locate() {
     setLocError("");
     if (!("geolocation" in navigator)) {
-      setLocError("Your browser does not offer location sharing.");
+      setLocError(t.geoUnsupported);
       return;
     }
     setLocating(true);
@@ -81,7 +85,7 @@ function HomeFields({ values, defaults }: { values: Values | undefined; defaults
       },
       () => {
         setLocating(false);
-        setLocError("Location was not shared. Choose your canton instead.");
+        setLocError(t.geoDenied);
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
     );
@@ -90,37 +94,34 @@ function HomeFields({ values, defaults }: { values: Values | undefined; defaults
   return (
     <section className="card grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <div className="md:col-span-2 lg:col-span-4">
-        <h2 className="text-xl font-bold">Where you start</h2>
-        <p className="mt-1 text-sm text-muted">
-          Optional. Jovia uses it to suggest the best departure airport and to check your
-          canton&apos;s school holidays.
-        </p>
+        <h2 className="text-xl font-bold">{t.whereStart}</h2>
+        <p className="mt-1 text-sm text-muted">{t.whereStartLead}</p>
       </div>
       <div className="field md:col-span-2">
-        <label htmlFor="pl-origin">Home town</label>
+        <label htmlFor="pl-origin">{t.homeTown}</label>
         <input id="pl-origin" name="origin" className="input" maxLength={120} autoComplete="address-level2"
-          placeholder="e.g. Bern" defaultValue={text(values, "origin", defaults.homePlace)} />
+          placeholder={t.homeTownPlaceholder} defaultValue={text(values, "origin", defaults.homePlace)} />
       </div>
       <div className="field">
-        <label htmlFor="pl-canton">Canton</label>
+        <label htmlFor="pl-canton">{t.canton}</label>
         <select id="pl-canton" name="home_canton" className="input" value={canton}
           onChange={(e) => setCanton(e.target.value)}>
-          <option value="">Not in Switzerland / not set</option>
-          {CANTONS.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+          <option value="">{t.cantonNone}</option>
+          {cantonsFor(locale).map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
         </select>
       </div>
       <div className="field">
-        <span className="label">Exact location</span>
+        <span className="label">{t.exactLocation}</span>
         {coords ? (
           <button type="button" className="btn btn-ghost" onClick={() => setCoords(null)}>
-            Stop using my location
+            {t.stopLocation}
           </button>
         ) : (
           <button type="button" className="btn btn-ghost" onClick={locate} disabled={locating}>
-            {locating ? "Locating…" : "Use my location"}
+            {locating ? t.locating : t.useLocation}
           </button>
         )}
-        <span className="hint">{locError || "Optional. Used for this trip only, never saved."}</span>
+        <span className="hint">{locError || t.locationHint}</span>
       </div>
       {coords ? (
         <>
@@ -130,7 +131,7 @@ function HomeFields({ values, defaults }: { values: Values | undefined; defaults
       ) : null}
       {airports.length ? (
         <div className="md:col-span-2 lg:col-span-4">
-          <p className="label">Nearest airports {coords ? "to your location" : `to ${cantonByCode(canton)?.capital}`}</p>
+          <p className="label">{coords ? t.nearestToLocation : f(t.nearestTo, { place: cantonByCode(canton)?.capital ?? "" })}</p>
           <ul className="mt-2 flex flex-wrap gap-2">
             {airports.map((a) => (
               <li key={a.code} className="pill">
@@ -139,7 +140,7 @@ function HomeFields({ values, defaults }: { values: Values | undefined; defaults
             ))}
           </ul>
           <p className="hint mt-1.5">
-            Straight-line distance. Jovia weighs travel to the airport when it suggests where to fly from.
+            {t.airportsHint}
           </p>
         </div>
       ) : null}
@@ -157,6 +158,11 @@ function Fields({
   error?: string;
 }) {
   const v = (key: string, fallback = "") => text(values, key, fallback);
+  const { t: all } = useI18n();
+  const t = all.plan;
+  const o = all.options;
+  const named = (pairs: [string, string][], names: Record<string, string>): [string, string][] =>
+    pairs.map(([k, fallback]) => [k, names[k] ?? fallback]);
   const interests = list(values, "interests");
 
   const [party, setParty] = useState(v("party", "couple"));
@@ -191,28 +197,28 @@ function Fields({
   return (
     <>
       <section className="card grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <h2 className="text-xl font-bold md:col-span-2 lg:col-span-4">Where and when</h2>
+        <h2 className="text-xl font-bold md:col-span-2 lg:col-span-4">{t.whereWhen}</h2>
         <div className="field md:col-span-2 lg:col-span-4">
-          <label htmlFor="pl-destination">Destination</label>
+          <label htmlFor="pl-destination">{t.destination}</label>
           <input id="pl-destination" name="destination" className="input" required maxLength={120}
-            placeholder="City, region or country" defaultValue={v("destination")} />
+            placeholder={t.destinationPlaceholder} defaultValue={v("destination")} />
         </div>
         <div className="field">
-          <label htmlFor="pl-start">Start date</label>
+          <label htmlFor="pl-start">{t.startDate}</label>
           <input id="pl-start" name="start_date" type="date" className="input" required defaultValue={v("start_date", defaults.startDate ?? "")} />
         </div>
         <div className="field">
-          <label htmlFor="pl-end">End date</label>
+          <label htmlFor="pl-end">{t.endDate}</label>
           <input id="pl-end" name="end_date" type="date" className="input" required defaultValue={v("end_date", defaults.endDate ?? "")} />
-          <span className="hint">Up to {maxDays} days on your plan.</span>
+          <span className="hint">{f(t.upToDays, { n: maxDays })}</span>
         </div>
         <div className="field">
-          <label htmlFor="pl-budget">Total budget</label>
+          <label htmlFor="pl-budget">{t.budget}</label>
           <input id="pl-budget" name="budget" type="number" min={0} step={50} inputMode="numeric"
-            className="input" placeholder="Optional" defaultValue={v("budget")} />
+            className="input" placeholder={all.common.optional} defaultValue={v("budget")} />
         </div>
         <div className="field">
-          <label htmlFor="pl-currency">Currency</label>
+          <label htmlFor="pl-currency">{t.currency}</label>
           <select id="pl-currency" name="currency" className="input" defaultValue={v("currency", defaults.currency)}>
             {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
@@ -223,34 +229,31 @@ function Fields({
 
       <section className="card flex flex-col gap-4">
         <div>
-          <h2 className="text-xl font-bold">Stops along the way</h2>
-          <p className="mt-1 text-sm text-muted">
-            Optional. Visiting several places, for example Tokyo, Kyoto and Osaka? Add each
-            place with the dates you will be there, and Jovia plans every day in the right city.
-          </p>
+          <h2 className="text-xl font-bold">{t.stops}</h2>
+          <p className="mt-1 text-sm text-muted">{t.stopsLead}</p>
         </div>
         {stops.length > 0 ? (
           <ul className="flex flex-col gap-3">
             {stops.map((s, i) => (
               <li key={i} className="grid gap-3 rounded-2xl border border-line p-3 md:grid-cols-[2fr_1fr_1fr_auto] md:items-end">
                 <div className="field">
-                  <label htmlFor={`pl-stop-place-${i}`}>Stop {i + 1}</label>
+                  <label htmlFor={`pl-stop-place-${i}`}>{f(t.stopN, { n: i + 1 })}</label>
                   <input id={`pl-stop-place-${i}`} name="stop_place" className="input" required maxLength={80}
-                    placeholder="City or place" value={s.place} onChange={(e) => setStop(i, { place: e.target.value })} />
+                    placeholder={t.stopPlaceholder} value={s.place} onChange={(e) => setStop(i, { place: e.target.value })} />
                 </div>
                 <div className="field">
-                  <label htmlFor={`pl-stop-from-${i}`}>From</label>
+                  <label htmlFor={`pl-stop-from-${i}`}>{t.from}</label>
                   <input id={`pl-stop-from-${i}`} name="stop_from" type="date" className="input" required
                     value={s.from} onChange={(e) => setStop(i, { from: e.target.value })} />
                 </div>
                 <div className="field">
-                  <label htmlFor={`pl-stop-to-${i}`}>Until</label>
+                  <label htmlFor={`pl-stop-to-${i}`}>{t.until}</label>
                   <input id={`pl-stop-to-${i}`} name="stop_to" type="date" className="input" required
                     value={s.to} onChange={(e) => setStop(i, { to: e.target.value })} />
                 </div>
                 <button type="button" className="btn btn-ghost"
                   onClick={() => setStops((current) => current.filter((_, j) => j !== i))}>
-                  Remove
+                  {all.common.remove}
                 </button>
               </li>
             ))}
@@ -259,23 +262,23 @@ function Fields({
         {stops.length < MAX_STOPS ? (
           <button type="button" className="btn btn-ghost sm:w-fit"
             onClick={() => setStops((current) => [...current, { place: "", from: "", to: "" }])}>
-            Add a stop
+            {t.addStop}
           </button>
         ) : (
-          <p className="hint">You can add up to {MAX_STOPS} stops.</p>
+          <p className="hint">{f(t.maxStops, { n: MAX_STOPS })}</p>
         )}
       </section>
 
       <section className="card flex flex-col gap-4">
-        <h2 className="text-xl font-bold">Who is travelling</h2>
+        <h2 className="text-xl font-bold">{t.who}</h2>
         <fieldset className="field">
-          <legend className="label mb-1.5">Travelling as</legend>
+          <legend className="label mb-1.5">{t.travellingAs}</legend>
           <div className="flex flex-wrap gap-2">
-            {PARTY_TYPES.map(([key, label]) => (
+            {named(PARTY_TYPES, o.party).map(([key, name]) => (
               <label key={key} className="chip">
                 <input type="radio" name="party" value={key} checked={party === key}
                   onChange={() => chooseParty(key)} className="sr-only" />
-                <span>{label}</span>
+                <span>{name}</span>
               </label>
             ))}
           </div>
@@ -283,24 +286,24 @@ function Fields({
 
         <div>
           <p className="label">
-            {ages.length} {ages.length === 1 ? "traveller" : "travellers"}
+            {f(ages.length === 1 ? t.travellerOne : t.travellerOther, { n: ages.length })}
           </p>
           <p className="hint mt-0.5">
             {isGroup
-              ? "Enter the age of every person, children included, so activities fit everyone."
-              : "Age is optional, and helps Jovia choose fitting activities."}
+              ? t.agesGroup
+              : t.agesOptional}
           </p>
           <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {ages.map((age, i) => (
               <li key={i} className="flex items-end gap-2">
                 <div className="field flex-1">
-                  <label htmlFor={`pl-age-${i}`}>Person {i + 1}: age</label>
+                  <label htmlFor={`pl-age-${i}`}>{f(t.personAge, { n: i + 1 })}</label>
                   <input id={`pl-age-${i}`} name="ages" type="number" min={0} max={120} inputMode="numeric"
-                    className="input" required={isGroup} placeholder={isGroup ? "Age" : "Optional"}
+                    className="input" required={isGroup} placeholder={isGroup ? t.age : all.common.optional}
                     value={age} onChange={(e) => setAge(i, e.target.value)} />
                 </div>
                 {isGroup && ages.length > min ? (
-                  <button type="button" className="btn btn-ghost px-3" aria-label={`Remove person ${i + 1}`}
+                  <button type="button" className="btn btn-ghost px-3" aria-label={f(t.removePerson, { n: i + 1 })}
                     onClick={() => setAges((current) => current.filter((_, j) => j !== i))}>
                     ×
                   </button>
@@ -311,45 +314,45 @@ function Fields({
           {isGroup && ages.length < max ? (
             <button type="button" className="btn btn-ghost mt-3 sm:w-fit"
               onClick={() => setAges((current) => [...current, ""])}>
-              Add a person
+              {t.addPerson}
             </button>
           ) : null}
         </div>
       </section>
 
       <section className="card flex flex-col gap-4">
-        <h2 className="text-xl font-bold">What you enjoy</h2>
+        <h2 className="text-xl font-bold">{t.enjoy}</h2>
         <fieldset>
-          <legend className="label mb-1.5">Interests (choose any)</legend>
+          <legend className="label mb-1.5">{t.interests}</legend>
           <div className="flex flex-wrap gap-2">
-            {INTERESTS.map(([key, label]) => (
+            {named(INTERESTS, o.interests).map(([key, name]) => (
               <label key={key} className="chip">
                 <input type="checkbox" name="interests" value={key} defaultChecked={interests.includes(key)} className="sr-only" />
-                <span>{label}</span>
+                <span>{name}</span>
               </label>
             ))}
           </div>
         </fieldset>
         <div className="grid gap-4 lg:grid-cols-2">
-          <Choice name="pace" legend="Pace" options={PACES} value={v("pace", "balanced")} />
-          <Choice name="level" legend="Comfort level" options={LEVELS} value={v("level", "mid")} />
-          <Choice name="lodging" legend="Accommodation" options={LODGING} value={v("lodging", "any")} />
-          <Choice name="travel_mode" legend="Preferred way to travel" options={TRAVEL_MODES} value={v("travel_mode", "any")} />
+          <Choice name="pace" legend={t.pace} options={named(PACES, o.pace)} value={v("pace", "balanced")} />
+          <Choice name="level" legend={t.comfort} options={named(LEVELS, o.level)} value={v("level", "mid")} />
+          <Choice name="lodging" legend={t.lodging} options={named(LODGING, o.lodging)} value={v("lodging", "any")} />
+          <Choice name="travel_mode" legend={t.travelMode} options={named(TRAVEL_MODES, o.travelMode)} value={v("travel_mode", "any")} />
         </div>
       </section>
 
       <section className="card grid gap-4 lg:grid-cols-2">
-        <h2 className="text-xl font-bold lg:col-span-2">Anything else</h2>
+        <h2 className="text-xl font-bold lg:col-span-2">{t.anythingElse}</h2>
         <div className="field">
-          <label htmlFor="pl-wishes">Special wishes</label>
+          <label htmlFor="pl-wishes">{t.wishes}</label>
           <textarea id="pl-wishes" name="wishes" rows={3} maxLength={600} className="input py-3"
-            placeholder="Optional. A birthday dinner, a must-see place, a surprise…" defaultValue={v("wishes")} />
+            placeholder={t.wishesPlaceholder} defaultValue={v("wishes")} />
         </div>
         <div className="field">
-          <label htmlFor="pl-constraints">Restrictions or requirements</label>
+          <label htmlFor="pl-constraints">{t.constraints}</label>
           <textarea id="pl-constraints" name="constraints" rows={3} maxLength={600} className="input py-3"
-            placeholder="Optional. Step-free access, vegetarian, no long drives…" defaultValue={v("constraints")} />
-          <span className="hint">Used for this trip only. Never added to long-term memory.</span>
+            placeholder={t.constraintsPlaceholder} defaultValue={v("constraints")} />
+          <span className="hint">{t.constraintsHint}</span>
         </div>
       </section>
 
@@ -357,11 +360,11 @@ function Fields({
         {error ? <p className="notice notice-error">{error}</p> : null}
         {pending ? (
           <p className="notice">
-            Jovia is planning your trip. This usually takes one to two minutes. Please keep this page open.
+            {t.planning}
           </p>
         ) : null}
         <button type="submit" className="btn btn-primary sm:w-fit" disabled={pending}>
-          {pending ? "Planning your trip…" : "Create my itinerary"}
+          {pending ? t.planningButton : t.submit}
         </button>
       </div>
     </>

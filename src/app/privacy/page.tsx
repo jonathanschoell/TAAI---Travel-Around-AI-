@@ -1,60 +1,26 @@
-import type { Metadata } from "next";
 import { PublicHeader, SiteFooter } from "@/components/site";
-import { OPERATOR } from "@/lib/operator";
+import { LEGAL } from "@/lib/i18n/legal";
+import { getI18n, titleFor } from "@/lib/i18n/server";
 
-export const metadata: Metadata = { title: "Privacy policy" };
+export const generateMetadata = titleFor("privacy");
 
-const SECTIONS: [string, string[]][] = [
-  ["Who is responsible", [
-    `${OPERATOR.name}, ${OPERATOR.street}, ${OPERATOR.postalCodeAndCity}, ${OPERATOR.country}.`,
-    `For questions about your data, or to exercise your rights, write to ${OPERATOR.email}.`,
-  ]],
-  ["What we store", [
-    "Account: your email address and a securely hashed password. We never store your password in readable form.",
-    "Profile: the name, age group, currency and number of travellers you choose to enter.",
-    "Consents: when you accepted this policy and when you turned personalisation on or off.",
-    "Usage: when your account was last active, so we can see how many people use Jovia.",
-  ]],
-  ["What we use it for", [
-    "To let you log in and keep your trips and preferences private to your account.",
-    "To improve travel suggestions, only if you have turned long-term personalisation on.",
-    "To understand overall usage of the service.",
-  ]],
-  ["What the operator can see", [
-    "The operator can see account email addresses, registration and sign-in times, and overall usage figures.",
-    "Trip contents and AI memory entries of individual users are not shown in the operator's admin area.",
-  ]],
-  ["Service providers", [
-    "Database and sign-in: Supabase, hosted in Zurich, Switzerland.",
-    "Website hosting: Vercel.",
-    "AI trip planning: Anthropic, USA. What you enter in the trip planner (destination, dates, ages, interests, wishes) is sent to Anthropic to create your itinerary. Your email address and password are never sent.",
-    "Sign-up and password emails are sent through Supabase.",
-    "Holiday calendars and exchange rates are fetched from public services without any personal data.",
-  ]],
-  ["Your choices", [
-    "See and edit your data under “My data” and “Profile”.",
-    "Turn long-term personalisation on or off at any time.",
-    "Delete your account and all related data yourself under “My data”.",
-  ]],
-];
-
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const { locale } = await getI18n();
+  const L = LEGAL[locale];
   return (
     <>
       <PublicHeader />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6">
-        <span className="pill pill-signal">Draft, not yet legally reviewed</span>
-        <h1 className="mt-3 text-3xl font-extrabold sm:text-4xl">Privacy policy</h1>
-        <p className="mt-2 text-muted">
-          This draft describes how Jovia handles personal data today. A legal review under the
-          Swiss FADP and the GDPR is still to follow before public launch.
-        </p>
+        <span className="pill pill-signal">{L.draft}</span>
+        <h1 className="mt-3 text-3xl font-extrabold sm:text-4xl">{L.privacy.title}</h1>
+        <p className="mt-2 text-muted">{L.privacy.lead}</p>
+        {L.binding ? <p className="notice mt-4 text-sm">{L.binding}</p> : null}
         <div className="mt-8 flex flex-col gap-8">
-          {SECTIONS.map(([title, items]) => (
+          {L.privacy.sections.map(([title, items]) => (
             <section key={title}>
               <h2 className="text-xl font-bold">{title}</h2>
               <ul className="mt-2 flex list-disc flex-col gap-1 pl-5">
-                {items.map((t) => <li key={t}>{t}</li>)}
+                {items.map((item) => <li key={item}>{item}</li>)}
               </ul>
             </section>
           ))}

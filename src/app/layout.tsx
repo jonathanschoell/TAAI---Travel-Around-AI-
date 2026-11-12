@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Figtree, Plus_Jakarta_Sans } from "next/font/google";
+import { Suspense } from "react";
+import { I18nProvider } from "@/lib/i18n/client";
+import { DICTS } from "@/lib/i18n/dictionaries";
+import { getLocale } from "@/lib/i18n/server";
 import "./globals.css";
 
 const display = Plus_Jakarta_Sans({
@@ -15,16 +19,26 @@ const body = Figtree({
 /** Plays the plane intro on every page load, never for people who prefer reduced motion. */
 const INTRO_SCRIPT = `try{var d=document.documentElement;if(!matchMedia("(prefers-reduced-motion: reduce)").matches){d.classList.add("jovia-intro");setTimeout(function(){d.classList.remove("jovia-intro")},4200)}}catch(e){}`;
 
-export const metadata: Metadata = {
-  title: {
-    default: "Jovia",
-    template: "%s · Jovia",
-  },
-  description:
-    "Jovia is your personal AI travel agency. Tell us who is travelling and what you love, and get a day-by-day itinerary made for you.",
-  applicationName: "Jovia",
-  appleWebApp: { capable: true, title: "Jovia", statusBarStyle: "default" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return {
+    title: { default: "Jovia", template: "%s · Jovia" },
+    description: DICTS[locale].meta.description,
+    applicationName: "Jovia",
+    appleWebApp: { capable: true, title: "Jovia", statusBarStyle: "default" },
+  };
+}
+
+/** Reads the visitor's language and hands the texts to interactive components. */
+async function WithLanguage({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
+  return (
+    <I18nProvider locale={locale} t={DICTS[locale].client}>
+      <script dangerouslySetInnerHTML={{ __html: `document.documentElement.lang=${JSON.stringify(locale)}` }} />
+      {children}
+    </I18nProvider>
+  );
+}
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -45,7 +59,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
         <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT }} />
-        {children}
+        <Suspense fallback={null}>
+          <WithLanguage>{children}</WithLanguage>
+        </Suspense>
       </body>
     </html>
   );
