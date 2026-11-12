@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 /* Layout idea: plain white and one confident blue; lots of air, thin lines,
-   content left-aligned, mobile-first, generous tap targets. One light theme only:
-   the site stays white even when the device is set to dark mode. */
+   content left-aligned, mobile-first, generous tap targets. White by default;
+   a dark theme follows the device setting. */
 :root {
   --bg: #ffffff;
   --surface: #ffffff;
@@ -15,6 +15,22 @@
   --danger: #b3261e;
   --ok: #17734a;
   color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16223f;
+    --surface: #1f2e52;
+    --ink: #eef3ff;
+    --muted: #a9b7d4;
+    --line: #34497a;
+    --brand: #6a97ff;
+    --brand-ink: #061233;
+    --signal: #8cc4ff;
+    --danger: #ff8a80;
+    --ok: #6fd39a;
+    color-scheme: dark;
+  }
 }
 
 @theme inline {
