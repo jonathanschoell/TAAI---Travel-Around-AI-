@@ -17,7 +17,7 @@ Diese Anleitung bringt die Seite online. Du brauchst dafür dein Supabase-Projek
 
 Diese beiden Einstellungen sind kostenlos und zwingend nötig. Ohne sie führt der Link in der Bestätigungs-E-Mail auf `localhost` und lässt sich nicht öffnen.
 
-Die E-Mail-Vorlagen (**Emails → Templates**) lassen sich bei neuen kostenlosen Projekten nicht bearbeiten. Das ist nicht nötig: Die Standardvorlagen funktionieren mit TAAI. Wer später einen eigenen E-Mail-Dienst einträgt, kann die Vorlagen anpassen und dann diese Links verwenden, damit sie auf jedem Gerät funktionieren:
+Die E-Mail-Vorlagen (**Emails → Templates**) lassen sich bei neuen kostenlosen Projekten nicht bearbeiten. Das ist nicht nötig: Die Standardvorlagen funktionieren mit Jovia. Wer später einen eigenen E-Mail-Dienst einträgt, kann die Vorlagen anpassen und dann diese Links verwenden, damit sie auf jedem Gerät funktionieren:
 
 - *Confirm signup*: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/dashboard`
 - *Reset password*: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password`
