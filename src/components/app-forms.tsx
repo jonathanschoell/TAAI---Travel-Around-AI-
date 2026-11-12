@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { deleteAccount, setUserTier, updateProfile, type AppFormState } from "@/app/(app)/actions";
 import { AGE_GROUPS, CURRENCIES } from "@/lib/options";
+import { CANTONS } from "@/lib/swiss";
 
 const empty: AppFormState = {};
 
@@ -18,7 +19,14 @@ function Messages({ state }: { state: AppFormState }) {
 export function ProfileForm({
   profile,
 }: {
-  profile: { display_name: string; age_group: string | null; currency: string; default_travelers: number };
+  profile: {
+    display_name: string;
+    age_group: string | null;
+    currency: string;
+    default_travelers: number;
+    home_canton?: string | null;
+    home_place?: string | null;
+  };
 }) {
   const [state, action, pending] = useActionState(updateProfile, empty);
   return (
@@ -46,6 +54,20 @@ export function ProfileForm({
         <label htmlFor="pf-travelers">Usual number of travellers</label>
         <input id="pf-travelers" name="default_travelers" type="number" min={1} max={20}
           inputMode="numeric" className="input" defaultValue={profile.default_travelers} />
+      </div>
+      <div className="field">
+        <label htmlFor="pf-place">Home town</label>
+        <input id="pf-place" name="home_place" className="input" maxLength={80} autoComplete="address-level2"
+          placeholder="e.g. Bern" defaultValue={profile.home_place ?? ""} />
+        <span className="hint">Optional. Used to suggest your departure airport.</span>
+      </div>
+      <div className="field">
+        <label htmlFor="pf-canton">Home canton</label>
+        <select id="pf-canton" name="home_canton" className="input" defaultValue={profile.home_canton ?? ""}>
+          <option value="">Not set</option>
+          {CANTONS.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+        </select>
+        <span className="hint">Optional. Used for school holidays and nearby airports.</span>
       </div>
       <div className="field">
         <label htmlFor="pf-language">Language</label>

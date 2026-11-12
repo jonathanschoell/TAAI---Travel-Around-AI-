@@ -7,6 +7,7 @@ import { PRIVACY_VERSION } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { AGE_GROUPS, CURRENCIES } from "@/lib/options";
+import { cantonByCode } from "@/lib/swiss";
 
 export type AppFormState = { error?: string; notice?: string };
 
@@ -16,6 +17,8 @@ export async function updateProfile(_: AppFormState, fd: FormData): Promise<AppF
   const age = String(fd.get("age_group") ?? "");
   const currency = String(fd.get("currency") ?? "");
   const travelers = Number(fd.get("default_travelers") ?? 1);
+  const canton = String(fd.get("home_canton") ?? "");
+  const place = String(fd.get("home_place") ?? "").trim().slice(0, 80);
 
   if (!name) return { error: "Enter a name for your profile." };
   if (!CURRENCIES.includes(currency)) return { error: "Choose a currency from the list." };
@@ -23,15 +26,20 @@ export async function updateProfile(_: AppFormState, fd: FormData): Promise<AppF
     return { error: "Number of travellers must be between 1 and 20." };
 
   const supabase = await createClient();
-  const { error } = await supabase
-    .from("profiles")
-    .update({
-      display_name: name,
-      age_group: AGE_GROUPS.includes(age) ? age : null,
-      currency,
-      default_travelers: travelers,
-    })
-    .eq("user_id", user.id);
+  const base = {
+    display_name: name,
+    age_group: AGE_GROUPS.includes(age) ? age : null,
+    currency,
+    default_travelers: travelers,
+  };
+  const home = { home_canton: cantonByCode(canton)?.code ?? null, home_place: place || null };
+  let { error } = await supabase.from("profiles").update({ ...base, ...home }).eq("user_id", user.id);
+  if (error && /home_(canton|place)/.test(error.message)) {
+    // The home columns do not exist until migration 0003 has been run.
+    ({ error } = await supabase.from("profiles").update(base).eq("user_id", user.id));
+    if (!error)
+      return { notice: "Profile saved. Home canton could not be saved yet: run supabase/migrations/0003_home_location.sql." };
+  }
   if (error) return { error: "We could not save your profile. Please try again." };
   revalidatePath("/", "layout");
   return { notice: "Profile saved." };

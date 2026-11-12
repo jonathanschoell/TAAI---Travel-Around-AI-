@@ -2,7 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { getProfile, requireUser } from "@/lib/auth";
-import { generatePlan, PlannerError } from "@/lib/planner/ai";
+import { generatePlan, PlannerError, type SwissContext } from "@/lib/planner/ai";
+import { getHolidays } from "@/lib/holidays";
+import { cantonByCode, nearestAirports } from "@/lib/swiss";
+import type { TripInput } from "@/lib/planner/options";
 import { parseTripForm } from "@/lib/planner/parse";
 import { getQuota, TIERS } from "@/lib/billing";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -12,6 +15,7 @@ export type PlanFormState = { error?: string; values?: Record<string, string | s
 
 const DAY = 24 * 60 * 60 * 1000;
 const LIST_FIELDS = ["interests", "ages", "stop_place", "stop_from", "stop_to"];
+
 
 function keep(fd: FormData): Record<string, string | string[]> {
   const out: Record<string, string | string[]> = {};
@@ -44,6 +48,20 @@ async function loadPersonalContext(userId: string, enabled: boolean): Promise<st
   return lines.join("\n");
 }
 
+/** Departure airports and canton holidays for the trip, from reference and official data. */
+async function swissContext(input: TripInput): Promise<SwissContext | null> {
+  const canton = cantonByCode(input.homeCanton);
+  const point = input.homeCoords ?? (canton ? { lat: canton.lat, lng: canton.lng } : null);
+  if (!point) return null;
+  const holidays = canton ? await getHolidays(canton.code, input.startDate, input.endDate) : null;
+  const label = [input.origin, canton ? `canton ${canton.name}` : ""].filter(Boolean).join(", ");
+  return {
+    homeLabel: label || "their shared location",
+    airports: nearestAirports(point.lat, point.lng, 4),
+    holidays,
+  };
+}
+
 export async function createTrip(_: PlanFormState, fd: FormData): Promise<PlanFormState> {
   const user = await requireUser();
   const values = keep(fd);
@@ -74,10 +92,11 @@ export async function createTrip(_: PlanFormState, fd: FormData): Promise<PlanFo
 
   const profile = await getProfile(user.id);
   const context = await loadPersonalContext(user.id, profile?.personalization_enabled ?? false);
+  const swiss = await swissContext(input);
 
   let result;
   try {
-    result = await generatePlan(input, context, quota.tier);
+    result = await generatePlan(input, context, quota.tier, swiss);
   } catch (e) {
     const kind = e instanceof PlannerError ? e.kind : "failed";
     const messages: Record<string, string> = {
@@ -107,7 +126,15 @@ export async function createTrip(_: PlanFormState, fd: FormData): Promise<PlanFo
     currency: input.currency,
     budget_total: input.budget,
     summary: plan.summary,
-    input: { ...input, tips: plan.tips },
+    // The device location is used for this plan only and is not stored.
+    input: {
+      ...input,
+      homeCoords: null,
+      tips: plan.tips,
+      departure: plan.departure,
+      airports: swiss?.airports ?? [],
+      holidays: swiss?.holidays ?? [],
+    },
     budget_breakdown: plan.budget,
   }).select("id").single();
   if (tripError || !trip)

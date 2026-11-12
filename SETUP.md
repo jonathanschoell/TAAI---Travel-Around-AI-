@@ -79,3 +79,9 @@ npm run dev
 ## Impressum und AGB
 
 Name, Adresse und Kontakt-E-Mail des Betreibers stehen in `src/lib/operator.ts`. Solange sie leer sind, zeigt das Impressum rote Platzhalter. AGB (`/terms`), Datenschutzerklärung (`/privacy`) und Impressum (`/imprint`) sind Entwürfe und sollten vor dem öffentlichen Start rechtlich geprüft werden.
+
+## Schweizer Funktionen (Wohnort, Flughäfen, Schulferien, Wechselkurse)
+
+1. In Supabase im **SQL Editor** die Datei `supabase/migrations/0003_home_location.sql` ausführen. Sie ergänzt das Profil um Wohnkanton und Wohnort.
+2. Sonst ist nichts einzurichten: Schulferien und Feiertage kommen von der freien OpenHolidays API, Wechselkurse von Frankfurter (Referenzkurse der Europäischen Zentralbank). Beide brauchen keinen Schlüssel.
+3. Der Standort des Geräts ist freiwillig, wird auf rund einen Kilometer gerundet und nur für die jeweilige Planung verwendet, nie gespeichert.

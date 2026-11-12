@@ -3,6 +3,8 @@ import { PlanForm } from "@/components/plan-form";
 import Link from "next/link";
 import { getProfile, requireUser } from "@/lib/auth";
 import { getQuota, TIERS } from "@/lib/billing";
+import { getUpcomingSchoolHolidays, HOLIDAY_SOURCE } from "@/lib/holidays";
+import { cantonByCode } from "@/lib/swiss";
 
 export const metadata: Metadata = { title: "Plan a trip" };
 
@@ -14,6 +16,10 @@ export default async function PlanPage() {
   const profile = await getProfile(user.id);
   const quota = await getQuota(user);
   const limits = TIERS[quota.tier];
+  const canton = cantonByCode(profile?.home_canton);
+  const school = canton ? await getUpcomingSchoolHolidays(canton.code) : null;
+  const day = (iso: string) =>
+    new Date(iso + "T00:00:00Z").toLocaleDateString("en-CH", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -31,9 +37,35 @@ export default async function PlanPage() {
         </span>
         {quota.tier === "free" ? <Link href="/pricing" className="underline">See Premium</Link> : null}
       </p>
+      {canton && school?.length ? (
+        <details className="card">
+          <summary className="cursor-pointer font-semibold">
+            School holidays in {canton.name}, next 12 months
+          </summary>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {school.map((h) => (
+              <li key={h.name + h.start} className="text-sm">
+                <span className="font-semibold">{h.name}</span>
+                <span className="block text-muted">
+                  {day(h.start)} to {day(h.end)}{h.varies ? " · varies by municipality" : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="hint mt-3">
+            From the{" "}
+            <a href={HOLIDAY_SOURCE.url} className="underline" target="_blank" rel="noreferrer">{HOLIDAY_SOURCE.name}</a>.
+            The data can be incomplete. Check your school&apos;s calendar before booking.
+          </p>
+        </details>
+      ) : null}
       <PlanForm
         maxDays={limits.maxDays}
-        defaults={{ currency: profile?.currency ?? "CHF" }}
+        defaults={{
+          currency: profile?.currency ?? "CHF",
+          homePlace: profile?.home_place ?? "",
+          homeCanton: profile?.home_canton ?? "",
+        }}
       />
     </div>
   );

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { deleteTrip, reportTrip } from "@/app/(app)/actions";
 import { requireUser } from "@/lib/auth";
+import { chfRate, FX_SOURCE } from "@/lib/fx";
+import { HOLIDAY_SOURCE } from "@/lib/holidays";
 import { BUDGET_PARTS, INTERESTS, SLOTS } from "@/lib/planner/options";
 import { createClient } from "@/lib/supabase/server";
 
@@ -44,7 +46,18 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
   const breakdown = (trip.budget_breakdown ?? {}) as Record<string, number>;
   const total = BUDGET_PARTS.reduce((sum, [k]) => sum + (Number(breakdown[k]) || 0), 0);
   const biggest = Math.max(1, ...BUDGET_PARTS.map(([k]) => Number(breakdown[k]) || 0));
-  const saved = (trip.input ?? {}) as { tips?: string[]; stops?: { place: string; from: string; to: string }[] };
+  const saved = (trip.input ?? {}) as {
+    tips?: string[];
+    stops?: { place: string; from: string; to: string }[];
+    departure?: { code: string; reason: string } | null;
+    airports?: { code: string; name: string; country: string; km: number }[];
+    holidays?: { name: string; start: string; end: string; varies: boolean; kind: "school" | "public" }[];
+    homeCanton?: string;
+  };
+  const airports = Array.isArray(saved.airports) ? saved.airports : [];
+  const holidays = Array.isArray(saved.holidays) ? saved.holidays : [];
+  const departure = saved.departure ?? null;
+  const fx = trip.currency !== "CHF" ? await chfRate(trip.currency) : null;
   const tips = (saved.tips ?? []).slice(0, 4);
   const stops = Array.isArray(saved.stops) ? saved.stops : [];
   const budget = trip.budget_total ? Number(trip.budget_total) : null;
@@ -78,6 +91,14 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
         <aside className="card">
           <p className="text-sm text-muted">Estimated total</p>
           <p className="font-display text-3xl font-extrabold tabular-nums">{money(total)}</p>
+          {fx ? (
+            <p className="text-sm text-muted tabular-nums">
+              ≈ CHF {Math.round(total * fx.chfPerUnit).toLocaleString("en-CH")} at the reference rate of{" "}
+              {fx.date} (1 {trip.currency} = {fx.chfPerUnit.toFixed(4)} CHF,{" "}
+              <a href={FX_SOURCE.url} className="underline" target="_blank" rel="noreferrer">{FX_SOURCE.name}</a>).
+              Card and bank fees not included.
+            </p>
+          ) : null}
           {budget ? (
             <p className="mt-1 text-sm">
               {total <= budget
@@ -91,6 +112,57 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
           </p>
         </aside>
       </header>
+
+      {airports.length || holidays.length ? (
+        <section className="grid gap-5 lg:grid-cols-2">
+          {airports.length ? (
+            <article className="card">
+              <h2 className="text-xl font-bold">Getting there</h2>
+              {departure ? (
+                <p className="mt-2">
+                  <span className="pill pill-signal mr-2">Suggested: {departure.code}</span>
+                  {departure.reason}
+                </p>
+              ) : null}
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {airports.map((a) => (
+                  <li key={a.code} className="pill">
+                    <span className="font-bold">{a.code}</span> {a.name} · {a.km} km
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-sm text-muted">
+                Distances are straight-line from home. Flight prices and times are not checked
+                yet: compare flights from these airports before you book.
+              </p>
+            </article>
+          ) : null}
+          {holidays.length ? (
+            <article className="card">
+              <h2 className="text-xl font-bold">Holidays during your trip</h2>
+              <ul className="mt-3 flex flex-col gap-2">
+                {holidays.map((h) => (
+                  <li key={h.kind + h.name + h.start} className="flex flex-wrap justify-between gap-2 border-b border-line pb-2 last:border-0">
+                    <span>
+                      <span className="pill mr-2">{h.kind === "school" ? "School holidays" : "Public holiday"}</span>
+                      {h.name}
+                    </span>
+                    <span className="text-sm text-muted">
+                      {date(h.start)}{h.end !== h.start ? ` to ${date(h.end)}` : ""}
+                      {h.varies ? " · varies by municipality" : ""}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-sm text-muted">
+                Home canton calendar from{" "}
+                <a href={HOLIDAY_SOURCE.url} className="underline" target="_blank" rel="noreferrer">{HOLIDAY_SOURCE.name}</a>.
+                Check your school&apos;s dates, they can differ.
+              </p>
+            </article>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className="flex flex-col gap-5">
         {(days ?? []).map((d) => {

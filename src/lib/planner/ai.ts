@@ -20,7 +20,15 @@ export type PlanDay = {
   transit_notes: string;
   activities: PlanActivity[];
 };
+/** Facts about the start of the trip that come from data, not from the AI. */
+export type SwissContext = {
+  homeLabel: string;
+  airports: { code: string; name: string; country: string; km: number }[];
+  holidays: { name: string; start: string; end: string; varies: boolean; kind: "school" | "public" }[] | null;
+};
+
 export type Plan = {
+  departure: { code: string; reason: string } | null;
   title: string;
   summary: string;
   days: PlanDay[];
@@ -60,6 +68,14 @@ const TOOL = {
     type: "object",
     properties: {
       title: { type: "string", description: "Short, appealing trip title" },
+      departure_airport_code: {
+        type: "string",
+        description: "IATA code of the recommended departure airport from the candidate list, or an empty string if none was given",
+      },
+      departure_airport_reason: {
+        type: "string",
+        description: "One or two sentences on why, based on getting to the airport and the destination. No prices or flight times. Empty if no candidates were given.",
+      },
       summary: { type: "string", description: "2 to 3 sentences describing the trip" },
       days: {
         type: "array",
@@ -84,7 +100,7 @@ const TOOL = {
       },
       tips: { type: "array", items: { type: "string" }, description: "Up to 4 practical tips or hidden gems" },
     },
-    required: ["title", "summary", "days", "budget", "tips"],
+    required: ["title", "departure_airport_code", "departure_airport_reason", "summary", "days", "budget", "tips"],
     additionalProperties: false,
   },
 };
@@ -93,12 +109,12 @@ function label(pairs: [string, string][], key: string) {
   return pairs.find(([k]) => k === key)?.[1] ?? key;
 }
 
-export function buildPrompt(input: TripInput, personalContext: string) {
+export function buildPrompt(input: TripInput, personalContext: string, swiss: SwissContext | null = null) {
   const known = input.ages.filter((x): x is number => x !== null);
   const children = known.filter((x) => x < 18);
   const lines = [
     `Destination: ${input.destination}`,
-    input.origin ? `Departing from: ${input.origin}` : "",
+    swiss?.homeLabel ? `Travellers start from: ${swiss.homeLabel}` : input.origin ? `Travellers start from: ${input.origin}` : "",
     `Dates: ${input.startDate} to ${input.endDate} (${input.days} days)`,
     `Travellers: ${input.travelers} in total, travelling as: ${input.party}`,
     known.length
@@ -128,6 +144,7 @@ export function buildPrompt(input: TripInput, personalContext: string) {
     "You are Jovia, an expert personal travel agent. Plan a complete, individual itinerary for the travellers below.",
     "",
     lines.join("\n"),
+    swissBlock(swiss),
     personalContext ? `\nWhat we know about these travellers from earlier trips (the request above wins if they conflict):\n${personalContext}` : "",
     "",
     "Rules:",
@@ -145,7 +162,17 @@ export function buildPrompt(input: TripInput, personalContext: string) {
     "- Respect the pace and the budget. Include one or two lesser-known places, not only the famous sights.",
     "- Only suggest places you are confident exist. Never invent opening hours or exact prices: all costs are your best estimates for the whole group.",
     "- Give latitude and longitude when you know them reasonably well; use 0 for both otherwise.",
-    "- Write everything in English.",
+    "- Write everything in English. Use Swiss francs (CHF) unless the travellers chose another currency.",
+    ...(swiss?.airports.length
+      ? [
+          "- Recommend one departure airport from the candidate list. Weigh how easy it is to get there from home (Swiss travellers often take the train), the destination, and that smaller airports have fewer connections. Do not state flight prices, schedules or airlines as facts. On day 1, describe getting to that airport in the transit notes.",
+        ]
+      : ["- Leave departure_airport_code and departure_airport_reason empty."]),
+    ...(swiss?.holidays?.length
+      ? [
+          "- The trip overlaps the holidays listed above. Mention it where it matters (busier places, closures on public holidays). Never claim specific price differences or savings.",
+        ]
+      : []),
     "Do not answer in text. Call the save_itinerary tool exactly once with the finished plan.",
   ].join("\n");
 }
@@ -155,7 +182,25 @@ const num = (v: unknown): number | null =>
 const str = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
 
 /** Turns whatever the model returned into a safe, well-formed plan, or throws. */
-export function normalizePlan(raw: unknown, days: number): Plan {
+function swissBlock(swiss: SwissContext | null) {
+  if (!swiss) return "";
+  const lines: string[] = [];
+  if (swiss.airports.length)
+    lines.push(
+      "Candidate departure airports (straight-line distance from home, not travel time):\n" +
+        swiss.airports.map((a) => `  - ${a.code} ${a.name}, ${a.country}: about ${a.km} km`).join("\n"),
+    );
+  if (swiss.holidays?.length)
+    lines.push(
+      "Holidays in the travellers' home canton during the trip (open calendar data):\n" +
+        swiss.holidays
+          .map((h) => `  - ${h.kind === "school" ? "School holidays" : "Public holiday"}: ${h.name}, ${h.start} to ${h.end}${h.varies ? " (dates vary by municipality)" : ""}`)
+          .join("\n"),
+    );
+  return lines.length ? "\n" + lines.join("\n") : "";
+}
+
+export function normalizePlan(raw: unknown, days: number, allowedAirports: string[] = []): Plan {
   const r = (raw ?? {}) as Record<string, unknown>;
   const rawDays = Array.isArray(r.days) ? r.days : [];
   const outDays: PlanDay[] = rawDays.slice(0, days).map((d, i) => {
@@ -199,6 +244,9 @@ export function normalizePlan(raw: unknown, days: number): Plan {
     BUDGET_PARTS.map(([k]) => [k, Math.max(0, Math.round(num(rb[k]) ?? 0))]),
   );
   return {
+    departure: allowedAirports.includes(str(r.departure_airport_code, 3).toUpperCase())
+      ? { code: str(r.departure_airport_code, 3).toUpperCase(), reason: str(r.departure_airport_reason, 400) }
+      : null,
     title: str(r.title, 120) || "Your trip",
     summary: str(r.summary, 800),
     days: outDays,
@@ -214,6 +262,7 @@ export async function generatePlan(
   input: TripInput,
   personalContext: string,
   tier: "free" | "premium" = "premium",
+  swiss: SwissContext | null = null,
 ): Promise<{ plan: Plan; usage: Usage; model: string }> {
   const apiKey = process.env["ANTHROPIC_API_KEY"]?.trim();
   if (!apiKey) throw new PlannerError("not_configured", "ANTHROPIC_API_KEY is missing.");
@@ -231,7 +280,7 @@ export async function generatePlan(
     model,
     max_tokens: 16000,
     tool_choice: { type: "auto" },
-    messages: [{ role: "user", content: buildPrompt(input, personalContext) }],
+    messages: [{ role: "user", content: buildPrompt(input, personalContext, swiss) }],
   };
   const variants = [
     { ...base_body, tools: [{ ...TOOL, strict: true }], thinking: { type: "between_tools" }, output_config: { effort: "medium" } },
@@ -284,7 +333,7 @@ export async function generatePlan(
   }
   return {
     model,
-    plan: normalizePlan(block.input, input.days),
+    plan: normalizePlan(block.input, input.days, swiss?.airports.map((a) => a.code) ?? []),
     usage: {
       input_tokens: data.usage?.input_tokens ?? null,
       output_tokens: data.usage?.output_tokens ?? null,
