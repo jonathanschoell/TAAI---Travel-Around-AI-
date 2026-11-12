@@ -8,8 +8,8 @@ export type Tier = "free" | "premium";
 
 /** What each tier may do. Change the numbers here; the rest of the app reads them. */
 export const TIERS: Record<Tier, { label: string; plansPerMonth: number; plansPerDay: number; maxDays: number }> = {
-  free: { label: "Free", plansPerMonth: 2, plansPerDay: 2, maxDays: 5 },
-  premium: { label: "Premium", plansPerMonth: 30, plansPerDay: 8, maxDays: 10 },
+  free: { label: "Free", plansPerMonth: 2, plansPerDay: 2, maxDays: 21 },
+  premium: { label: "Premium", plansPerMonth: 30, plansPerDay: 8, maxDays: 21 },
 };
 
 /** Admins always count as premium so they can test everything. */

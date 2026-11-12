@@ -29,7 +29,7 @@ const SECTIONS: [string, string[]][] = [
   ]],
   ["5. Free and Premium", [
     "The Free plan includes a limited number of itineraries per month at no charge. The current limits are shown on the pricing page.",
-    `Premium costs ${PREMIUM_PRICE} per month and includes more itineraries, longer trips and a more capable AI model. Prices include any applicable value added tax.`,
+    `Premium costs ${PREMIUM_PRICE} per month and includes more itineraries and longer trips. Prices include any applicable value added tax.`,
     "Premium is not yet available for purchase. Before it is, these terms will be updated with the payment method, the billing period, how to cancel and any right of withdrawal.",
     "We may change limits and features of the Free plan. Changes to a paid plan apply from the next billing period and are announced in advance.",
   ]],

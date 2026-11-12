@@ -11,9 +11,11 @@ export const metadata: Metadata = { title: "Plan a trip" };
 // Creating an itinerary can take a couple of minutes.
 export const maxDuration = 300;
 
-export default async function PlanPage() {
+export default async function PlanPage({ searchParams }: PageProps<"/plan">) {
   const user = await requireUser();
   const profile = await getProfile(user.id);
+  const q = await searchParams;
+  const isDate = (v: unknown): v is string => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
   const quota = await getQuota(user);
   const limits = TIERS[quota.tier];
   const canton = cantonByCode(profile?.home_canton);
@@ -65,6 +67,8 @@ export default async function PlanPage() {
           currency: profile?.currency ?? "CHF",
           homePlace: profile?.home_place ?? "",
           homeCanton: profile?.home_canton ?? "",
+          startDate: isDate(q.start) ? q.start : "",
+          endDate: isDate(q.end) ? q.end : "",
         }}
       />
     </div>

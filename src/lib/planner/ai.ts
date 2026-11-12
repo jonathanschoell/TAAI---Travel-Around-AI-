@@ -105,11 +105,59 @@ const TOOL = {
   },
 };
 
+const daySchema = TOOL.input_schema.properties.days;
+
+const OUTLINE_TOOL = {
+  name: "save_outline",
+  description: "Save the outline of a long trip: one entry per day plus the parts that cover the whole trip.",
+  input_schema: {
+    type: "object",
+    properties: {
+      title: TOOL.input_schema.properties.title,
+      departure_airport_code: TOOL.input_schema.properties.departure_airport_code,
+      departure_airport_reason: TOOL.input_schema.properties.departure_airport_reason,
+      summary: TOOL.input_schema.properties.summary,
+      days: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            day_number: { type: "integer" },
+            date: { type: "string", description: "YYYY-MM-DD" },
+            place: { type: "string", description: "Where the travellers spend this day" },
+            theme: { type: "string", description: "Short headline for the day" },
+          },
+          required: ["day_number", "date", "place", "theme"],
+          additionalProperties: false,
+        },
+      },
+      budget: TOOL.input_schema.properties.budget,
+      tips: TOOL.input_schema.properties.tips,
+    },
+    required: ["title", "departure_airport_code", "departure_airport_reason", "summary", "days", "budget", "tips"],
+    additionalProperties: false,
+  },
+};
+
+const DAYS_TOOL = {
+  name: "save_days",
+  description: "Save some days of the itinerary in full detail.",
+  input_schema: {
+    type: "object",
+    properties: { days: daySchema },
+    required: ["days"],
+    additionalProperties: false,
+  },
+};
+
 function label(pairs: [string, string][], key: string) {
   return pairs.find(([k]) => k === key)?.[1] ?? key;
 }
 
-export function buildPrompt(input: TripInput, personalContext: string, swiss: SwissContext | null = null) {
+const INTRO = "You are Jovia, an expert personal travel agent. Plan a complete, individual itinerary for the travellers below.";
+
+/** Everything known about the trip and the travellers. */
+function buildContext(input: TripInput, personalContext: string, swiss: SwissContext | null) {
   const known = input.ages.filter((x): x is number => x !== null);
   const children = known.filter((x) => x < 18);
   const lines = [
@@ -139,16 +187,16 @@ export function buildPrompt(input: TripInput, personalContext: string, swiss: Sw
     input.wishes ? `Special wishes: ${input.wishes}` : "",
     input.constraints ? `Restrictions or requirements (must be respected): ${input.constraints}` : "",
   ].filter(Boolean);
-
   return [
-    "You are Jovia, an expert personal travel agent. Plan a complete, individual itinerary for the travellers below.",
-    "",
     lines.join("\n"),
     swissBlock(swiss),
     personalContext ? `\nWhat we know about these travellers from earlier trips (the request above wins if they conflict):\n${personalContext}` : "",
-    "",
-    "Rules:",
-    `- Plan exactly ${input.days} days, numbered from 1.`,
+  ].join("\n");
+}
+
+/** How the days themselves must be planned. */
+function dayRules(input: TripInput) {
+  return [
     "- Every day has activities for the morning, afternoon and evening, plus at least one restaurant suggestion (slot \"restaurant\").",
     "- Match activities to the exact ages of everyone travelling: consider what a toddler, a school child, a teenager or an older adult can do and enjoy. With children, mix things for adults and children and plan real breaks.",
     ...(input.stops.length
@@ -163,6 +211,12 @@ export function buildPrompt(input: TripInput, personalContext: string, swiss: Sw
     "- Only suggest places you are confident exist. Never invent opening hours or exact prices: all costs are your best estimates for the whole group.",
     "- Give latitude and longitude when you know them reasonably well; use 0 for both otherwise.",
     "- Write everything in English. Use Swiss francs (CHF) unless the travellers chose another currency.",
+  ];
+}
+
+/** Rules for the parts of the plan that cover the whole trip. */
+function tripRules(swiss: SwissContext | null) {
+  return [
     ...(swiss?.airports.length
       ? [
           "- Recommend one departure airport from the candidate list. Weigh how easy it is to get there from home (Swiss travellers often take the train), the destination, and that smaller airports have fewer connections. Do not state flight prices, schedules or airlines as facts. On day 1, describe getting to that airport in the transit notes.",
@@ -173,8 +227,71 @@ export function buildPrompt(input: TripInput, personalContext: string, swiss: Sw
           "- The trip overlaps the holidays listed above. Mention it where it matters (busier places, closures on public holidays). Never claim specific price differences or savings.",
         ]
       : []),
+  ];
+}
+
+/** The prompt for a trip planned in one go. */
+export function buildPrompt(input: TripInput, personalContext: string, swiss: SwissContext | null = null) {
+  return [
+    INTRO,
+    "",
+    buildContext(input, personalContext, swiss),
+    "",
+    "Rules:",
+    `- Plan exactly ${input.days} days, numbered from 1.`,
+    ...dayRules(input),
+    ...tripRules(swiss),
     "Do not answer in text. Call the save_itinerary tool exactly once with the finished plan.",
   ].join("\n");
+}
+
+/** Step 1 of a long trip: where the travellers are each day, plus everything that covers the whole trip. */
+export function buildOutlinePrompt(input: TripInput, personalContext: string, swiss: SwissContext | null = null) {
+  return [
+    INTRO,
+    "This is a long trip, so you plan it in two steps. Now do step 1 only: the outline.",
+    "",
+    buildContext(input, personalContext, swiss),
+    "",
+    "Rules:",
+    `- Outline exactly ${input.days} days, numbered from 1, with the date of each day.`,
+    "- For each day give the place where the travellers spend it and a short theme. Plan a sensible route: few changes of base, realistic travel days, rest days on long trips.",
+    ...(input.stops.length ? ["- Follow the fixed stops exactly."] : []),
+    "- Estimate the budget for the whole trip and the whole group, and give up to 4 tips.",
+    ...tripRules(swiss),
+    "Do not answer in text. Call the save_outline tool exactly once.",
+  ].join("\n");
+}
+
+export type OutlineDay = { day_number: number; date: string; place: string; theme: string };
+
+/** Step 2 of a long trip: a block of days in full detail, following the outline. */
+export function buildDaysPrompt(
+  input: TripInput,
+  personalContext: string,
+  swiss: SwissContext | null,
+  outline: OutlineDay[],
+  from: number,
+  to: number,
+  departure: string | null,
+) {
+  return [
+    INTRO,
+    "This is a long trip planned in two steps. The outline below is already decided. Now plan some of the days in full detail.",
+    "",
+    buildContext(input, personalContext, swiss),
+    "",
+    "Outline of the whole trip (follow it, do not change places or dates):",
+    outline.map((d) => `  - Day ${d.day_number} (${d.date}): ${d.place}, ${d.theme}`).join("\n"),
+    departure && from === 1 ? `Departure airport: ${departure}. On day 1, describe getting to it in the transit notes.` : "",
+    "",
+    "Rules:",
+    `- Plan days ${from} to ${to} only, numbered ${from} to ${to}. Return exactly ${to - from + 1} days.`,
+    "- Keep each day in the place given by the outline and use the outline's theme as a starting point.",
+    "- Do not repeat activities or restaurants that obviously belong to other days of the outline.",
+    ...dayRules(input),
+    "Do not answer in text. Call the save_days tool exactly once.",
+  ].filter((x) => x !== "").join("\n");
 }
 
 const num = (v: unknown): number | null =>
@@ -257,35 +374,31 @@ export function normalizePlan(raw: unknown, days: number, allowedAirports: strin
 
 export type Usage = { input_tokens: number | null; output_tokens: number | null };
 
-/** Asks Claude for an itinerary. The API key never leaves the server. */
-export async function generatePlan(
-  input: TripInput,
-  personalContext: string,
-  tier: "free" | "premium" = "premium",
-  swiss: SwissContext | null = null,
-): Promise<{ plan: Plan; usage: Usage; model: string }> {
+/** Trips longer than this are planned in steps: an outline, then blocks of days in parallel. */
+export const SINGLE_CALL_MAX_DAYS = 7;
+const BLOCK_DAYS = 7;
+
+type Tool = { name: string; description: string; input_schema: object };
+
+/** One request to Claude that must end in a call of `tool`. The API key never leaves the server. */
+async function callTool(model: string, prompt: string, tool: Tool, maxTokens: number) {
   const apiKey = process.env["ANTHROPIC_API_KEY"]?.trim();
   if (!apiKey) throw new PlannerError("not_configured", "ANTHROPIC_API_KEY is missing.");
   const base = (process.env["ANTHROPIC_BASE_URL"]?.trim() || "https://api.anthropic.com").replace(/\/+$/, "");
-  // Free accounts use the small, inexpensive model; premium accounts the stronger one.
-  const model =
-    tier === "premium"
-      ? process.env["ANTHROPIC_MODEL"]?.trim() || "claude-sonnet-5-5"
-      : process.env["ANTHROPIC_MODEL_FREE"]?.trim() || "claude-haiku-5-5";
 
   // Current Claude models do not accept a forced tool call, so the tool is offered with
   // "auto" and a strict schema. If a model rejects one of the newer options, the request
-  // is repeated once with fewer of them.
-  const base_body = {
+  // is repeated with fewer of them.
+  const baseBody = {
     model,
-    max_tokens: 16000,
+    max_tokens: maxTokens,
     tool_choice: { type: "auto" },
-    messages: [{ role: "user", content: buildPrompt(input, personalContext, swiss) }],
+    messages: [{ role: "user", content: prompt }],
   };
   const variants = [
-    { ...base_body, tools: [{ ...TOOL, strict: true }], thinking: { type: "between_tools" }, output_config: { effort: "medium" } },
-    { ...base_body, tools: [{ ...TOOL, strict: true }] },
-    { ...base_body, tools: [TOOL] },
+    { ...baseBody, tools: [{ ...tool, strict: true }], thinking: { type: "between_tools" }, output_config: { effort: "medium" } },
+    { ...baseBody, tools: [{ ...tool, strict: true }] },
+    { ...baseBody, tools: [tool] },
   ];
 
   let res: Response | null = null;
@@ -300,7 +413,7 @@ export async function generatePlan(
         },
         body: JSON.stringify(body),
         cache: "no-store",
-        signal: AbortSignal.timeout(280_000),
+        signal: AbortSignal.timeout(240_000),
       });
     } catch {
       throw new PlannerError("failed", "The AI service did not answer in time.");
@@ -327,16 +440,108 @@ export async function generatePlan(
     stop_reason?: string;
     usage?: { input_tokens?: number; output_tokens?: number };
   };
-  const block = data.content?.find((b) => b.type === "tool_use" && b.name === TOOL.name);
+  const block = data.content?.find((b) => b.type === "tool_use" && b.name === tool.name);
   if (!block || data.stop_reason === "max_tokens") {
     throw new PlannerError("incomplete", "The plan came back incomplete.");
   }
   return {
-    model,
-    plan: normalizePlan(block.input, input.days, swiss?.airports.map((a) => a.code) ?? []),
-    usage: {
-      input_tokens: data.usage?.input_tokens ?? null,
-      output_tokens: data.usage?.output_tokens ?? null,
-    },
+    input: block.input as Record<string, unknown>,
+    usage: { input_tokens: data.usage?.input_tokens ?? 0, output_tokens: data.usage?.output_tokens ?? 0 },
   };
+}
+
+function pickModel(tier: "free" | "premium") {
+  // Every account uses the small, inexpensive model by default. Each tier can be
+  // switched to another model in the hosting settings without changing code.
+  return tier === "premium"
+    ? process.env["ANTHROPIC_MODEL"]?.trim() || "claude-haiku-5-5"
+    : process.env["ANTHROPIC_MODEL_FREE"]?.trim() || "claude-haiku-5-5";
+}
+
+/** Reads the outline the model returned; it must name every day of the trip in order. */
+export function normalizeOutline(raw: unknown, input: TripInput): OutlineDay[] {
+  const r = (raw ?? {}) as Record<string, unknown>;
+  const days = (Array.isArray(r.days) ? r.days : []).slice(0, input.days);
+  if (days.length < input.days) throw new PlannerError("incomplete", "The outline came back incomplete.");
+  const start = Date.parse(input.startDate + "T00:00:00Z");
+  return days.map((d, i) => {
+    const x = (d ?? {}) as Record<string, unknown>;
+    return {
+      day_number: i + 1,
+      // The date always comes from the trip dates, never from the model.
+      date: new Date(start + i * 86400000).toISOString().slice(0, 10),
+      place: str(x.place, 80) || input.destination,
+      theme: str(x.theme, 120),
+    };
+  });
+}
+
+/** Days of one block, in order; throws if any day is missing. */
+function takeBlock(raw: Record<string, unknown>, from: number, to: number): unknown[] {
+  const list = Array.isArray(raw.days) ? (raw.days as Record<string, unknown>[]) : [];
+  const want = to - from + 1;
+  const numbered = list.filter((d) => Number(d?.day_number) >= from && Number(d?.day_number) <= to);
+  const chosen = (numbered.length === want ? numbered : list.slice(0, want)).sort(
+    (a, b) => Number(a?.day_number) - Number(b?.day_number),
+  );
+  if (chosen.length < want) throw new PlannerError("incomplete", "Some days came back incomplete.");
+  return chosen;
+}
+
+/** Asks Claude for an itinerary: in one go for short trips, in steps for long ones. */
+export async function generatePlan(
+  input: TripInput,
+  personalContext: string,
+  tier: "free" | "premium" = "premium",
+  swiss: SwissContext | null = null,
+): Promise<{ plan: Plan; usage: Usage; model: string }> {
+  const model = pickModel(tier);
+  const airports = swiss?.airports.map((a) => a.code) ?? [];
+
+  if (input.days <= SINGLE_CALL_MAX_DAYS) {
+    const { input: raw, usage } = await callTool(model, buildPrompt(input, personalContext, swiss), TOOL, 16000);
+    return { model, plan: normalizePlan(raw, input.days, airports), usage };
+  }
+
+  // Step 1: the outline.
+  const outlineCall = await callTool(model, buildOutlinePrompt(input, personalContext, swiss), OUTLINE_TOOL, 8000);
+  const outline = normalizeOutline(outlineCall.input, input);
+  const code = str(outlineCall.input.departure_airport_code, 3).toUpperCase();
+  const departure = airports.includes(code) ? code : null;
+
+  // Step 2: blocks of days, all at the same time. A block that fails is tried once more.
+  // Blocks of equal size, at most BLOCK_DAYS each: 21 days = 7+7+7, 15 days = 5+5+5.
+  const size = Math.ceil(input.days / Math.ceil(input.days / BLOCK_DAYS));
+  const blocks: [number, number][] = [];
+  for (let from = 1; from <= input.days; from += size) {
+    blocks.push([from, Math.min(input.days, from + size - 1)]);
+  }
+  const runBlock = async ([from, to]: [number, number]) => {
+    const prompt = buildDaysPrompt(input, personalContext, swiss, outline, from, to, departure);
+    for (let attempt = 1; ; attempt++) {
+      try {
+        const call = await callTool(model, prompt, DAYS_TOOL, 16000);
+        return { days: takeBlock(call.input, from, to), usage: call.usage };
+      } catch (e) {
+        const retry = e instanceof PlannerError && (e.kind === "incomplete" || e.kind === "failed");
+        if (!retry || attempt >= 2) throw e;
+      }
+    }
+  };
+  const results = await Promise.all(blocks.map(runBlock));
+
+  const raw = { ...outlineCall.input, days: results.flatMap((r) => r.days) };
+  const plan = normalizePlan(raw, input.days, airports);
+  // Keep the outline's places in the day headlines when the detailed day lost them.
+  plan.days.forEach((d, i) => {
+    if (!d.theme) d.theme = `${outline[i].place}: ${outline[i].theme}`;
+  });
+  const usage = [outlineCall.usage, ...results.map((r) => r.usage)].reduce(
+    (sum, u) => ({
+      input_tokens: (sum.input_tokens ?? 0) + (u.input_tokens ?? 0),
+      output_tokens: (sum.output_tokens ?? 0) + (u.output_tokens ?? 0),
+    }),
+    { input_tokens: 0, output_tokens: 0 } as Usage,
+  );
+  return { model, plan, usage };
 }

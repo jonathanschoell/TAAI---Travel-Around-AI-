@@ -61,7 +61,7 @@ export const BUDGET_PARTS: [string, string][] = [
   ["other", "Other"],
 ];
 
-export const MAX_TRIP_DAYS = 10;
+export const MAX_TRIP_DAYS = 21;
 export const MAX_TRAVELLERS = 12;
 export const MAX_STOPS = 8;
 
