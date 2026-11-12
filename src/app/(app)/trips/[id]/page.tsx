@@ -44,7 +44,9 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
   const breakdown = (trip.budget_breakdown ?? {}) as Record<string, number>;
   const total = BUDGET_PARTS.reduce((sum, [k]) => sum + (Number(breakdown[k]) || 0), 0);
   const biggest = Math.max(1, ...BUDGET_PARTS.map(([k]) => Number(breakdown[k]) || 0));
-  const tips = ((trip.input as { tips?: string[] } | null)?.tips ?? []).slice(0, 4);
+  const saved = (trip.input ?? {}) as { tips?: string[]; stops?: { place: string; from: string; to: string }[] };
+  const tips = (saved.tips ?? []).slice(0, 4);
+  const stops = Array.isArray(saved.stops) ? saved.stops : [];
   const budget = trip.budget_total ? Number(trip.budget_total) : null;
   const catLabel = (c: string | null) => INTERESTS.find(([k]) => k === c)?.[1];
 
@@ -62,6 +64,16 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
           </p>
           <h1 className="mt-1 text-3xl font-extrabold sm:text-5xl">{trip.title}</h1>
           {trip.summary ? <p className="mt-3 max-w-3xl text-lg text-muted">{trip.summary}</p> : null}
+          {stops.length ? (
+            <p className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="text-sm font-semibold">Route:</span>
+              {stops.map((st) => (
+                <span key={st.place + st.from} className="pill">
+                  {st.place} · {date(st.from)} to {date(st.to)}
+                </span>
+              ))}
+            </p>
+          ) : null}
         </div>
         <aside className="card">
           <p className="text-sm text-muted">Estimated total</p>

@@ -62,6 +62,8 @@ export const BUDGET_PARTS: [string, string][] = [
 ];
 
 export const MAX_TRIP_DAYS = 10;
+export const MAX_TRAVELLERS = 12;
+export const MAX_STOPS = 8;
 
 export type TripInput = {
   destination: string;
@@ -71,9 +73,10 @@ export type TripInput = {
   days: number;
   travelers: number;
   party: string;
-  adultAgeGroup: string;
-  children: number;
-  childrenAges: string;
+  /** One entry per traveller; null when the age was not given. */
+  ages: (number | null)[];
+  /** Fixed places along the way, with the dates spent there. */
+  stops: { place: string; from: string; to: string }[];
   interests: string[];
   budget: number | null;
   currency: string;

@@ -18,11 +18,11 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #091224;
-    --surface: #101c36;
-    --ink: #e9effc;
-    --muted: #95a5c4;
-    --line: #22345c;
+    --bg: #16223f;
+    --surface: #1f2e52;
+    --ink: #eef3ff;
+    --muted: #a9b7d4;
+    --line: #34497a;
     --brand: #6a97ff;
     --brand-ink: #061233;
     --signal: #8cc4ff;
