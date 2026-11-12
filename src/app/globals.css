@@ -1,9 +1,10 @@
 @import "tailwindcss";
 
 /* Layout idea: plain white and one confident blue; lots of air, thin lines,
-   content left-aligned, mobile-first, generous tap targets. */
+   content left-aligned, mobile-first, generous tap targets. White by default;
+   a dark theme follows the device setting. */
 :root {
-  --bg: #f6f8fd;
+  --bg: #ffffff;
   --surface: #ffffff;
   --ink: #0b1b3a;
   --muted: #56637d;
