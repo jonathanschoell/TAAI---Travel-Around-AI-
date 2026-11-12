@@ -9,7 +9,7 @@ const FLIGHT_MS = 2600;
 const START_X = -90;
 
 /**
- * The JOVIA wordmark. On the first page load of a browser session a plane crosses the
+ * The JOVIA wordmark. Every time the site is opened or reloaded, a plane crosses the
  * top of the screen and drops the letters into place. The intro is switched on by a
  * small script in the root layout (html.jovia-intro) and skipped for people who prefer
  * reduced motion.
@@ -40,9 +40,9 @@ export function Wordmark({ href = "/" }: { href?: string }) {
 
   return (
     <>
-      <Link href={href} className="inline-flex items-center" aria-label="Jovia home">
+      <Link href={href} className="inline-flex shrink-0 items-center whitespace-nowrap" aria-label="Jovia home">
         <span ref={word} aria-hidden="true"
-          className="font-display text-[1.7rem] leading-none font-extrabold tracking-[0.12em] text-brand">
+          className="font-display text-[1.45rem] leading-none font-extrabold tracking-[0.12em] whitespace-nowrap text-brand sm:text-[1.7rem]">
           {LETTERS.map((letter, i) => (
             <span key={letter + i} data-letter className="jw-letter inline-block"
               style={{ ["--jw-delay" as string]: `${300 + i * 140}ms` }}>

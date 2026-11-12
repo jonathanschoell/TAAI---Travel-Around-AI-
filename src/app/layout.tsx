@@ -12,8 +12,8 @@ const body = Figtree({
   subsets: ["latin"],
 });
 
-/** Plays the plane intro once per browser session, never for people who prefer reduced motion. */
-const INTRO_SCRIPT = `try{var d=document.documentElement;if(!sessionStorage.getItem("jovia-intro")&&!matchMedia("(prefers-reduced-motion: reduce)").matches){d.classList.add("jovia-intro");sessionStorage.setItem("jovia-intro","1");setTimeout(function(){d.classList.remove("jovia-intro")},4200)}}catch(e){}`;
+/** Plays the plane intro on every page load, never for people who prefer reduced motion. */
+const INTRO_SCRIPT = `try{var d=document.documentElement;if(!matchMedia("(prefers-reduced-motion: reduce)").matches){d.classList.add("jovia-intro");setTimeout(function(){d.classList.remove("jovia-intro")},4200)}}catch(e){}`;
 
 export const metadata: Metadata = {
   title: {
