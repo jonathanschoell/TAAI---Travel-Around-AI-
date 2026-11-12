@@ -1,15 +1,13 @@
-import type { Metadata } from "next";
 import { ResetForm } from "@/components/auth-forms";
 import { AuthShell } from "@/components/site";
+import { getI18n, titleFor } from "@/lib/i18n/server";
 
-export const metadata: Metadata = { title: "Choose a new password" };
+export const generateMetadata = titleFor("reset");
 
-export default function ResetPasswordPage() {
+export default async function ResetPasswordPage() {
+  const { t } = await getI18n();
   return (
-    <AuthShell
-      title="Choose a new password"
-      lead="You opened a valid reset link. Set a new password for your account."
-    >
+    <AuthShell title={t.auth.resetTitle} lead={t.auth.resetLead}>
       <ResetForm />
     </AuthShell>
   );

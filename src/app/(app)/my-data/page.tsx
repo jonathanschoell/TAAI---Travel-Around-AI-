@@ -1,14 +1,13 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { setPersonalization } from "@/app/(app)/actions";
 import { DeleteAccountForm } from "@/components/app-forms";
 import { getProfile, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { LANGUAGES } from "@/lib/i18n/config";
+import { getI18n, titleFor } from "@/lib/i18n/server";
 
-export const metadata: Metadata = { title: "My data" };
+export const generateMetadata = titleFor("myData");
 
-const fmt = (iso: string | null | undefined) =>
-  iso ? new Date(iso).toLocaleString("en-CH", { dateStyle: "medium", timeStyle: "short" }) : "—";
 
 export default async function MyDataPage() {
   const user = await requireUser();
@@ -20,73 +19,67 @@ export default async function MyDataPage() {
     .order("created_at", { ascending: false })
     .limit(20);
   const on = profile?.personalization_enabled ?? false;
+  const { t: all, dateTime: fmt } = await getI18n();
+  const t = all.myData;
+  const languageName = LANGUAGES.find((l) => l.code === profile?.language)?.name ?? "—";
 
   return (
     <div className="grid items-start gap-6 lg:grid-cols-2">
       <div className="lg:col-span-2">
-        <h1 className="text-3xl font-extrabold sm:text-4xl">My data</h1>
-        <p className="mt-2 text-muted">
-          Everything Jovia stores about you, and the controls to change or remove it.
-        </p>
+        <h1 className="text-3xl font-extrabold sm:text-4xl">{t.title}</h1>
+        <p className="mt-2 text-muted">{t.lead}</p>
       </div>
 
       <section className="card">
-        <h2 className="text-xl font-bold">Account and profile</h2>
+        <h2 className="text-xl font-bold">{t.account}</h2>
         <dl className="mt-3 grid grid-cols-[10rem_1fr] gap-y-2 text-sm">
-          <dt className="text-muted">Email</dt><dd className="break-all">{user.email}</dd>
-          <dt className="text-muted">Account created</dt><dd>{fmt(user.created_at)}</dd>
-          <dt className="text-muted">Profile name</dt><dd>{profile?.display_name ?? "—"}</dd>
-          <dt className="text-muted">Age group</dt><dd>{profile?.age_group ?? "Not set"}</dd>
-          <dt className="text-muted">Currency</dt><dd>{profile?.currency ?? "—"}</dd>
-          <dt className="text-muted">Last active</dt><dd>{fmt(profile?.last_seen_at)}</dd>
+          <dt className="text-muted">{t.email}</dt><dd className="break-all">{user.email}</dd>
+          <dt className="text-muted">{t.created}</dt><dd>{fmt(user.created_at)}</dd>
+          <dt className="text-muted">{t.profileName}</dt><dd>{profile?.display_name ?? "—"}</dd>
+          <dt className="text-muted">{t.ageGroup}</dt><dd>{profile?.age_group ?? t.notSet}</dd>
+          <dt className="text-muted">{t.currency}</dt><dd>{profile?.currency ?? "—"}</dd>
+          <dt className="text-muted">{t.language}</dt><dd>{languageName}</dd>
+          <dt className="text-muted">{t.lastActive}</dt><dd>{fmt(profile?.last_seen_at)}</dd>
         </dl>
-        <Link href="/profile" className="btn btn-ghost mt-4 sm:w-fit">Edit profile</Link>
+        <Link href="/profile" className="btn btn-ghost mt-4 sm:w-fit">{t.editProfile}</Link>
       </section>
 
       <section className="card">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-bold">Long-term personalisation</h2>
-          <span className="pill">{on ? "On" : "Off"}</span>
+          <h2 className="text-xl font-bold">{t.personalisation}</h2>
+          <span className="pill">{on ? t.on : t.off}</span>
         </div>
-        <p className="mt-2 text-sm text-muted">
-          When this is on, Jovia may remember lasting travel preferences from your trips and
-          feedback to improve future suggestions. It never stores health, religious or political
-          information. When it is off, the AI only uses what you enter for the current trip.
-          Trip planning and memory are still being built, so nothing has been learned yet.
-        </p>
+        <p className="mt-2 text-sm text-muted">{t.personalisationBody}</p>
         <form action={setPersonalization} className="mt-4">
           <input type="hidden" name="enabled" value={on ? "false" : "true"} />
           <button type="submit" className={on ? "btn btn-ghost" : "btn btn-primary"}>
-            {on ? "Turn personalisation off" : "I agree, turn personalisation on"}
+            {on ? t.turnOff : t.turnOn}
           </button>
         </form>
       </section>
 
       <section className="card">
-        <h2 className="text-xl font-bold">Consent history</h2>
+        <h2 className="text-xl font-bold">{t.consents}</h2>
         {consents && consents.length > 0 ? (
           <ul className="mt-3 flex flex-col gap-2 text-sm">
             {consents.map((c, i) => (
               <li key={i} className="flex flex-wrap justify-between gap-2 border-b border-line pb-2 last:border-0">
                 <span>
-                  {c.kind === "privacy_policy" ? "Privacy policy" : "Personalisation"}:{" "}
-                  {c.granted ? "accepted" : "withdrawn"} ({c.policy_version})
+                  {c.kind === "privacy_policy" ? t.privacyPolicy : t.personalisationShort}:{" "}
+                  {c.granted ? t.accepted : t.withdrawn} ({c.policy_version})
                 </span>
                 <span className="text-muted">{fmt(c.created_at)}</span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-2 text-sm text-muted">No entries yet.</p>
+          <p className="mt-2 text-sm text-muted">{t.noEntries}</p>
         )}
       </section>
 
       <section className="card border-danger lg:col-span-2">
-        <h2 className="text-xl font-bold">Delete account</h2>
-        <p className="mt-2 text-sm text-muted">
-          This permanently removes your account, profile, trips, feedback and AI memory. It
-          cannot be undone.
-        </p>
+        <h2 className="text-xl font-bold">{t.deleteTitle}</h2>
+        <p className="mt-2 text-sm text-muted">{t.deleteBody}</p>
         <div className="mt-4"><DeleteAccountForm /></div>
       </section>
     </div>

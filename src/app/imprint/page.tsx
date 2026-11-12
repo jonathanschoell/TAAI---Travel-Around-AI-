@@ -1,53 +1,51 @@
-import type { Metadata } from "next";
 import { PublicHeader, SiteFooter } from "@/components/site";
+import { f } from "@/lib/i18n/config";
+import { LEGAL } from "@/lib/i18n/legal";
+import { getI18n, titleFor } from "@/lib/i18n/server";
 import { OPERATOR, operatorComplete } from "@/lib/operator";
 
-export const metadata: Metadata = { title: "Imprint" };
+export const generateMetadata = titleFor("imprint");
 
-const missing = <span className="text-danger">[to be completed]</span>;
+const COUNTRY: Record<string, string> = { en: "Switzerland", de: "Schweiz", fr: "Suisse", it: "Svizzera" };
 
-export default function ImprintPage() {
+export default async function ImprintPage() {
+  const { locale } = await getI18n();
+  const L = LEGAL[locale].imprint;
+  const missing = <span className="text-danger">{L.missing}</span>;
   return (
     <>
       <PublicHeader />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6">
-        {operatorComplete ? null : <span className="pill pill-signal">Incomplete: operator details missing</span>}
-        <h1 className="mt-3 text-3xl font-extrabold sm:text-4xl">Imprint</h1>
+        {operatorComplete ? null : <span className="pill pill-signal">{L.incomplete}</span>}
+        <h1 className="mt-3 text-3xl font-extrabold sm:text-4xl">{L.title}</h1>
 
         <section className="mt-6">
-          <h2 className="text-xl font-bold">Operator of this website</h2>
+          <h2 className="text-xl font-bold">{L.operator}</h2>
           <address className="mt-2 not-italic leading-relaxed">
             {OPERATOR.name || missing}<br />
             {OPERATOR.street || missing}<br />
             {OPERATOR.postalCodeAndCity || missing}<br />
-            {OPERATOR.country}
+            {COUNTRY[locale] ?? OPERATOR.country}
           </address>
-          {OPERATOR.uid ? <p className="mt-2">Company number (UID): {OPERATOR.uid}</p> : null}
+          {OPERATOR.uid ? <p className="mt-2">{f(L.uid, { uid: OPERATOR.uid })}</p> : null}
         </section>
 
         <section className="mt-6">
-          <h2 className="text-xl font-bold">Contact</h2>
+          <h2 className="text-xl font-bold">{L.contact}</h2>
           <p className="mt-2">
-            Email:{" "}
+            {L.email}{" "}
             {OPERATOR.email ? <a href={`mailto:${OPERATOR.email}`} className="underline">{OPERATOR.email}</a> : missing}
           </p>
         </section>
 
         <section className="mt-6">
-          <h2 className="text-xl font-bold">About the content</h2>
-          <p className="mt-2 text-muted">
-            Itineraries on Jovia are created by artificial intelligence. Prices, opening hours
-            and availability are estimates and are not checked by a person. Please verify
-            important details with the provider before you book or travel.
-          </p>
+          <h2 className="text-xl font-bold">{L.contentTitle}</h2>
+          <p className="mt-2 text-muted">{L.content}</p>
         </section>
 
         <section className="mt-6">
-          <h2 className="text-xl font-bold">Links to other websites</h2>
-          <p className="mt-2 text-muted">
-            Jovia links to websites of third parties, for example maps. Their operators are
-            responsible for the content of those sites.
-          </p>
+          <h2 className="text-xl font-bold">{L.linksTitle}</h2>
+          <p className="mt-2 text-muted">{L.links}</p>
         </section>
       </main>
       <SiteFooter />

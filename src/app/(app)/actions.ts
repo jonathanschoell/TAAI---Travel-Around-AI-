@@ -8,6 +8,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { AGE_GROUPS, CURRENCIES } from "@/lib/options";
 import { cantonByCode } from "@/lib/swiss";
+import { cookies } from "next/headers";
+import { isLocale, LOCALE_COOKIE } from "@/lib/i18n/config";
+import { getI18n } from "@/lib/i18n/server";
+import { DICTS } from "@/lib/i18n/dictionaries";
 
 export type AppFormState = { error?: string; notice?: string };
 
@@ -18,15 +22,19 @@ export async function updateProfile(_: AppFormState, fd: FormData): Promise<AppF
   const currency = String(fd.get("currency") ?? "");
   const canton = String(fd.get("home_canton") ?? "");
   const place = String(fd.get("home_place") ?? "").trim().slice(0, 80);
+  const askedLanguage = String(fd.get("language") ?? "");
+  const T = (await getI18n()).t.profile;
 
-  if (!name) return { error: "Enter a name for your profile." };
-  if (!CURRENCIES.includes(currency)) return { error: "Choose a currency from the list." };
+  if (!name) return { error: T.errors.name };
+  if (!CURRENCIES.includes(currency)) return { error: T.errors.currency };
+  const language = isLocale(askedLanguage) ? askedLanguage : null;
 
   const supabase = await createClient();
   const base = {
     display_name: name,
     age_group: AGE_GROUPS.includes(age) ? age : null,
     currency,
+    ...(language ? { language } : {}),
   };
   const home = { home_canton: cantonByCode(canton)?.code ?? null, home_place: place || null };
   let { error } = await supabase.from("profiles").update({ ...base, ...home }).eq("user_id", user.id);
@@ -34,11 +42,18 @@ export async function updateProfile(_: AppFormState, fd: FormData): Promise<AppF
     // The home columns do not exist until migration 0003 has been run.
     ({ error } = await supabase.from("profiles").update(base).eq("user_id", user.id));
     if (!error)
-      return { notice: "Profile saved. Home canton could not be saved yet: run supabase/migrations/0003_home_location.sql." };
+      return { notice: T.savedNoHome };
   }
-  if (error) return { error: "We could not save your profile. Please try again." };
+  if (error) return { error: T.errors.failed };
+  if (language) {
+    (await cookies()).set(LOCALE_COOKIE, language, {
+      path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax", secure: process.env.NODE_ENV === "production",
+    });
+  }
   revalidatePath("/", "layout");
-  return { notice: "Profile saved." };
+  // Texts in the new language, so the confirmation matches the page after the switch.
+  const saved = language ? DICTS[language].profile.saved : T.saved;
+  return { notice: saved };
 }
 
 export async function setPersonalization(fd: FormData) {
@@ -63,18 +78,19 @@ export async function setPersonalization(fd: FormData) {
 export async function deleteAccount(_: AppFormState, fd: FormData): Promise<AppFormState> {
   const user = await requireUser();
   const password = String(fd.get("password") ?? "");
-  if (!password || !user.email) return { error: "Enter your password to confirm." };
+  const A = (await getI18n()).t.account;
+  if (!password || !user.email) return { error: A.enterPassword };
 
   const supabase = await createClient();
   const check = await supabase.auth.signInWithPassword({ email: user.email, password });
-  if (check.error) return { error: "That password is not correct." };
+  if (check.error) return { error: A.wrongPassword };
 
   const admin = createAdminClient();
   if (!admin)
-    return { error: "Account deletion is not connected yet. Please contact the site owner." };
+    return { error: A.notConnected };
   // Deleting the auth user removes every row that references it (ON DELETE CASCADE).
   const { error } = await admin.auth.admin.deleteUser(user.id);
-  if (error) return { error: "We could not delete the account. Please try again." };
+  if (error) return { error: A.deleteFailed };
   await supabase.auth.signOut();
   redirect("/login?notice=deleted");
 }

@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { deleteTrip, reportTrip } from "@/app/(app)/actions";
 import { requireUser } from "@/lib/auth";
 import { chfRate, FX_SOURCE } from "@/lib/fx";
 import { HOLIDAY_SOURCE } from "@/lib/holidays";
-import { BUDGET_PARTS, INTERESTS, SLOTS } from "@/lib/planner/options";
+import { BUDGET_PARTS, SLOTS } from "@/lib/planner/options";
 import { createClient } from "@/lib/supabase/server";
+import { f } from "@/lib/i18n/config";
+import { getI18n, titleFor } from "@/lib/i18n/server";
 
-export const metadata: Metadata = { title: "Your itinerary" };
+export const generateMetadata = titleFor("trip");
 
 type Activity = {
   id: string; trip_day_id: string; slot: string; position: number; name: string;
@@ -17,14 +18,15 @@ type Activity = {
   latitude: number | null; longitude: number | null;
 };
 
-const date = (iso: string | null) =>
-  iso ? new Date(iso + "T00:00:00Z").toLocaleDateString("en-CH", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }) : "";
 
 export default async function TripPage({ params, searchParams }: PageProps<"/trips/[id]">) {
   const user = await requireUser();
   const { id } = await params;
   const query = await searchParams;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
+  const { t: all, date: fmtDate, number } = await getI18n();
+  const t = all.trip;
+  const date = (iso: string | null) => fmtDate(iso, { weekday: "short", day: "numeric", month: "short" });
 
   const supabase = await createClient();
   const { data: trip } = await supabase.from("trips")
@@ -42,7 +44,7 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
     : { data: [] as Activity[] };
   const activities = (acts ?? []) as Activity[];
 
-  const money = (n: number) => `${trip.currency} ${Math.round(n).toLocaleString("en-CH")}`;
+  const money = (n: number) => `${trip.currency} ${number(n)}`;
   const breakdown = (trip.budget_breakdown ?? {}) as Record<string, number>;
   const total = BUDGET_PARTS.reduce((sum, [k]) => sum + (Number(breakdown[k]) || 0), 0);
   const biggest = Math.max(1, ...BUDGET_PARTS.map(([k]) => Number(breakdown[k]) || 0));
@@ -61,55 +63,51 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
   const tips = (saved.tips ?? []).slice(0, 4);
   const stops = Array.isArray(saved.stops) ? saved.stops : [];
   const budget = trip.budget_total ? Number(trip.budget_total) : null;
-  const catLabel = (c: string | null) => INTERESTS.find(([k]) => k === c)?.[1];
+  const catLabel = (c: string | null) => (c ? (all.client.options.interests as Record<string, string>)[c] : undefined);
 
   return (
     <div className="flex flex-col gap-8">
       {query.notice === "reported" ? (
-        <p className="notice notice-ok">Thank you. Your report was sent and will be reviewed.</p>
+        <p className="notice notice-ok">{t.reported}</p>
       ) : null}
 
       <header className="grid gap-6 lg:grid-cols-[2fr_1fr] lg:items-start">
         <div>
           <p className="text-sm font-semibold text-muted">
-            {trip.destination} · {date(trip.start_date)} to {date(trip.end_date)} · {trip.travelers}{" "}
-            {trip.travelers === 1 ? "traveller" : "travellers"}
+            {trip.destination} · {date(trip.start_date)} {t.to} {date(trip.end_date)} · {trip.travelers}{" "}
+            {trip.travelers === 1 ? t.travellerOne : t.travellerOther}
           </p>
           <h1 className="mt-1 text-3xl font-extrabold sm:text-5xl">{trip.title}</h1>
           {trip.summary ? <p className="mt-3 max-w-3xl text-lg text-muted">{trip.summary}</p> : null}
           {stops.length ? (
             <p className="mt-4 flex flex-wrap items-center gap-2">
-              <span className="text-sm font-semibold">Route:</span>
+              <span className="text-sm font-semibold">{t.route}</span>
               {stops.map((st) => (
                 <span key={st.place + st.from} className="pill">
-                  {st.place} · {date(st.from)} to {date(st.to)}
+                  {st.place} · {date(st.from)} {t.to} {date(st.to)}
                 </span>
               ))}
             </p>
           ) : null}
         </div>
         <aside className="card">
-          <p className="text-sm text-muted">Estimated total</p>
+          <p className="text-sm text-muted">{t.estimatedTotal}</p>
           <p className="font-display text-3xl font-extrabold tabular-nums">{money(total)}</p>
           {fx ? (
             <p className="text-sm text-muted tabular-nums">
-              ≈ CHF {Math.round(total * fx.chfPerUnit).toLocaleString("en-CH")} at the reference rate of{" "}
-              {fx.date} (1 {trip.currency} = {fx.chfPerUnit.toFixed(4)} CHF,{" "}
-              <a href={FX_SOURCE.url} className="underline" target="_blank" rel="noreferrer">{FX_SOURCE.name}</a>).
-              Card and bank fees not included.
+              {f(t.fx, { chf: number(total * fx.chfPerUnit), date: fmtDate(fx.date), cur: trip.currency, rate: fx.chfPerUnit.toFixed(4) })}{" "}
+              <a href={FX_SOURCE.url} className="underline" target="_blank" rel="noreferrer">{FX_SOURCE.name}</a>
+              {t.fxFees}
             </p>
           ) : null}
           {budget ? (
             <p className="mt-1 text-sm">
               {total <= budget
-                ? `About ${money(budget - total)} under your budget of ${money(budget)}.`
-                : `About ${money(total - budget)} over your budget of ${money(budget)}.`}
+                ? f(t.under, { diff: money(budget - total), budget: money(budget) })
+                : f(t.over, { diff: money(total - budget), budget: money(budget) })}
             </p>
           ) : null}
-          <p className="mt-2 text-sm text-muted">
-            Saved to your account. All prices are AI estimates, not quotes. Check opening
-            hours and prices before you book.
-          </p>
+          <p className="mt-2 text-sm text-muted">{t.savedNote}</p>
         </aside>
       </header>
 
@@ -117,10 +115,10 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
         <section className="grid gap-5 lg:grid-cols-2">
           {airports.length ? (
             <article className="card">
-              <h2 className="text-xl font-bold">Getting there</h2>
+              <h2 className="text-xl font-bold">{t.gettingThere}</h2>
               {departure ? (
                 <p className="mt-2">
-                  <span className="pill pill-signal mr-2">Suggested: {departure.code}</span>
+                  <span className="pill pill-signal mr-2">{f(t.suggested, { code: departure.code })}</span>
                   {departure.reason}
                 </p>
               ) : null}
@@ -131,33 +129,30 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 text-sm text-muted">
-                Distances are straight-line from home. Flight prices and times are not checked
-                yet: compare flights from these airports before you book.
-              </p>
+              <p className="mt-2 text-sm text-muted">{t.airportsNote}</p>
             </article>
           ) : null}
           {holidays.length ? (
             <article className="card">
-              <h2 className="text-xl font-bold">Holidays during your trip</h2>
+              <h2 className="text-xl font-bold">{t.holidaysTitle}</h2>
               <ul className="mt-3 flex flex-col gap-2">
                 {holidays.map((h) => (
                   <li key={h.kind + h.name + h.start} className="flex flex-wrap justify-between gap-2 border-b border-line pb-2 last:border-0">
                     <span>
-                      <span className="pill mr-2">{h.kind === "school" ? "School holidays" : "Public holiday"}</span>
+                      <span className="pill mr-2">{h.kind === "school" ? t.school : t.public}</span>
                       {h.name}
                     </span>
                     <span className="text-sm text-muted">
-                      {date(h.start)}{h.end !== h.start ? ` to ${date(h.end)}` : ""}
-                      {h.varies ? " · varies by municipality" : ""}
+                      {date(h.start)}{h.end !== h.start ? ` ${t.to} ${date(h.end)}` : ""}
+                      {h.varies ? ` · ${t.varies}` : ""}
                     </span>
                   </li>
                 ))}
               </ul>
               <p className="mt-2 text-sm text-muted">
-                Home canton calendar from{" "}
+                {t.holidaysFrom}{" "}
                 <a href={HOLIDAY_SOURCE.url} className="underline" target="_blank" rel="noreferrer">{HOLIDAY_SOURCE.name}</a>.
-                Check your school&apos;s dates, they can differ.
+                {t.holidaysNote}
               </p>
             </article>
           ) : null}
@@ -172,15 +167,16 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
             <article key={d.id} className="card">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 className="text-2xl font-extrabold">
-                  <span className="text-brand">Day {d.day_number}</span>
+                  <span className="text-brand">{f(t.day, { n: d.day_number })}</span>
                   {d.theme ? ` · ${d.theme}` : ""}
                 </h2>
                 <p className="text-sm text-muted">
-                  {date(d.day_date)} · est. {money(dayCost)}
+                  {date(d.day_date)} · {f(t.est, { amount: money(dayCost) })}
                 </p>
               </div>
               <div className="mt-4 grid gap-x-8 gap-y-5 lg:grid-cols-2">
-                {SLOTS.map(([slot, slotLabel]) => {
+                {SLOTS.map(([slot]) => {
+                  const slotLabel = (t.slots as Record<string, string>)[slot] ?? slot;
                   const items = todays.filter((a) => a.slot === slot);
                   if (!items.length) return null;
                   return (
@@ -195,13 +191,13 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
                               {catLabel(a.category) ? <span className="pill">{catLabel(a.category)}</span> : null}
                               {a.duration_minutes ? <span className="pill">{a.duration_minutes} min</span> : null}
                               <span className="pill">
-                                {a.cost ? `est. ${money(Number(a.cost))}` : "Free or included"}
+                                {a.cost ? f(t.est, { amount: money(Number(a.cost)) }) : t.free}
                               </span>
-                              {a.verified ? null : <span className="pill">Not verified</span>}
+                              {a.verified ? null : <span className="pill">{t.notVerified}</span>}
                               {a.latitude !== null && a.longitude !== null ? (
                                 <a className="pill underline" target="_blank" rel="noreferrer"
                                   href={`https://www.openstreetmap.org/?mlat=${a.latitude}&mlon=${a.longitude}#map=16/${a.latitude}/${a.longitude}`}>
-                                  Open map
+                                  {t.openMap}
                                 </a>
                               ) : null}
                             </p>
@@ -214,7 +210,7 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
               </div>
               {d.transit_notes ? (
                 <p className="mt-4 border-t border-line pt-3 text-sm text-muted">
-                  <span className="font-semibold text-ink">Getting around: </span>{d.transit_notes}
+                  <span className="font-semibold text-ink">{t.gettingAround} </span>{d.transit_notes}
                 </p>
               ) : null}
             </article>
@@ -224,16 +220,17 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
 
       <section className="grid gap-5 lg:grid-cols-2">
         <article className="card">
-          <h2 className="text-xl font-bold">Budget overview</h2>
-          <p className="mt-1 text-sm text-muted">All figures are estimates for the whole group.</p>
+          <h2 className="text-xl font-bold">{t.budgetTitle}</h2>
+          <p className="mt-1 text-sm text-muted">{t.budgetLead}</p>
           <ul className="mt-4 flex flex-col gap-3">
-            {BUDGET_PARTS.map(([k, name]) => {
+            {BUDGET_PARTS.map(([k]) => {
+              const name = (t.budgetParts as Record<string, string>)[k] ?? k;
               const value = Number(breakdown[k]) || 0;
               return (
                 <li key={k}>
                   <div className="flex justify-between text-sm">
                     <span>{name}</span>
-                    <span className="tabular-nums">est. {money(value)}</span>
+                    <span className="tabular-nums">{f(t.est, { amount: money(value) })}</span>
                   </div>
                   <div className="mt-1 h-2 rounded-full bg-line">
                     <div className="h-2 rounded-full bg-brand" style={{ width: `${Math.round((value / biggest) * 100)}%` }} />
@@ -244,30 +241,28 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
           </ul>
         </article>
         <article className="card">
-          <h2 className="text-xl font-bold">Tips for this trip</h2>
+          <h2 className="text-xl font-bold">{t.tipsTitle}</h2>
           {tips.length ? (
             <ul className="mt-3 flex list-disc flex-col gap-2 pl-5">
               {tips.map((t) => <li key={t}>{t}</li>)}
             </ul>
           ) : (
-            <p className="mt-2 text-muted">No extra tips for this trip.</p>
+            <p className="mt-2 text-muted">{t.noTips}</p>
           )}
-          <p className="mt-4 text-sm text-muted">
-            Coming next: interactive map, photos, swapping or removing activities, and PDF export.
-          </p>
+          <p className="mt-4 text-sm text-muted">{t.comingNext}</p>
         </article>
       </section>
 
       <section className="flex flex-wrap items-center gap-3">
-        <Link href="/plan" className="btn btn-primary">Plan another trip</Link>
-        <Link href="/dashboard" className="btn btn-ghost">All trips</Link>
+        <Link href="/plan" className="btn btn-primary">{t.another}</Link>
+        <Link href="/dashboard" className="btn btn-ghost">{t.allTrips}</Link>
         <form action={reportTrip}>
           <input type="hidden" name="trip_id" value={trip.id} />
-          <button type="submit" className="btn btn-ghost">Report a problem with this plan</button>
+          <button type="submit" className="btn btn-ghost">{t.report}</button>
         </form>
         <form action={deleteTrip}>
           <input type="hidden" name="trip_id" value={trip.id} />
-          <button type="submit" className="btn btn-ghost text-danger">Delete trip</button>
+          <button type="submit" className="btn btn-ghost text-danger">{t.delete}</button>
         </form>
       </section>
     </div>

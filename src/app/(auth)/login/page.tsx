@@ -1,23 +1,24 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LoginForm } from "@/components/auth-forms";
 import { AuthShell } from "@/components/site";
+import { getI18n, titleFor } from "@/lib/i18n/server";
 
-export const metadata: Metadata = { title: "Log in" };
+export const generateMetadata = titleFor("login");
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const { t } = await getI18n();
   return (
     <AuthShell
-      title="Welcome back"
-      lead="Log in to plan trips and see your saved itineraries."
+      title={t.auth.loginTitle}
+      lead={t.auth.loginLead}
       footer={
         <p>
-          New to Jovia? <Link href="/register" className="underline">Create an account</Link>
+          {t.auth.newHere} <Link href="/register" className="underline">{t.auth.createAnAccount}</Link>
         </p>
       }
     >
-      <Suspense fallback={<p className="text-muted">Loading…</p>}>
+      <Suspense fallback={<p className="text-muted">{t.site.loading}</p>}>
         <LoginForm />
       </Suspense>
     </AuthShell>

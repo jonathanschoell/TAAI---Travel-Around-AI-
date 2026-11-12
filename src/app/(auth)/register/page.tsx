@@ -1,18 +1,19 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { RegisterForm } from "@/components/auth-forms";
 import { AuthShell } from "@/components/site";
+import { getI18n, titleFor } from "@/lib/i18n/server";
 
-export const metadata: Metadata = { title: "Create account" };
+export const generateMetadata = titleFor("register");
 
-export default function RegisterPage() {
+export default async function RegisterPage() {
+  const { t } = await getI18n();
   return (
     <AuthShell
-      title="Create your account"
-      lead="An account keeps your trips and travel preferences in one private place."
+      title={t.auth.registerTitle}
+      lead={t.auth.registerLead}
       footer={
         <p>
-          Already have an account? <Link href="/login" className="underline">Log in</Link>
+          {t.auth.haveAccount} <Link href="/login" className="underline">{t.auth.logIn}</Link>
         </p>
       }
     >

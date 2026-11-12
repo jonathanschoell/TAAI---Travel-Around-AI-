@@ -87,3 +87,5 @@ Name, Adresse und Kontakt-E-Mail des Betreibers stehen in `src/lib/operator.ts`.
 1. In Supabase im **SQL Editor** die Datei `supabase/migrations/0003_home_location.sql` ausführen. Sie ergänzt das Profil um Wohnkanton und Wohnort.
 2. Sonst ist nichts einzurichten: Schulferien und Feiertage kommen von der freien OpenHolidays API, Wechselkurse von Frankfurter (Referenzkurse der Europäischen Zentralbank). Beide brauchen keinen Schlüssel.
 3. Der Standort des Geräts ist freiwillig, wird auf rund einen Kilometer gerundet und nur für die jeweilige Planung verwendet, nie gespeichert.
+
+**Sprachen:** Die Website gibt es auf Englisch, Deutsch, Französisch und Italienisch. Ohne Wahl nimmt sie die Sprache des Browsers; über das Globus-Menü oder im Profil lässt sie sich wechseln (gespeichert im Cookie `jovia-lang` und im Profil). Neue Reisepläne schreibt die KI in der gewählten Sprache. Die Texte stehen in `src/lib/i18n/` (`en.ts` ist die Vorlage, `legal.ts` enthält AGB, Datenschutz und Impressum). Admin-Bereich und `/setup-check` bleiben Englisch. Die E-Mails von Supabase sind weiterhin Englisch.

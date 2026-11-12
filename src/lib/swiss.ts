@@ -75,3 +75,20 @@ export function nearestAirports(lat: number, lng: number, count = 4): NearbyAirp
     .sort((x, y) => x.km - y.km)
     .slice(0, count);
 }
+
+/** Canton names in each site language; English uses the names in CANTONS. */
+const CANTON_NAMES: Record<"de" | "fr" | "it", Record<string, string>> = {
+  de: { AG: "Aargau", AI: "Appenzell Innerrhoden", AR: "Appenzell Ausserrhoden", BE: "Bern", BL: "Basel-Landschaft", BS: "Basel-Stadt", FR: "Freiburg", GE: "Genf", GL: "Glarus", GR: "Graubünden", JU: "Jura", LU: "Luzern", NE: "Neuenburg", NW: "Nidwalden", OW: "Obwalden", SG: "St. Gallen", SH: "Schaffhausen", SO: "Solothurn", SZ: "Schwyz", TG: "Thurgau", TI: "Tessin", UR: "Uri", VD: "Waadt", VS: "Wallis", ZG: "Zug", ZH: "Zürich" },
+  fr: { AG: "Argovie", AI: "Appenzell Rhodes-Intérieures", AR: "Appenzell Rhodes-Extérieures", BE: "Berne", BL: "Bâle-Campagne", BS: "Bâle-Ville", FR: "Fribourg", GE: "Genève", GL: "Glaris", GR: "Grisons", JU: "Jura", LU: "Lucerne", NE: "Neuchâtel", NW: "Nidwald", OW: "Obwald", SG: "Saint-Gall", SH: "Schaffhouse", SO: "Soleure", SZ: "Schwytz", TG: "Thurgovie", TI: "Tessin", UR: "Uri", VD: "Vaud", VS: "Valais", ZG: "Zoug", ZH: "Zurich" },
+  it: { AG: "Argovia", AI: "Appenzello Interno", AR: "Appenzello Esterno", BE: "Berna", BL: "Basilea Campagna", BS: "Basilea Città", FR: "Friburgo", GE: "Ginevra", GL: "Glarona", GR: "Grigioni", JU: "Giura", LU: "Lucerna", NE: "Neuchâtel", NW: "Nidvaldo", OW: "Obvaldo", SG: "San Gallo", SH: "Sciaffusa", SO: "Soletta", SZ: "Svitto", TG: "Turgovia", TI: "Ticino", UR: "Uri", VD: "Vaud", VS: "Vallese", ZG: "Zugo", ZH: "Zurigo" },
+};
+
+export function cantonName(code: string, locale: string) {
+  const local = locale === "de" || locale === "fr" || locale === "it" ? CANTON_NAMES[locale][code] : undefined;
+  return local ?? cantonByCode(code)?.name ?? code;
+}
+
+/** Cantons sorted by their name in the given language. */
+export function cantonsFor(locale: string) {
+  return CANTONS.map((c) => ({ ...c, name: cantonName(c.code, locale) })).sort((a, b) => a.name.localeCompare(b.name, locale));
+}

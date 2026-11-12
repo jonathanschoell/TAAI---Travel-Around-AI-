@@ -10,6 +10,8 @@ import { parseTripForm } from "@/lib/planner/parse";
 import { getQuota, TIERS } from "@/lib/billing";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { f } from "@/lib/i18n/config";
+import { getI18n } from "@/lib/i18n/server";
 
 export type PlanFormState = { error?: string; values?: Record<string, string | string[]> };
 
@@ -49,11 +51,11 @@ async function loadPersonalContext(userId: string, enabled: boolean): Promise<st
 }
 
 /** Departure airports and canton holidays for the trip, from reference and official data. */
-async function swissContext(input: TripInput): Promise<SwissContext | null> {
+async function swissContext(input: TripInput, locale: string): Promise<SwissContext | null> {
   const canton = cantonByCode(input.homeCanton);
   const point = input.homeCoords ?? (canton ? { lat: canton.lat, lng: canton.lng } : null);
   if (!point) return null;
-  const holidays = canton ? await getHolidays(canton.code, input.startDate, input.endDate) : null;
+  const holidays = canton ? await getHolidays(canton.code, input.startDate, input.endDate, locale) : null;
   const label = [input.origin, canton ? `canton ${canton.name}` : ""].filter(Boolean).join(", ");
   return {
     homeLabel: label || "their shared location",
@@ -65,7 +67,9 @@ async function swissContext(input: TripInput): Promise<SwissContext | null> {
 export async function createTrip(_: PlanFormState, fd: FormData): Promise<PlanFormState> {
   const user = await requireUser();
   const values = keep(fd);
-  const { input, error } = parseTripForm(fd);
+  const { t, locale } = await getI18n();
+  const E = t.plan.errors;
+  const { input, error } = parseTripForm(fd, E);
   if (!input) return { error, values };
 
   const quota = await getQuota(user);
@@ -74,38 +78,35 @@ export async function createTrip(_: PlanFormState, fd: FormData): Promise<PlanFo
     return {
       error:
         quota.tier === "free"
-          ? `Free accounts can plan trips of up to ${limits.maxDays} days. Shorten the dates, or see Pricing for longer trips.`
-          : `Trips can be up to ${limits.maxDays} days long. Please shorten the dates.`,
+          ? f(E.freeTooLong, { n: limits.maxDays })
+          : f(E.tooLong, { n: limits.maxDays }),
       values,
     };
   if (quota.leftThisMonth <= 0)
     return {
       error:
         quota.tier === "free"
-          ? `You have used your ${limits.plansPerMonth} free itineraries for this month. See Pricing for more.`
-          : `You have reached this month's limit of ${limits.plansPerMonth} itineraries.`,
+          ? f(E.freeUsed, { n: limits.plansPerMonth })
+          : f(E.monthLimit, { n: limits.plansPerMonth }),
       values,
     };
   if (quota.leftToday <= 0)
-    return { error: "You have reached today's limit. Please try again tomorrow.", values };
+    return { error: E.dayLimit, values };
   const admin = createAdminClient();
 
   const profile = await getProfile(user.id);
   const context = await loadPersonalContext(user.id, profile?.personalization_enabled ?? false);
-  const swiss = await swissContext(input);
+  const swiss = await swissContext(input, locale);
 
   let result;
   try {
-    result = await generatePlan(input, context, quota.tier, swiss);
+    result = await generatePlan(input, context, quota.tier, swiss, locale);
   } catch (e) {
     const kind = e instanceof PlannerError ? e.kind : "failed";
     const messages: Record<string, string> = {
-      not_configured: "The AI planner is not connected yet. The site owner still has to add a valid ANTHROPIC_API_KEY.",
-      busy: "The AI service is very busy right now. Please try again in a minute.",
-      incomplete: "The plan came back incomplete. Please try again, or shorten the trip a little.",
-      failed: "We could not create the plan this time. Nothing was saved. Please try again.",
+      not_configured: E.not_configured, busy: E.busy, incomplete: E.incomplete, failed: E.failed,
     };
-    return { error: messages[kind], values };
+    return { error: messages[kind] ?? E.failed, values };
   }
   const { plan, usage } = result;
 
@@ -138,7 +139,7 @@ export async function createTrip(_: PlanFormState, fd: FormData): Promise<PlanFo
     budget_breakdown: plan.budget,
   }).select("id").single();
   if (tripError || !trip)
-    return { error: "The plan was created but could not be saved. Please try again.", values };
+    return { error: E.notSaved, values };
 
   const startMs = Date.parse(input.startDate + "T00:00:00Z");
   const { data: dayRows, error: dayError } = await supabase.from("trip_days").insert(
@@ -169,7 +170,7 @@ export async function createTrip(_: PlanFormState, fd: FormData): Promise<PlanFo
     : (await supabase.from("activities").insert(activities)).error;
   if (actError) {
     await supabase.from("trips").delete().eq("id", trip.id);
-    return { error: "The plan was created but could not be saved. Please try again.", values };
+    return { error: E.notSaved, values };
   }
 
   redirect(`/trips/${trip.id}`);
