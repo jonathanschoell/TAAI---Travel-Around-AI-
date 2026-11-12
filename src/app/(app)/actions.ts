@@ -110,7 +110,8 @@ export async function reportTrip(fd: FormData) {
 export async function setUserTier(_: AppFormState, fd: FormData): Promise<AppFormState> {
   const me = await requireAdmin();
   const email = String(fd.get("email") ?? "").trim().toLowerCase();
-  const tier = fd.get("tier") === "premium" ? "premium" : "free";
+  const asked = String(fd.get("tier") ?? "");
+  const tier = asked === "premium" || asked === "unlimited" ? asked : "free";
   if (!email) return { error: "Enter the email address of the account." };
   const admin = createAdminClient();
   if (!admin) return { error: "The secret key is missing on the server." };
@@ -131,5 +132,6 @@ export async function setUserTier(_: AppFormState, fd: FormData): Promise<AppFor
     return { error: "Could not save. Has supabase/migrations/0002_subscriptions.sql been run in Supabase?" };
   await admin.from("admin_audit_log").insert({ admin_user_id: me.id, action: `set_tier_${tier}`, target: userId });
   revalidatePath("/admin");
-  return { notice: `${email} is now on the ${tier === "premium" ? "Premium" : "Free"} plan.` };
+  const names = { free: "Free", premium: "Premium", unlimited: "Unlimited" };
+  return { notice: `${email} is now on the ${names[tier]} plan.` };
 }

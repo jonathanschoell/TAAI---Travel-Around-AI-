@@ -12,7 +12,8 @@ export const OPERATOR = {
   uid: "",
 };
 
-export const PREMIUM_PRICE = "CHF 3.50";
+export const PREMIUM_PRICE = "CHF 5.95";
+export const UNLIMITED_PRICE = "CHF 99.90";
 export const TERMS_VERSION = "draft-2026-11";
 
 export const operatorComplete = Boolean(

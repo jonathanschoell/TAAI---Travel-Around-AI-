@@ -60,7 +60,7 @@ Admin ist nur, wer in `ADMIN_EMAILS` steht und seine E-Mail bestätigt hat. Ein 
 
 6. In Supabase im **SQL Editor** zusätzlich die Datei `supabase/migrations/0002_subscriptions.sql` ausführen. Sie legt die Tabelle für Free und Premium an.
 
-**Stufen:** Free = 2 Pläne pro Monat, bis 21 Tage. Premium = 30 Pläne pro Monat (CHF 3.50 pro Monat, noch nicht kaufbar), bis 21 Tage. Beide Stufen nutzen standardmässig das günstige Modell `claude-haiku-5-5`. Die Zahlen stehen in `src/lib/billing.ts`. Admin-Konten zählen immer als Premium. Im Admin-Bereich lässt sich Premium von Hand vergeben, bis eine Online-Bezahlung angebunden ist. Die Modelle lassen sich in Vercel mit `ANTHROPIC_MODEL_FREE` und `ANTHROPIC_MODEL` überschreiben.
+**Stufen:** Free = 2 Pläne pro Monat, bis 21 Tage. Premium = 30 Pläne pro Monat (CHF 5.95 pro Monat), bis 21 Tage. Unlimited = unbegrenzte Pläne mit Claude Opus (CHF 99.90 pro Monat), bis 21 Tage. Bezahlte Stufen noch nicht kaufbar. Für Unlimited zuerst `supabase/migrations/0004_unlimited_tier.sql` im SQL Editor ausführen; das Modell lässt sich mit `ANTHROPIC_MODEL_UNLIMITED` ändern. Free und Premium nutzen standardmässig das günstige Modell `claude-haiku-5-5`. Die Zahlen stehen in `src/lib/billing.ts`. Admin-Konten zählen mindestens als Premium. Im Admin-Bereich lassen sich Premium und Unlimited von Hand vergeben, bis eine Online-Bezahlung angebunden ist. Die Modelle lassen sich in Vercel mit `ANTHROPIC_MODEL_FREE` und `ANTHROPIC_MODEL` überschreiben.
 
 ## Was schon funktioniert
 
