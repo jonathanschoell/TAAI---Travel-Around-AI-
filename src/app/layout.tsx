@@ -12,6 +12,9 @@ const body = Figtree({
   subsets: ["latin"],
 });
 
+/** Plays the plane intro once per browser session, never for people who prefer reduced motion. */
+const INTRO_SCRIPT = `try{var d=document.documentElement;if(!sessionStorage.getItem("jovia-intro")&&!matchMedia("(prefers-reduced-motion: reduce)").matches){d.classList.add("jovia-intro");sessionStorage.setItem("jovia-intro","1");setTimeout(function(){d.classList.remove("jovia-intro")},4200)}}catch(e){}`;
+
 export const metadata: Metadata = {
   title: {
     default: "Jovia",
@@ -37,9 +40,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${display.variable} ${body.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
+        <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT }} />
         {children}
       </body>
     </html>

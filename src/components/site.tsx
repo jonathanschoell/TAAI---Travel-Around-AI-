@@ -1,32 +1,8 @@
 import Link from "next/link";
-
-/** The Jovia mark: a lowercase "j" whose dot is the destination at the end of a route. */
-export function Mark({ className = "size-9" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 64 64" className={className} aria-hidden="true">
-      <defs>
-        <linearGradient id="jovia-mark" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#3b82ff" />
-          <stop offset="1" stopColor="#1a3fc4" />
-        </linearGradient>
-      </defs>
-      <rect width="64" height="64" rx="18" fill="url(#jovia-mark)" />
-      <path d="M13 37C15 22 25 13 38 13.5" fill="none" stroke="#fff" strokeOpacity=".55"
-        strokeWidth="2.6" strokeLinecap="round" strokeDasharray="0.1 6.2" />
-      <path d="M39 26V39.5A11.5 11.5 0 0 1 27.5 51H24" fill="none" stroke="#fff"
-        strokeWidth="7.5" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="39" cy="14" r="5" fill="#fff" />
-    </svg>
-  );
-}
+import { Wordmark } from "@/components/wordmark";
 
 export function Logo({ href = "/" }: { href?: string }) {
-  return (
-    <Link href={href} className="inline-flex items-center gap-2.5" aria-label="Jovia home">
-      <Mark />
-      <span className="font-display text-2xl font-extrabold tracking-tight">Jovia</span>
-    </Link>
-  );
+  return <Wordmark href={href} />;
 }
 
 export function PublicHeader() {
