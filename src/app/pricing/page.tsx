@@ -14,7 +14,6 @@ const FREE = [
 const PREMIUM = [
   "30 AI itineraries per month",
   "Trips of up to 10 days",
-  "Our most capable AI model for richer, better-reasoned plans",
   "New features first as they launch",
 ];
 

@@ -267,10 +267,11 @@ export async function generatePlan(
   const apiKey = process.env["ANTHROPIC_API_KEY"]?.trim();
   if (!apiKey) throw new PlannerError("not_configured", "ANTHROPIC_API_KEY is missing.");
   const base = (process.env["ANTHROPIC_BASE_URL"]?.trim() || "https://api.anthropic.com").replace(/\/+$/, "");
-  // Free accounts use the small, inexpensive model; premium accounts the stronger one.
+  // Every account uses the small, inexpensive model by default. Each tier can be
+  // switched to another model in the hosting settings without changing code.
   const model =
     tier === "premium"
-      ? process.env["ANTHROPIC_MODEL"]?.trim() || "claude-sonnet-5-5"
+      ? process.env["ANTHROPIC_MODEL"]?.trim() || "claude-haiku-5-5"
       : process.env["ANTHROPIC_MODEL_FREE"]?.trim() || "claude-haiku-5-5";
 
   // Current Claude models do not accept a forced tool call, so the tool is offered with
