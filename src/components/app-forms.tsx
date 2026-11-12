@@ -107,6 +107,7 @@ export function TierForm() {
         <label htmlFor="tier-tier">Plan</label>
         <select id="tier-tier" name="tier" className="input" defaultValue="premium">
           <option value="premium">Premium</option>
+          <option value="unlimited">Unlimited</option>
           <option value="free">Free</option>
         </select>
       </div>

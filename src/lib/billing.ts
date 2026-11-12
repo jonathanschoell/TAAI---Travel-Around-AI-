@@ -4,26 +4,32 @@ import { isAdminUser } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-export type Tier = "free" | "premium";
+export type Tier = "free" | "premium" | "unlimited";
 
 /** What each tier may do. Change the numbers here; the rest of the app reads them. */
 export const TIERS: Record<Tier, { label: string; plansPerMonth: number; plansPerDay: number; maxDays: number }> = {
   free: { label: "Free", plansPerMonth: 2, plansPerDay: 2, maxDays: 21 },
   premium: { label: "Premium", plansPerMonth: 30, plansPerDay: 8, maxDays: 21 },
+  unlimited: { label: "Unlimited", plansPerMonth: Infinity, plansPerDay: Infinity, maxDays: 21 },
 };
 
-/** Admins always count as premium so they can test everything. */
+export const isUnlimited = (n: number) => !Number.isFinite(n);
+
+/** The account's plan. Admins count at least as Premium so they can test everything. */
 export async function getTier(user: User): Promise<Tier> {
-  if (isAdminUser(user)) return "premium";
   const supabase = await createClient();
   const { data } = await supabase
     .from("subscriptions")
     .select("tier, status, current_period_end")
     .eq("user_id", user.id)
     .maybeSingle();
-  if (!data || data.tier !== "premium" || data.status !== "active") return "free";
-  if (data.current_period_end && new Date(data.current_period_end).getTime() < Date.now()) return "free";
-  return "premium";
+  let tier: Tier = "free";
+  const expired = data?.current_period_end && new Date(data.current_period_end).getTime() < Date.now();
+  if (data && data.status === "active" && !expired && (data.tier === "premium" || data.tier === "unlimited")) {
+    tier = data.tier;
+  }
+  if (tier === "free" && isAdminUser(user)) tier = "premium";
+  return tier;
 }
 
 export type Quota = {

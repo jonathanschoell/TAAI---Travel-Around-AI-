@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PlanForm } from "@/components/plan-form";
 import Link from "next/link";
 import { getProfile, requireUser } from "@/lib/auth";
-import { getQuota, TIERS } from "@/lib/billing";
+import { getQuota, isUnlimited, TIERS } from "@/lib/billing";
 import { getUpcomingSchoolHolidays, HOLIDAY_SOURCE } from "@/lib/holidays";
 import { cantonByCode } from "@/lib/swiss";
 
@@ -34,10 +34,12 @@ export default async function PlanPage({ searchParams }: PageProps<"/plan">) {
       <p className="notice flex flex-wrap items-center justify-between gap-2">
         <span>
           <span className="pill pill-signal mr-2">{limits.label}</span>
-          {quota.leftThisMonth} of {limits.plansPerMonth} itineraries left this month. Trips of up
-          to {limits.maxDays} days.
+          {isUnlimited(limits.plansPerMonth)
+            ? "Unlimited itineraries."
+            : `${quota.leftThisMonth} of ${limits.plansPerMonth} itineraries left this month.`}{" "}
+          Trips of up to {limits.maxDays} days.
         </span>
-        {quota.tier === "free" ? <Link href="/pricing" className="underline">See Premium</Link> : null}
+        {quota.tier !== "unlimited" ? <Link href="/pricing" className="underline">See plans</Link> : null}
       </p>
       {canton && school?.length ? (
         <details className="card">

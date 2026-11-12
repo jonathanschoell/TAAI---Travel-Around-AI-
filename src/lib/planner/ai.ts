@@ -374,9 +374,14 @@ export function normalizePlan(raw: unknown, days: number, allowedAirports: strin
 
 export type Usage = { input_tokens: number | null; output_tokens: number | null };
 
-/** Trips longer than this are planned in steps: an outline, then blocks of days in parallel. */
+/**
+ * Trips longer than this are planned in steps: an outline, then blocks of days in parallel.
+ * The larger model (Unlimited plan) thinks longer, so it gets smaller blocks to stay well
+ * inside the server's time limit.
+ */
 export const SINGLE_CALL_MAX_DAYS = 7;
 const BLOCK_DAYS = 7;
+const LARGE_MODEL_BLOCK_DAYS = 4;
 
 type Tool = { name: string; description: string; input_schema: object };
 
@@ -450,12 +455,12 @@ async function callTool(model: string, prompt: string, tool: Tool, maxTokens: nu
   };
 }
 
-function pickModel(tier: "free" | "premium") {
-  // Every account uses the small, inexpensive model by default. Each tier can be
-  // switched to another model in the hosting settings without changing code.
-  return tier === "premium"
-    ? process.env["ANTHROPIC_MODEL"]?.trim() || "claude-haiku-5-5"
-    : process.env["ANTHROPIC_MODEL_FREE"]?.trim() || "claude-haiku-5-5";
+function pickModel(tier: "free" | "premium" | "unlimited") {
+  // Free and Premium use the small, inexpensive model; Unlimited uses Claude Opus.
+  // Each plan's model can be changed in the hosting settings without changing code.
+  if (tier === "unlimited") return process.env["ANTHROPIC_MODEL_UNLIMITED"]?.trim() || "claude-opus-5-5";
+  if (tier === "premium") return process.env["ANTHROPIC_MODEL"]?.trim() || "claude-haiku-5-5";
+  return process.env["ANTHROPIC_MODEL_FREE"]?.trim() || "claude-haiku-5-5";
 }
 
 /** Reads the outline the model returned; it must name every day of the trip in order. */
@@ -492,26 +497,27 @@ function takeBlock(raw: Record<string, unknown>, from: number, to: number): unkn
 export async function generatePlan(
   input: TripInput,
   personalContext: string,
-  tier: "free" | "premium" = "premium",
+  tier: "free" | "premium" | "unlimited" = "premium",
   swiss: SwissContext | null = null,
 ): Promise<{ plan: Plan; usage: Usage; model: string }> {
   const model = pickModel(tier);
   const airports = swiss?.airports.map((a) => a.code) ?? [];
+  const blockDays = tier === "unlimited" ? LARGE_MODEL_BLOCK_DAYS : BLOCK_DAYS;
 
-  if (input.days <= SINGLE_CALL_MAX_DAYS) {
-    const { input: raw, usage } = await callTool(model, buildPrompt(input, personalContext, swiss), TOOL, 16000);
+  if (input.days <= Math.min(SINGLE_CALL_MAX_DAYS, blockDays)) {
+    const { input: raw, usage } = await callTool(model, buildPrompt(input, personalContext, swiss), TOOL, 32000);
     return { model, plan: normalizePlan(raw, input.days, airports), usage };
   }
 
   // Step 1: the outline.
-  const outlineCall = await callTool(model, buildOutlinePrompt(input, personalContext, swiss), OUTLINE_TOOL, 8000);
+  const outlineCall = await callTool(model, buildOutlinePrompt(input, personalContext, swiss), OUTLINE_TOOL, 16000);
   const outline = normalizeOutline(outlineCall.input, input);
   const code = str(outlineCall.input.departure_airport_code, 3).toUpperCase();
   const departure = airports.includes(code) ? code : null;
 
   // Step 2: blocks of days, all at the same time. A block that fails is tried once more.
-  // Blocks of equal size, at most BLOCK_DAYS each: 21 days = 7+7+7, 15 days = 5+5+5.
-  const size = Math.ceil(input.days / Math.ceil(input.days / BLOCK_DAYS));
+  // Blocks of equal size, at most blockDays each: 21 days = 7+7+7, 15 days = 5+5+5.
+  const size = Math.ceil(input.days / Math.ceil(input.days / blockDays));
   const blocks: [number, number][] = [];
   for (let from = 1; from <= input.days; from += size) {
     blocks.push([from, Math.min(input.days, from + size - 1)]);
@@ -520,7 +526,7 @@ export async function generatePlan(
     const prompt = buildDaysPrompt(input, personalContext, swiss, outline, from, to, departure);
     for (let attempt = 1; ; attempt++) {
       try {
-        const call = await callTool(model, prompt, DAYS_TOOL, 16000);
+        const call = await callTool(model, prompt, DAYS_TOOL, 32000);
         return { days: takeBlock(call.input, from, to), usage: call.usage };
       } catch (e) {
         const retry = e instanceof PlannerError && (e.kind === "incomplete" || e.kind === "failed");
