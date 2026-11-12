@@ -7,7 +7,7 @@ export const OPERATOR = {
   street: "Spitalackerstrasse 26",
   postalCodeAndCity: "3013 Bern",
   country: "Switzerland",
-  email: "JoviaSwitzeland@gmail.com",
+  email: "JoviaSwitzerland@gmail.com",
   /** Company number (UID), only if a company is registered. */
   uid: "",
 };
