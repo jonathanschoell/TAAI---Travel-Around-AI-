@@ -13,6 +13,7 @@ async function AppNav() {
   const links = [
     { href: "/dashboard", label: "Dashboard" },
     { href: "/plan", label: "Plan a trip" },
+    { href: "/holidays", label: "Holiday finder" },
     { href: "/profile", label: "Profile" },
     { href: "/my-data", label: "My data" },
     ...(isAdminUser(user) ? [{ href: "/admin", label: "Admin" }] : []),

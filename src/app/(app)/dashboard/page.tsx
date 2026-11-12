@@ -41,7 +41,10 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
             Describe who is travelling, what you enjoy and your budget. Jovia builds a
             day-by-day itinerary and saves it here.
           </p>
-          <Link href="/plan" className="btn btn-primary sm:w-fit">Plan a new trip</Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/plan" className="btn btn-primary">Plan a new trip</Link>
+            <Link href="/holidays" className="btn btn-ghost">Find the best dates</Link>
+          </div>
         </article>
 
         <article className="card flex flex-col gap-3">

@@ -47,7 +47,7 @@ const PARTY_SIZE: Record<string, [number, number]> = {
 };
 
 type Stop = { place: string; from: string; to: string };
-type Defaults = { currency: string; homePlace: string; homeCanton: string };
+type Defaults = { currency: string; homePlace: string; homeCanton: string; startDate?: string; endDate?: string };
 
 /** Home town, canton and optional device location; shows the nearest airports as you type. */
 function HomeFields({ values, defaults }: { values: Values | undefined; defaults: Defaults }) {
@@ -199,11 +199,11 @@ function Fields({
         </div>
         <div className="field">
           <label htmlFor="pl-start">Start date</label>
-          <input id="pl-start" name="start_date" type="date" className="input" required defaultValue={v("start_date")} />
+          <input id="pl-start" name="start_date" type="date" className="input" required defaultValue={v("start_date", defaults.startDate ?? "")} />
         </div>
         <div className="field">
           <label htmlFor="pl-end">End date</label>
-          <input id="pl-end" name="end_date" type="date" className="input" required defaultValue={v("end_date")} />
+          <input id="pl-end" name="end_date" type="date" className="input" required defaultValue={v("end_date", defaults.endDate ?? "")} />
           <span className="hint">Up to {maxDays} days on your plan.</span>
         </div>
         <div className="field">
