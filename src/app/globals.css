@@ -187,6 +187,28 @@ h3 {
     min-height: 96px;
   }
 
+  .chip-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 40px;
+    padding: 0 0.875rem;
+    border-radius: 999px;
+    border: 1.5px solid var(--line);
+    background: var(--surface);
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .chip-btn-on {
+    border-color: var(--brand);
+    color: var(--brand);
+  }
+  .chip-btn:focus-visible {
+    outline: 3px solid var(--signal);
+    outline-offset: 2px;
+  }
+
   .notice {
     border-radius: 12px;
     padding: 0.75rem 0.875rem;

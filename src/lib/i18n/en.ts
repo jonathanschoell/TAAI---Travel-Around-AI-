@@ -126,6 +126,17 @@ export const en = {
       planningButton: "Planning your trip…",
       submit: "Create my itinerary",
     },
+    replace: {
+      button: "Replace",
+      wishLabel: "What would you like instead of {name}?",
+      wishPlaceholder: "Optional. E.g. something calmer, indoors, cheaper",
+      submit: "Suggest something else",
+      pending: "Finding an alternative…",
+      cancel: "Cancel",
+      done: "Replaced with: {name}",
+      failed: "That did not work this time. Please try again.",
+      limit: "You have used today's {n} replacements. Please try again tomorrow.",
+    },
     options: {
       interests: {
         beach: "Beach and sea",
@@ -411,6 +422,21 @@ export const en = {
     over: "About {diff} over your budget of {budget}.",
     savedNote:
       "Saved to your account. All prices are AI estimates, not quotes. Check opening hours and prices before you book.",
+    photoBy: "Photo: {author}, {license}, Wikimedia Commons",
+    photoLicense: "Photo: {license}, Wikimedia Commons",
+    mapTitle: "Map",
+    mapAll: "All days",
+    mapNote: "Places are positioned by the AI and can be off. Check addresses before you go.",
+    book: {
+      title: "Book your trip",
+      lead: "Search links filled in with your places, dates and travellers. Prices and availability are shown on the provider's site, where you also book.",
+      flights: "Flights",
+      hotels: "Hotels",
+      activities: "Things to do",
+      on: "on {provider}",
+      note: "Jovia does not earn anything from these links and does not see what you book.",
+      partnerNote: "Some of these are partner links: Jovia may earn a commission, at no extra cost to you. Jovia does not see what you book.",
+    },
     gettingThere: "Getting there",
     suggested: "Suggested: {code}",
     airportsNote:
@@ -440,7 +466,7 @@ export const en = {
     },
     tipsTitle: "Tips for this trip",
     noTips: "No extra tips for this trip.",
-    comingNext: "Coming next: interactive map, photos, swapping or removing activities, and PDF export.",
+    comingNext: "Coming next: PDF export and sharing your plan.",
     another: "Plan another trip",
     allTrips: "All trips",
     report: "Report a problem with this plan",
