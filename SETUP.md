@@ -89,3 +89,9 @@ Name, Adresse und Kontakt-E-Mail des Betreibers stehen in `src/lib/operator.ts`.
 3. Der Standort des Geräts ist freiwillig, wird auf rund einen Kilometer gerundet und nur für die jeweilige Planung verwendet, nie gespeichert.
 
 **Sprachen:** Die Website gibt es auf Englisch, Deutsch, Französisch und Italienisch. Ohne Wahl nimmt sie die Sprache des Browsers; über das Globus-Menü oder im Profil lässt sie sich wechseln (gespeichert im Cookie `jovia-lang` und im Profil). Neue Reisepläne schreibt die KI in der gewählten Sprache. Die Texte stehen in `src/lib/i18n/` (`en.ts` ist die Vorlage, `legal.ts` enthält AGB, Datenschutz und Impressum). Admin-Bereich und `/setup-check` bleiben Englisch. Die Bestätigungs- und Passwort-E-Mails laufen über Resend (eigener SMTP, Absender no-reply@jovia.agency); ihre Texte sind in Supabase unter Authentication → Emails → Templates noch Englisch.
+
+**Reiseplan: Fotos, Karte, Buchungslinks, Austauschen**
+- Fotos der Reiseziele kommen ohne Schlüssel von Wikivoyage/Wikipedia (Wikimedia Commons, freie Lizenz, Urheber wird angezeigt). Findet sich kein passendes Foto, erscheint keines.
+- Die Karte nutzt Leaflet mit OpenStreetMap-Kacheln. Für viel Verkehr erlaubt OpenStreetMap das nicht; dann einen Kachel-Anbieter nehmen und in Vercel `NEXT_PUBLIC_MAP_TILE_URL` (z. B. `https://…/{z}/{x}/{y}.png`) und `NEXT_PUBLIC_MAP_ATTRIBUTION` setzen.
+- Buchungslinks (Google Flights, Booking.com, GetYourGuide) sind vorausgefüllte Suchen. Partner-IDs, sobald vorhanden: `BOOKING_AFFILIATE_ID`, `GETYOURGUIDE_PARTNER_ID`. Dann erscheint automatisch der Hinweis auf mögliche Provisionen.
+- „Austauschen“ ersetzt eine einzelne Aktivität per KI. Tageslimit pro Abo in `src/lib/billing.ts` (`editsPerDay`: Free 5, Premium 40, Unlimited unbegrenzt).

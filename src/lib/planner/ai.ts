@@ -318,6 +318,27 @@ function swissBlock(swiss: SwissContext | null) {
   return lines.length ? "\n" + lines.join("\n") : "";
 }
 
+/** One activity as returned by the model, made safe. Coordinates of 0/0 count as unknown. */
+export function cleanActivity(a: unknown): PlanActivity {
+  const x = (a ?? {}) as Record<string, unknown>;
+  const lat = num(x.latitude);
+  const lng = num(x.longitude);
+  const okCoords =
+    lat !== null && lng !== null && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && !(lat === 0 && lng === 0);
+  const cost = num(x.cost);
+  const mins = num(x.duration_minutes);
+  return {
+    slot: SLOT_KEYS.includes(String(x.slot)) ? String(x.slot) : "afternoon",
+    name: str(x.name, 160),
+    category: CATEGORY_KEYS.includes(String(x.category)) ? String(x.category) : null,
+    description: str(x.description, 500),
+    duration_minutes: mins !== null && mins > 0 ? Math.round(mins) : null,
+    cost: cost !== null && cost >= 0 ? Math.round(cost * 100) / 100 : null,
+    latitude: okCoords ? lat : null,
+    longitude: okCoords ? lng : null,
+  };
+}
+
 export function normalizePlan(raw: unknown, days: number, allowedAirports: string[] = []): Plan {
   const r = (raw ?? {}) as Record<string, unknown>;
   const rawDays = Array.isArray(r.days) ? r.days : [];
@@ -329,25 +350,7 @@ export function normalizePlan(raw: unknown, days: number, allowedAirports: strin
       theme: str(day.theme, 120),
       transit_notes: str(day.transit_notes, 400),
       activities: acts
-        .map((a) => {
-          const x = (a ?? {}) as Record<string, unknown>;
-          const lat = num(x.latitude);
-          const lng = num(x.longitude);
-          const okCoords =
-            lat !== null && lng !== null && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && !(lat === 0 && lng === 0);
-          const cost = num(x.cost);
-          const mins = num(x.duration_minutes);
-          return {
-            slot: SLOT_KEYS.includes(String(x.slot)) ? String(x.slot) : "afternoon",
-            name: str(x.name, 160),
-            category: CATEGORY_KEYS.includes(String(x.category)) ? String(x.category) : null,
-            description: str(x.description, 500),
-            duration_minutes: mins !== null && mins > 0 ? Math.round(mins) : null,
-            cost: cost !== null && cost >= 0 ? Math.round(cost * 100) / 100 : null,
-            latitude: okCoords ? lat : null,
-            longitude: okCoords ? lng : null,
-          };
-        })
+        .map(cleanActivity)
         .filter((a) => a.name)
         .slice(0, 12),
     };
@@ -553,4 +556,51 @@ export async function generatePlan(
     { input_tokens: 0, output_tokens: 0 } as Usage,
   );
   return { model, plan, usage };
+}
+
+const ACTIVITY_TOOL = {
+  name: "save_activity",
+  description: "Save the one replacement activity.",
+  input_schema: activitySchema,
+};
+
+export type ReplaceRequest = {
+  input: TripInput;
+  place: string;
+  dayNumber: number;
+  dayTheme: string;
+  current: { slot: string; name: string; description: string };
+  /** Every activity name already in the trip, so the replacement is new. */
+  avoid: string[];
+  wish: string;
+};
+
+/**
+ * Suggests one alternative for a single activity, keeping the slot, the place and the rest
+ * of the trip unchanged. Used when someone does not like one part of the plan.
+ */
+export async function suggestReplacement(
+  req: ReplaceRequest,
+  tier: "free" | "premium" | "unlimited",
+  locale = "en",
+): Promise<{ activity: PlanActivity; usage: Usage }> {
+  const input = { ...req.input, language: LANGUAGES.find((l) => l.code === locale)?.english ?? "English" };
+  const prompt = [
+    "You are Jovia, a careful travel planner. Replace ONE activity in an existing itinerary.",
+    buildContext(input, "", null),
+    "",
+    `Day ${req.dayNumber}${req.dayTheme ? ` (${req.dayTheme})` : ""}, in ${req.place}.`,
+    `Activity to replace (slot "${req.current.slot}"): ${req.current.name}. ${req.current.description}`,
+    req.wish ? `What the travellers want instead: ${req.wish}` : "The travellers simply want something different.",
+    "Already in the trip, do not suggest any of these: " + req.avoid.slice(0, 120).join("; "),
+    "",
+    "Rules:",
+    `- Keep the slot "${req.current.slot}" and stay in or close to ${req.place}, so the rest of the day still works.`,
+    ...dayRules(input).filter((r) => !r.startsWith("- Every day has")),
+    "Do not answer in text. Call the save_activity tool exactly once.",
+  ].join("\n");
+  const { input: raw, usage } = await callTool(pickModel(tier), prompt, ACTIVITY_TOOL, 4000);
+  const activity = { ...cleanActivity(raw), slot: req.current.slot };
+  if (!activity.name) throw new PlannerError("incomplete", "No replacement came back.");
+  return { activity, usage };
 }

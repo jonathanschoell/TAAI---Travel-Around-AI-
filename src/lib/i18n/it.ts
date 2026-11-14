@@ -124,6 +124,17 @@ export const it: Dict = {
       planningButton: "Pianificazione in corso…",
       submit: "Crea il mio itinerario",
     },
+    replace: {
+      button: "Sostituisci",
+      wishLabel: "Cosa vorresti al posto di {name}?",
+      wishPlaceholder: "Facoltativo. Per es. qualcosa di più tranquillo, al chiuso, più economico",
+      submit: "Proponi altro",
+      pending: "Ricerca di un'alternativa…",
+      cancel: "Annulla",
+      done: "Sostituito con: {name}",
+      failed: "Questa volta non ha funzionato. Riprova.",
+      limit: "Hai usato le {n} sostituzioni di oggi. Riprova domani.",
+    },
     options: {
       interests: {
         beach: "Spiaggia e mare",
@@ -409,6 +420,21 @@ export const it: Dict = {
     over: "Circa {diff} sopra il tuo budget di {budget}.",
     savedNote:
       "Salvato nel tuo account. Tutti i prezzi sono stime dell'IA, non offerte. Controlla orari e prezzi prima di prenotare.",
+    photoBy: "Foto: {author}, {license}, Wikimedia Commons",
+    photoLicense: "Foto: {license}, Wikimedia Commons",
+    mapTitle: "Mappa",
+    mapAll: "Tutti i giorni",
+    mapNote: "I luoghi sono posizionati dall'IA e possono essere imprecisi. Controlla gli indirizzi prima di andare.",
+    book: {
+      title: "Prenota il viaggio",
+      lead: "Link di ricerca compilati con i tuoi luoghi, date e viaggiatori. Prezzi e disponibilità li vedi sul sito del fornitore, dove prenoti anche.",
+      flights: "Voli",
+      hotels: "Hotel",
+      activities: "Attività",
+      on: "su {provider}",
+      note: "Jovia non guadagna nulla con questi link e non vede cosa prenoti.",
+      partnerNote: "Alcuni link sono link partner: Jovia può ricevere una commissione, senza costi aggiuntivi per te. Jovia non vede cosa prenoti.",
+    },
     gettingThere: "Come arrivare",
     suggested: "Proposto: {code}",
     airportsNote:
@@ -438,7 +464,7 @@ export const it: Dict = {
     },
     tipsTitle: "Consigli per questo viaggio",
     noTips: "Nessun altro consiglio per questo viaggio.",
-    comingNext: "In arrivo: mappa interattiva, foto, sostituire o rimuovere attività ed esportazione PDF.",
+    comingNext: "In arrivo: esportazione PDF e condivisione del piano.",
     another: "Pianifica un altro viaggio",
     allTrips: "Tutti i viaggi",
     report: "Segnala un problema con questo piano",

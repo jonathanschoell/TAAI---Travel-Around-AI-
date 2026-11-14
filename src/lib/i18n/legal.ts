@@ -120,6 +120,8 @@ const en: LegalTexts = {
         "AI trip planning: Anthropic, USA. What you enter in the trip planner (destination, dates, ages, interests, wishes) is sent to Anthropic to create your itinerary. Your email address and password are never sent.",
         "Sign-up and password emails are sent by Resend (Resend, Inc., USA) from servers in Ireland. Resend receives your email address and the content of these emails, nothing else.",
         "Holiday calendars and exchange rates are fetched from public services without any personal data.",
+        "Maps on itineraries are loaded by your browser from OpenStreetMap (OpenStreetMap Foundation, UK), and destination photos from Wikimedia Commons (Wikimedia Foundation, USA). These services see your IP address when the map or photo loads, as with any website.",
+        "Booking links take you to the provider's website (for example Booking.com, Google Flights or GetYourGuide). What you do there is covered by that provider's privacy policy. Jovia does not see what you book.",
       ]],
       ["Cookies", [
         "Jovia only uses cookies it needs to work: one keeps you signed in, one remembers the language you chose. There are no advertising or tracking cookies.",
@@ -238,6 +240,8 @@ const de: LegalTexts = {
         "KI-Reiseplanung: Anthropic, USA. Was du im Reiseplaner eingibst (Ziel, Daten, Alter, Interessen, Wünsche), wird an Anthropic gesendet, um deinen Reiseplan zu erstellen. Deine E-Mail-Adresse und dein Passwort werden nie gesendet.",
         "E-Mails zur Registrierung und zum Passwort verschickt Resend (Resend, Inc., USA) über Server in Irland. Resend erhält dafür deine E-Mail-Adresse und den Inhalt dieser E-Mails, sonst nichts.",
         "Ferienkalender und Wechselkurse werden ohne Personendaten von öffentlichen Diensten abgerufen.",
+        "Karten in Reiseplänen lädt dein Browser von OpenStreetMap (OpenStreetMap Foundation, Grossbritannien), Fotos der Reiseziele von Wikimedia Commons (Wikimedia Foundation, USA). Diese Dienste sehen dabei deine IP-Adresse, wie bei jeder Website.",
+        "Buchungslinks führen dich auf die Website des Anbieters (zum Beispiel Booking.com, Google Flights oder GetYourGuide). Was du dort tust, regelt die Datenschutzerklärung des Anbieters. Jovia sieht nicht, was du buchst.",
       ]],
       ["Cookies", [
         "Jovia nutzt nur Cookies, die für den Betrieb nötig sind: eines hält dich angemeldet, eines merkt sich die gewählte Sprache. Es gibt keine Werbe- oder Tracking-Cookies.",
@@ -356,6 +360,8 @@ const fr: LegalTexts = {
         "Planification IA : Anthropic, États-Unis. Ce que tu saisis dans le planificateur (destination, dates, âges, centres d'intérêt, souhaits) est envoyé à Anthropic pour créer ton itinéraire. Ton adresse e-mail et ton mot de passe ne sont jamais envoyés.",
         "Les e-mails d'inscription et de mot de passe sont envoyés par Resend (Resend, Inc., États-Unis) depuis des serveurs en Irlande. Resend reçoit ton adresse e-mail et le contenu de ces e-mails, rien d'autre.",
         "Les calendriers de vacances et les taux de change proviennent de services publics, sans données personnelles.",
+        "Les cartes des itinéraires sont chargées par ton navigateur depuis OpenStreetMap (OpenStreetMap Foundation, Royaume-Uni), et les photos des destinations depuis Wikimedia Commons (Wikimedia Foundation, États-Unis). Ces services voient ton adresse IP au chargement, comme pour tout site web.",
+        "Les liens de réservation te mènent sur le site du prestataire (par exemple Booking.com, Google Flights ou GetYourGuide). Ce que tu y fais relève de sa politique de confidentialité. Jovia ne voit pas ce que tu réserves.",
       ]],
       ["Cookies", [
         "Jovia n'utilise que les cookies nécessaires à son fonctionnement : l'un te garde connecté, l'autre retient la langue choisie. Il n'y a pas de cookies publicitaires ni de suivi.",
@@ -474,6 +480,8 @@ const it: LegalTexts = {
         "Pianificazione con IA: Anthropic, USA. Ciò che inserisci nel pianificatore (destinazione, date, età, interessi, desideri) viene inviato ad Anthropic per creare il tuo itinerario. Indirizzo e-mail e password non vengono mai inviati.",
         "Le e-mail di registrazione e per la password sono inviate da Resend (Resend, Inc., USA) tramite server in Irlanda. Resend riceve il tuo indirizzo e-mail e il contenuto di queste e-mail, nient'altro.",
         "Calendari delle vacanze e tassi di cambio provengono da servizi pubblici, senza dati personali.",
+        "Le mappe degli itinerari sono caricate dal tuo browser da OpenStreetMap (OpenStreetMap Foundation, Regno Unito) e le foto delle destinazioni da Wikimedia Commons (Wikimedia Foundation, USA). Questi servizi vedono il tuo indirizzo IP al caricamento, come per qualsiasi sito.",
+        "I link di prenotazione ti portano sul sito del fornitore (per esempio Booking.com, Google Flights o GetYourGuide). Ciò che fai lì è regolato dalla sua informativa sulla privacy. Jovia non vede cosa prenoti.",
       ]],
       ["Cookie", [
         "Jovia usa solo i cookie necessari al funzionamento: uno ti mantiene connesso, uno ricorda la lingua scelta. Non ci sono cookie pubblicitari o di tracciamento.",

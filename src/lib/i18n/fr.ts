@@ -124,6 +124,17 @@ export const fr: Dict = {
       planningButton: "Préparation du voyage…",
       submit: "Créer mon itinéraire",
     },
+    replace: {
+      button: "Remplacer",
+      wishLabel: "Que veux-tu à la place de {name} ?",
+      wishPlaceholder: "Facultatif. P. ex. plus calme, à l'intérieur, moins cher",
+      submit: "Proposer autre chose",
+      pending: "Recherche d'une alternative…",
+      cancel: "Annuler",
+      done: "Remplacé par : {name}",
+      failed: "Cela n'a pas fonctionné cette fois. Réessaie.",
+      limit: "Tu as utilisé les {n} remplacements du jour. Réessaie demain.",
+    },
     options: {
       interests: {
         beach: "Plage et mer",
@@ -409,6 +420,21 @@ export const fr: Dict = {
     over: "Environ {diff} au-dessus de ton budget de {budget}.",
     savedNote:
       "Enregistré dans ton compte. Tous les prix sont des estimations de l'IA, pas des offres. Vérifie les horaires et les prix avant de réserver.",
+    photoBy: "Photo : {author}, {license}, Wikimedia Commons",
+    photoLicense: "Photo : {license}, Wikimedia Commons",
+    mapTitle: "Carte",
+    mapAll: "Tous les jours",
+    mapNote: "Les lieux sont placés par l'IA et peuvent être imprécis. Vérifie les adresses avant d'y aller.",
+    book: {
+      title: "Réserver ton voyage",
+      lead: "Des liens de recherche remplis avec tes lieux, dates et voyageurs. Les prix et disponibilités s'affichent chez le prestataire, où tu réserves aussi.",
+      flights: "Vols",
+      hotels: "Hôtels",
+      activities: "Activités",
+      on: "sur {provider}",
+      note: "Jovia ne gagne rien avec ces liens et ne voit pas ce que tu réserves.",
+      partnerNote: "Certains liens sont des liens partenaires : Jovia peut toucher une commission, sans frais supplémentaires pour toi. Jovia ne voit pas ce que tu réserves.",
+    },
     gettingThere: "Pour y aller",
     suggested: "Proposé : {code}",
     airportsNote:
@@ -438,7 +464,7 @@ export const fr: Dict = {
     },
     tipsTitle: "Conseils pour ce voyage",
     noTips: "Pas d'autres conseils pour ce voyage.",
-    comingNext: "Prochainement : carte interactive, photos, remplacer ou retirer des activités et export PDF.",
+    comingNext: "Prochainement : export PDF et partage de ton plan.",
     another: "Planifier un autre voyage",
     allTrips: "Tous les voyages",
     report: "Signaler un problème avec ce plan",

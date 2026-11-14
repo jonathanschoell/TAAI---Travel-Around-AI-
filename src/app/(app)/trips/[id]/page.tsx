@@ -1,5 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { PlacePhoto } from "@/components/place-photo";
+import { ReplaceActivity } from "@/components/replace-activity";
+import { TripMap, type MapPoint } from "@/components/trip-map";
+import { BookingLinks } from "@/components/booking-links";
+import { bookingLinks } from "@/lib/booking-links";
 import { deleteTrip, reportTrip } from "@/app/(app)/actions";
 import { requireUser } from "@/lib/auth";
 import { chfRate, FX_SOURCE } from "@/lib/fx";
@@ -24,7 +30,7 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
   const { id } = await params;
   const query = await searchParams;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
-  const { t: all, date: fmtDate, number } = await getI18n();
+  const { t: all, date: fmtDate, number, locale } = await getI18n();
   const t = all.trip;
   const date = (iso: string | null) => fmtDate(iso, { weekday: "short", day: "numeric", month: "short" });
 
@@ -63,6 +69,29 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
   const tips = (saved.tips ?? []).slice(0, 4);
   const stops = Array.isArray(saved.stops) ? saved.stops : [];
   const budget = trip.budget_total ? Number(trip.budget_total) : null;
+  const dayOf = new Map((days ?? []).map((d) => [d.id, d.day_number]));
+  const points: MapPoint[] = activities
+    .filter((a) => a.latitude !== null && a.longitude !== null)
+    .map((a) => ({
+      lat: Number(a.latitude), lng: Number(a.longitude), name: a.name, day: dayOf.get(a.trip_day_id) ?? 1,
+      slot: (t.slots as Record<string, string>)[a.slot] ?? a.slot,
+    }))
+    .sort((x, y) => x.day - y.day);
+  const input = saved as typeof saved & { ages?: (number | null)[] };
+  const links = bookingLinks(
+    {
+      destination: trip.destination,
+      startDate: trip.start_date,
+      endDate: trip.end_date,
+      ages: Array.isArray(input.ages) ? input.ages : [],
+      travelers: trip.travelers ?? 1,
+      currency: trip.currency ?? "CHF",
+      stops,
+      departure: departure?.code ?? null,
+    },
+    locale,
+  );
+  const places = [...new Set(stops.map((st) => st.place))].slice(0, 4);
   const catLabel = (c: string | null) => (c ? (all.client.options.interests as Record<string, string>)[c] : undefined);
 
   return (
@@ -70,6 +99,10 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
       {query.notice === "reported" ? (
         <p className="notice notice-ok">{t.reported}</p>
       ) : null}
+
+      <Suspense fallback={<div className="h-56 animate-pulse rounded-[22px] bg-surface sm:h-72 lg:h-80" />}>
+        <PlacePhoto place={trip.destination} label={trip.destination} />
+      </Suspense>
 
       <header className="grid gap-6 lg:grid-cols-[2fr_1fr] lg:items-start">
         <div>
@@ -159,6 +192,26 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
         </section>
       ) : null}
 
+      {places.length > 1 ? (
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label={t.route}>
+          {places.map((place) => (
+            <Suspense key={place} fallback={<div className="h-40 animate-pulse rounded-[22px] bg-surface" />}>
+              <PlacePhoto place={place} label={place} imgClassName="h-40" />
+            </Suspense>
+          ))}
+        </section>
+      ) : null}
+
+      {points.length ? (
+        <section className="card flex flex-col gap-3">
+          <div>
+            <h2 className="text-xl font-bold">{t.mapTitle}</h2>
+            <p className="mt-1 text-sm text-muted">{t.mapNote}</p>
+          </div>
+          <TripMap points={points} labels={{ all: t.mapAll, day: t.day, title: t.mapTitle }} />
+        </section>
+      ) : null}
+
       <section className="flex flex-col gap-5">
         {(days ?? []).map((d) => {
           const todays = activities.filter((a) => a.trip_day_id === d.id);
@@ -201,6 +254,7 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
                                 </a>
                               ) : null}
                             </p>
+                            <ReplaceActivity activityId={a.id} name={a.name} />
                           </li>
                         ))}
                       </ul>
@@ -252,6 +306,8 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
           <p className="mt-4 text-sm text-muted">{t.comingNext}</p>
         </article>
       </section>
+
+      <BookingLinks links={links} date={date} />
 
       <section className="flex flex-wrap items-center gap-3">
         <Link href="/plan" className="btn btn-primary">{t.another}</Link>

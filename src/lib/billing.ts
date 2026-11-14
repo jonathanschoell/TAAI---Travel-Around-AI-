@@ -7,10 +7,10 @@ import { createClient } from "@/lib/supabase/server";
 export type Tier = "free" | "premium" | "unlimited";
 
 /** What each tier may do. Change the numbers here; the rest of the app reads them. */
-export const TIERS: Record<Tier, { label: string; plansPerMonth: number; plansPerDay: number; maxDays: number }> = {
-  free: { label: "Free", plansPerMonth: 2, plansPerDay: 2, maxDays: 21 },
-  premium: { label: "Premium", plansPerMonth: 30, plansPerDay: 8, maxDays: 21 },
-  unlimited: { label: "Unlimited", plansPerMonth: Infinity, plansPerDay: Infinity, maxDays: 21 },
+export const TIERS: Record<Tier, { label: string; plansPerMonth: number; plansPerDay: number; maxDays: number; editsPerDay: number }> = {
+  free: { label: "Free", plansPerMonth: 2, plansPerDay: 2, maxDays: 21, editsPerDay: 5 },
+  premium: { label: "Premium", plansPerMonth: 30, plansPerDay: 8, maxDays: 21, editsPerDay: 40 },
+  unlimited: { label: "Unlimited", plansPerMonth: Infinity, plansPerDay: Infinity, maxDays: 21, editsPerDay: Infinity },
 };
 
 export const isUnlimited = (n: number) => !Number.isFinite(n);
@@ -66,4 +66,16 @@ export async function getQuota(user: User): Promise<Quota> {
     leftToday: Math.max(0, limits.plansPerDay - usedToday),
     counted: true,
   };
+}
+
+/** How many single-activity replacements are left today. Infinity when usage cannot be counted. */
+export async function editsLeftToday(user: User, tier: Tier): Promise<number> {
+  const limit = TIERS[tier].editsPerDay;
+  const admin = createAdminClient();
+  if (!admin || !Number.isFinite(limit)) return limit;
+  const now = new Date();
+  const dayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
+  const { count } = await admin.from("ai_usage").select("*", { count: "exact", head: true })
+    .eq("user_id", user.id).eq("kind", "edit").gte("created_at", dayStart);
+  return Math.max(0, limit - (count ?? 0));
 }
