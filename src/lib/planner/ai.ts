@@ -390,7 +390,7 @@ const LARGE_MODEL_BLOCK_DAYS = 4;
 type Tool = { name: string; description: string; input_schema: object };
 
 /** One request to Claude that must end in a call of `tool`. The API key never leaves the server. */
-async function callTool(model: string, prompt: string, tool: Tool, maxTokens: number) {
+export async function callTool(model: string, prompt: string, tool: Tool, maxTokens: number) {
   const apiKey = process.env["ANTHROPIC_API_KEY"]?.trim();
   if (!apiKey) throw new PlannerError("not_configured", "ANTHROPIC_API_KEY is missing.");
   const base = (process.env["ANTHROPIC_BASE_URL"]?.trim() || "https://api.anthropic.com").replace(/\/+$/, "");
@@ -459,7 +459,7 @@ async function callTool(model: string, prompt: string, tool: Tool, maxTokens: nu
   };
 }
 
-function pickModel(tier: "free" | "premium" | "unlimited") {
+export function pickModel(tier: "free" | "premium" | "unlimited") {
   // Free and Premium use the small, inexpensive model; Unlimited uses Claude Opus.
   // Each plan's model can be changed in the hosting settings without changing code.
   if (tier === "unlimited") return process.env["ANTHROPIC_MODEL_UNLIMITED"]?.trim() || "claude-opus-5-5";

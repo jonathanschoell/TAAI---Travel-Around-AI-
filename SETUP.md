@@ -95,3 +95,7 @@ Name, Adresse und Kontakt-E-Mail des Betreibers stehen in `src/lib/operator.ts`.
 - Die Karte nutzt Leaflet mit OpenStreetMap-Kacheln. Für viel Verkehr erlaubt OpenStreetMap das nicht; dann einen Kachel-Anbieter nehmen und in Vercel `NEXT_PUBLIC_MAP_TILE_URL` (z. B. `https://…/{z}/{x}/{y}.png`) und `NEXT_PUBLIC_MAP_ATTRIBUTION` setzen.
 - Buchungslinks (Google Flights, Booking.com, GetYourGuide) sind vorausgefüllte Suchen. Partner-IDs, sobald vorhanden: `BOOKING_AFFILIATE_ID`, `GETYOURGUIDE_PARTNER_ID`. Dann erscheint automatisch der Hinweis auf mögliche Provisionen.
 - „Austauschen“ ersetzt eine einzelne Aktivität per KI. Tageslimit pro Abo in `src/lib/billing.ts` (`editsPerDay`: Free 5, Premium 40, Unlimited unbegrenzt).
+
+**Chat-Reiseberater (`/chat`)**
+- Jede Nachricht ist ein KI-Aufruf (Modell wie beim Reiseplan des Abos). Die KI antwortet und führt eine strukturierte Reiseübersicht („Brief“). Sobald Ziel, genaue Daten und Reisende bekannt sind, erstellt „Reiseplan erstellen“ den Plan über dieselbe Prüfung und Speicherung wie das Formular.
+- Tageslimit pro Abo in `src/lib/billing.ts` (`chatPerDay`: Free 40, Premium 300, Unlimited unbegrenzt). Das Gespräch wird nicht in der Datenbank gespeichert, nur im Browser-Tab.

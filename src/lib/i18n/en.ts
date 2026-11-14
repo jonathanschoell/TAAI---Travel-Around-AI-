@@ -137,6 +137,43 @@ export const en = {
       failed: "That did not work this time. Please try again.",
       limit: "You have used today's {n} replacements. Please try again tomorrow.",
     },
+    chat: {
+      title: "Chat with Jovia",
+      greeting: "Hi! I'm Jovia, your travel advisor. Where would you like to go, or what kind of trip do you have in mind? Tell me as much or as little as you like.",
+      you: "You",
+      thinking: "Jovia is thinking…",
+      tryOne: "Or start with an example:",
+      examples: [
+        "I live in Bern and want to go to Greece for ten days in August with my girlfriend. Our budget is CHF 2,500: nice beach, good food, a good hotel and an easy journey.",
+        "A week of autumn holidays with our two kids (6 and 9). Somewhere warm, not too far from Zurich.",
+        "I have no idea yet: four days in a European city in spring, culture and good food.",
+      ],
+      inputLabel: "Your message",
+      placeholder: "Write your message…",
+      send: "Send",
+      hint: "Enter to send, Shift + Enter for a new line. The conversation stays in this browser tab.",
+      restart: "Start over",
+      readyNote: "Everything needed is there. Create your itinerary now, or keep chatting to refine it.",
+      create: "Create my itinerary",
+      planning: "Planning your trip…",
+      planningNote: "This usually takes one to two minutes. Please keep this page open.",
+      failed: "Jovia could not answer this time. Please send your message again.",
+      limit: "You have used today's {n} messages. Please continue tomorrow, or use the planner form.",
+      brief: {
+        title: "Your trip so far",
+        destination: "Destination",
+        from: "From",
+        dates: "Dates",
+        travellers: "Travellers",
+        budget: "Budget",
+        style: "Style",
+        interests: "Interests",
+        stops: "Stops",
+        wishes: "Wishes",
+        empty: "Nothing yet. Everything you tell Jovia appears here.",
+        needed: "To create the itinerary, Jovia needs the destination, exact dates and who is travelling.",
+      },
+    },
     options: {
       interests: {
         beach: "Beach and sea",
@@ -177,6 +214,7 @@ export const en = {
     profile: "Profile",
     myData: "My data",
     trip: "Your itinerary",
+    chat: "Travel advisor",
   },
 
   site: {
@@ -202,6 +240,7 @@ export const en = {
   nav: {
     main: "Main",
     dashboard: "Dashboard",
+    chat: "Travel advisor",
     plan: "Plan a trip",
     holidays: "Holiday finder",
     profile: "Profile",
@@ -335,6 +374,7 @@ export const en = {
     planTitle: "Plan a trip",
     planLead:
       "Describe who is travelling, what you enjoy and your budget. Jovia builds a day-by-day itinerary and saves it here.",
+    chat: "Chat with Jovia",
     planNew: "Plan a new trip",
     findDates: "Find the best dates",
     profileTitle: "Your profile",
@@ -514,6 +554,12 @@ export const en = {
     sourceFrom: "School and public holidays from the",
     sourceNote:
       "The calendar can be incomplete, and school holidays can differ between municipalities. Check your school's calendar and your employer's holidays before booking. Jovia does not have live prices yet, so it cannot say which dates are cheaper. Travel demand is often highest during school holidays.",
+  },
+
+  chatPage: {
+    title: "Your travel advisor",
+    lead: "Tell Jovia about your trip in your own words, like you would at a travel agency. Jovia asks only what it still needs, keeps track of everything in the trip summary and then builds your itinerary.",
+    form: "Prefer a form? Use the planner.",
   },
 
   myData: {
