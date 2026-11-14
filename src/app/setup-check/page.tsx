@@ -105,8 +105,20 @@ async function Checks() {
   });
 
   const allCore = rows.slice(0, 2).every((r) => r.ok);
+  // Vercel's own variables tell which project and environment answered this request.
+  // If settings look missing, this is often a second Vercel project linked to the same repository.
+  const deployment = process.env["VERCEL_URL"];
+  const production = process.env["VERCEL_PROJECT_PRODUCTION_URL"];
+  const env = process.env["VERCEL_ENV"];
   return (
     <>
+      {deployment ? (
+        <p className="notice mb-4 text-sm">
+          This page was served by the Vercel deployment <span className="font-semibold break-all">{deployment}</span>
+          {env ? ` (${env})` : ""}{production ? `, project address ${production}` : ""}. The settings below are the ones of
+          that Vercel project. If you have several Vercel projects for the same repository, each one needs its own settings.
+        </p>
+      ) : null}
       <p className={allCore ? "notice notice-ok" : "notice notice-error"}>
         {allCore
           ? "The server can see the Supabase settings."
