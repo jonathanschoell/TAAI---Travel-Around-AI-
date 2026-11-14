@@ -17,5 +17,9 @@ export async function setLanguage(locale: string) {
   if (!isSupabaseConfigured()) return;
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
-  if (data.user) await supabase.from("profiles").update({ language: locale }).eq("user_id", data.user.id);
+  if (data.user) {
+    await supabase.from("profiles").update({ language: locale }).eq("user_id", data.user.id);
+    // Account emails (password reset) use this to pick their language.
+    await supabase.auth.updateUser({ data: { language: locale } });
+  }
 }

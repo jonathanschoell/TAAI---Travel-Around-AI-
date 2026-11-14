@@ -46,6 +46,7 @@ export async function updateProfile(_: AppFormState, fd: FormData): Promise<AppF
   }
   if (error) return { error: T.errors.failed };
   if (language) {
+    await supabase.auth.updateUser({ data: { language } });
     (await cookies()).set(LOCALE_COOKIE, language, {
       path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax", secure: process.env.NODE_ENV === "production",
     });
