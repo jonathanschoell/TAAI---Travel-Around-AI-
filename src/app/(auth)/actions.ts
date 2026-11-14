@@ -48,12 +48,14 @@ export async function signUp(_: FormState, fd: FormData): Promise<FormState> {
     return { error: T.errors.accept, email };
 
   const supabase = await createClient();
+  const { locale } = await getI18n();
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       emailRedirectTo: `${await siteOrigin()}/auth/callback?next=/dashboard`,
-      data: { display_name: name, privacy_version: PRIVACY_VERSION },
+      // "language" picks the language of the account emails (see supabase/email-templates).
+      data: { display_name: name, privacy_version: PRIVACY_VERSION, language: locale },
     },
   });
   if (error) {

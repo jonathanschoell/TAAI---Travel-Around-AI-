@@ -1,0 +1,34 @@
+{{ $l := "en" }}{{ with .Data }}{{ with .language }}{{ $l = . }}{{ end }}{{ end }}<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light only">
+<title>{{ if eq $l "de" }}Bestätige dein Jovia-Konto{{ else if eq $l "fr" }}Confirme ton compte Jovia{{ else if eq $l "it" }}Conferma il tuo account Jovia{{ else }}Confirm your Jovia account{{ end }}</title>
+</head>
+<body style="margin:0;padding:0;background:#f3f6fc;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f6fc;">
+<tr><td align="center" style="padding:32px 16px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border:1px solid #dbe3f1;border-radius:20px;">
+<tr><td style="padding:32px 32px 8px 32px;font-family:Arial,Helvetica,sans-serif;">
+<p style="margin:0;font-size:24px;font-weight:800;letter-spacing:6px;color:#1d4fd8;">JOVIA</p>
+</td></tr>
+<tr><td style="padding:16px 32px 0 32px;font-family:Arial,Helvetica,sans-serif;color:#0b1b3a;">
+<h1 style="margin:0 0 12px 0;font-size:24px;line-height:1.25;font-weight:800;">{{ if eq $l "de" }}Willkommen bei Jovia{{ else if eq $l "fr" }}Bienvenue sur Jovia{{ else if eq $l "it" }}Benvenuto su Jovia{{ else }}Welcome to Jovia{{ end }}</h1>
+<p style="margin:0 0 24px 0;font-size:16px;line-height:1.5;color:#0b1b3a;">{{ if eq $l "de" }}Bitte bestätige deine E-Mail-Adresse. Danach ist dein Konto aktiv und du kannst deine erste Reise planen.{{ else if eq $l "fr" }}Confirme ton adresse e-mail. Ton compte sera ensuite actif et tu pourras planifier ton premier voyage.{{ else if eq $l "it" }}Conferma il tuo indirizzo e-mail. Dopo il tuo account sarà attivo e potrai pianificare il tuo primo viaggio.{{ else }}Please confirm your email address. Your account is then active and you can plan your first trip.{{ end }}</p>
+<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="border-radius:999px;background:#1d4fd8;">
+<a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 26px;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:999px;">{{ if eq $l "de" }}E-Mail-Adresse bestätigen{{ else if eq $l "fr" }}Confirmer mon adresse e-mail{{ else if eq $l "it" }}Conferma l'indirizzo e-mail{{ else }}Confirm email address{{ end }}</a>
+</td></tr></table>
+<p style="margin:24px 0 6px 0;font-size:13px;line-height:1.5;color:#56637d;">{{ if eq $l "de" }}Falls der Knopf nicht funktioniert, kopiere diesen Link in deinen Browser. Er ist nur kurze Zeit gültig.{{ else if eq $l "fr" }}Si le bouton ne fonctionne pas, copie ce lien dans ton navigateur. Il n'est valable que peu de temps.{{ else if eq $l "it" }}Se il pulsante non funziona, copia questo link nel browser. È valido solo per poco tempo.{{ else }}If the button doesn't work, copy this link into your browser. It is only valid for a short time.{{ end }}</p>
+<p style="margin:0 0 24px 0;font-size:13px;line-height:1.5;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#1d4fd8;">{{ .ConfirmationURL }}</a></p>
+<p style="margin:0;padding:16px 0 0 0;border-top:1px solid #dbe3f1;font-size:13px;line-height:1.5;color:#56637d;">{{ if eq $l "de" }}Du hast kein Konto bei Jovia erstellt? Dann ignoriere diese E-Mail einfach. Ohne Bestätigung wird kein Konto aktiv.{{ else if eq $l "fr" }}Tu n'as pas créé de compte sur Jovia ? Ignore simplement cet e-mail. Sans confirmation, aucun compte n'est activé.{{ else if eq $l "it" }}Non hai creato un account su Jovia? Ignora semplicemente questa e-mail. Senza conferma nessun account viene attivato.{{ else }}Didn't create a Jovia account? Just ignore this email. No account becomes active without confirmation.{{ end }}</p>
+</td></tr>
+<tr><td style="padding:24px 32px 32px 32px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:#56637d;">
+Jovia · {{ if eq $l "de" }}KI-Reiseplaner{{ else if eq $l "fr" }}Planificateur de voyages IA{{ else if eq $l "it" }}Pianificatore di viaggi con IA{{ else }}AI travel planner{{ end }} · <a href="https://www.jovia.agency" style="color:#56637d;">jovia.agency</a><br>
+Jovia, Jonathan Schoell, Spitalackerstrasse 26, 3013 Bern, {{ if eq $l "de" }}Schweiz{{ else if eq $l "fr" }}Suisse{{ else if eq $l "it" }}Svizzera{{ else }}Switzerland{{ end }}
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>
