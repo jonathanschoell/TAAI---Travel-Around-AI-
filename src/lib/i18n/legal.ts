@@ -118,7 +118,7 @@ const en: LegalTexts = {
         "Database and sign-in: Supabase, hosted in Zurich, Switzerland.",
         "Website hosting: Vercel.",
         "AI trip planning: Anthropic, USA. What you enter in the trip planner (destination, dates, ages, interests, wishes) is sent to Anthropic to create your itinerary. Your email address and password are never sent.",
-        "Sign-up and password emails are sent through Supabase.",
+        "Sign-up and password emails are sent by Resend (Resend, Inc., USA) from servers in Ireland. Resend receives your email address and the content of these emails, nothing else.",
         "Holiday calendars and exchange rates are fetched from public services without any personal data.",
       ]],
       ["Cookies", [
@@ -236,7 +236,7 @@ const de: LegalTexts = {
         "Datenbank und Anmeldung: Supabase, gehostet in Zürich, Schweiz.",
         "Hosting der Website: Vercel.",
         "KI-Reiseplanung: Anthropic, USA. Was du im Reiseplaner eingibst (Ziel, Daten, Alter, Interessen, Wünsche), wird an Anthropic gesendet, um deinen Reiseplan zu erstellen. Deine E-Mail-Adresse und dein Passwort werden nie gesendet.",
-        "E-Mails zur Registrierung und zum Passwort werden über Supabase versendet.",
+        "E-Mails zur Registrierung und zum Passwort verschickt Resend (Resend, Inc., USA) über Server in Irland. Resend erhält dafür deine E-Mail-Adresse und den Inhalt dieser E-Mails, sonst nichts.",
         "Ferienkalender und Wechselkurse werden ohne Personendaten von öffentlichen Diensten abgerufen.",
       ]],
       ["Cookies", [
@@ -354,7 +354,7 @@ const fr: LegalTexts = {
         "Base de données et connexion : Supabase, hébergé à Zurich, Suisse.",
         "Hébergement du site : Vercel.",
         "Planification IA : Anthropic, États-Unis. Ce que tu saisis dans le planificateur (destination, dates, âges, centres d'intérêt, souhaits) est envoyé à Anthropic pour créer ton itinéraire. Ton adresse e-mail et ton mot de passe ne sont jamais envoyés.",
-        "Les e-mails d'inscription et de mot de passe sont envoyés via Supabase.",
+        "Les e-mails d'inscription et de mot de passe sont envoyés par Resend (Resend, Inc., États-Unis) depuis des serveurs en Irlande. Resend reçoit ton adresse e-mail et le contenu de ces e-mails, rien d'autre.",
         "Les calendriers de vacances et les taux de change proviennent de services publics, sans données personnelles.",
       ]],
       ["Cookies", [
@@ -472,7 +472,7 @@ const it: LegalTexts = {
         "Database e accesso: Supabase, ospitato a Zurigo, Svizzera.",
         "Hosting del sito: Vercel.",
         "Pianificazione con IA: Anthropic, USA. Ciò che inserisci nel pianificatore (destinazione, date, età, interessi, desideri) viene inviato ad Anthropic per creare il tuo itinerario. Indirizzo e-mail e password non vengono mai inviati.",
-        "Le e-mail di registrazione e per la password sono inviate tramite Supabase.",
+        "Le e-mail di registrazione e per la password sono inviate da Resend (Resend, Inc., USA) tramite server in Irlanda. Resend riceve il tuo indirizzo e-mail e il contenuto di queste e-mail, nient'altro.",
         "Calendari delle vacanze e tassi di cambio provengono da servizi pubblici, senza dati personali.",
       ]],
       ["Cookie", [
