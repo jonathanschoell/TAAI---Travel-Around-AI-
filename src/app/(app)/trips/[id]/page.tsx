@@ -11,7 +11,7 @@ import { cleanStays } from "@/lib/planner/ai";
 import { BookingLinks } from "@/components/booking-links";
 import { bookingLinks } from "@/lib/booking-links";
 import { deleteTrip, reportTrip } from "@/app/(app)/actions";
-import { requireUser } from "@/lib/auth";
+import { getProfile, requireUser } from "@/lib/auth";
 import { chfRate, FX_SOURCE } from "@/lib/fx";
 import { HOLIDAY_SOURCE } from "@/lib/holidays";
 import { BUDGET_PARTS, SLOTS } from "@/lib/planner/options";
@@ -36,6 +36,7 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
   const user = await requireUser();
   const { id } = await params;
   const query = await searchParams;
+  const profile = await getProfile(user.id);
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const { t: all, date: fmtDate, number, locale } = await getI18n();
   const t = all.trip;
@@ -69,6 +70,7 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
     holidays?: { name: string; start: string; end: string; varies: boolean; kind: "school" | "public" }[];
     homeCanton?: string;
     origin?: string;
+    address?: string;
     stays?: unknown;
   };
   const stays = cleanStays(saved.stays);
@@ -232,6 +234,7 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
             startDate={trip.start_date}
             endDate={trip.end_date}
             origin={typeof saved.origin === "string" ? saved.origin : ""}
+            address={(typeof saved.address === "string" && saved.address) || profile?.home_address || ""}
             homeCanton={typeof saved.homeCanton === "string" ? saved.homeCanton : ""}
             departure={departure?.code ?? null}
             stops={stops}

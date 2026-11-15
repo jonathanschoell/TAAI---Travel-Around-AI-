@@ -121,6 +121,28 @@ export async function findStation(place: string): Promise<Station | null> {
   }
 }
 
+/**
+ * A street address as a starting point, so connections begin at the door (walk, tram or bus
+ * to the station). Returns the timetable's own spelling of the address, or null.
+ */
+export async function findAddress(address: string): Promise<Station | null> {
+  "use cache";
+  cacheLife("days");
+  const q = address.trim().slice(0, 160);
+  if (q.length < 5) return null;
+  try {
+    const data = (await getJson(`${BASE}/locations?type=address&query=${encodeURIComponent(q)}`)) as {
+      stations?: { name: string | null; coordinate?: { x: number | null; y: number | null } }[];
+    };
+    const hit = (data.stations ?? []).find((s) => s.name && s.coordinate?.x && s.coordinate?.y);
+    // Addresses have no station number; the timetable accepts the address text itself.
+    return hit ? { id: hit.name!, name: hit.name! } : null;
+  } catch (e) {
+    console.error("Address lookup failed", e instanceof Error ? e.message : e);
+    return null;
+  }
+}
+
 type RawSection = {
   journey: { category?: string | null; number?: string | null; to?: string | null } | null;
   walk: { duration?: number | null } | null;

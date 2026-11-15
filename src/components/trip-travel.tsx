@@ -2,7 +2,7 @@ import { ConnectionList } from "@/components/connection-list";
 import { f } from "@/lib/i18n/config";
 import { getI18n } from "@/lib/i18n/server";
 import { cantonByCode } from "@/lib/swiss";
-import { AIRPORT_STATIONS, connections, findStation, TIMETABLE_SOURCE, type Station } from "@/lib/timetable";
+import { AIRPORT_STATIONS, connections, findAddress, findStation, TIMETABLE_SOURCE, type Station } from "@/lib/timetable";
 
 type Props = {
   tripId: string;
@@ -10,6 +10,8 @@ type Props = {
   startDate: string;
   endDate: string;
   origin: string;
+  /** Street address for door-to-door connections; optional. */
+  address: string;
   homeCanton: string;
   departure: string | null;
   stops: { place: string; from: string; to: string }[];
@@ -26,7 +28,11 @@ export async function TripTravel(p: Props) {
   const t = all.trip.travel;
 
   const canton = cantonByCode(p.homeCanton);
-  const home: Station | null = (p.origin ? await findStation(p.origin) : null) ?? (canton ? await findStation(canton.capital) : null);
+  const home: Station | null =
+    (p.address ? await findAddress(p.origin && !p.address.toLowerCase().includes(p.origin.toLowerCase()) ? `${p.address}, ${p.origin}` : p.address) : null) ??
+    (p.origin ? await findStation(p.origin) : null) ??
+    (canton ? await findStation(canton.capital) : null);
+  const fromDoor = Boolean(p.address && home && !/^\d+$/.test(home.id));
   const airport = p.departure ? AIRPORT_STATIONS[p.departure] ?? null : null;
   const firstPlace = p.stops[0]?.place ?? p.destination;
   const lastPlace = p.stops[p.stops.length - 1]?.place ?? p.destination;
@@ -70,6 +76,7 @@ export async function TripTravel(p: Props) {
         <button type="submit" className="btn btn-ghost">{t.update}</button>
       </form>
       {airport ? <p className="text-sm text-muted">{f(t.flightHint, { code: p.departure ?? "" })}</p> : null}
+      {!fromDoor ? <p className="text-sm text-muted">{t.addAddress}</p> : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
         {outbound ? (

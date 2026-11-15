@@ -29,7 +29,11 @@ export async function ConnectionList({ title, result, note }: { title: string; r
                 <span className="flex flex-wrap gap-1.5 text-sm">
                   <span className="pill">{dur(c.durationMinutes)}</span>
                   <span className="pill">{c.transfers === 0 ? t.direct : f(c.transfers === 1 ? t.changeOne : t.changeOther, { n: c.transfers })}</span>
-                  {c.legs[0]?.fromPlatform ? <span className="pill pill-signal">{f(t.platform, { p: c.legs[0].fromPlatform })}</span> : null}
+                  {(() => {
+                    // Platform of the first train or bus (the journey may start with a walk from the door).
+                    const first = c.legs.find((l) => l.line);
+                    return first?.fromPlatform ? <span className="pill pill-signal">{f(t.platform, { p: first.fromPlatform })}</span> : null;
+                  })()}
                 </span>
               </summary>
               <ol className="flex flex-col gap-0 border-t border-line px-4 py-3">
@@ -52,8 +56,9 @@ export async function ConnectionList({ title, result, note }: { title: string; r
                       </span>
                     </li>
                   ) : (
-                    <li key={j} className="py-1 pl-[4.25rem] text-sm text-muted">
-                      {f(t.walk, { n: l.walkMinutes ?? 1, to: l.to })}
+                    <li key={j} className="grid grid-cols-[3.5rem_1fr] gap-x-3 py-1 text-sm text-muted">
+                      <span className="tabular-nums">{j === 0 ? l.fromTime : ""}</span>
+                      <span>{f(t.walk, { n: l.walkMinutes ?? 1, to: l.to })}</span>
                     </li>
                   ),
                 )}

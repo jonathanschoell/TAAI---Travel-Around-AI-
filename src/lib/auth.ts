@@ -51,6 +51,8 @@ export type Profile = {
   /** Added by migration 0003; undefined until it has been run. */
   home_canton?: string | null;
   home_place?: string | null;
+  /** Added by migration 0005. Street address, only for public transport from the door; never sent to the AI. */
+  home_address?: string | null;
 };
 
 export const getProfile = cache(async (userId: string): Promise<Profile | null> => {
