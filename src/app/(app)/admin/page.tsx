@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { TierForm } from "@/components/app-forms";
 import { requireAdmin } from "@/lib/auth";
 import { loadAdminOverview } from "@/lib/admin-stats";
@@ -27,8 +28,8 @@ export default async function AdminPage() {
       <div>
         <h1 className="text-3xl font-extrabold sm:text-4xl">Admin overview</h1>
         <p className="mt-2 max-w-2xl text-muted">
-          Usage figures for Jovia. Trip contents and AI memory of individual users are not shown
-          here. Every visit to this page is recorded in the audit log.
+          Usage figures for Jovia. Click an account to see everything stored for it. Every visit
+          is recorded in the audit log.
         </p>
       </div>
 
@@ -59,7 +60,9 @@ export default async function AdminPage() {
             <tbody>
               {users.map((u) => (
                 <tr key={u.id} className="border-t border-line">
-                  <td className="py-2 pr-4 break-all">{u.email}</td>
+                  <td className="py-2 pr-4 break-all">
+                    <Link href={`/admin/users/${u.id}`} className="font-semibold text-brand underline">{u.email}</Link>
+                  </td>
                   <td className="py-2 pr-4 whitespace-nowrap">{fmt(u.created_at)}</td>
                   <td className="py-2 pr-4 whitespace-nowrap">{fmt(u.last_sign_in_at)}</td>
                   <td className="py-2">
