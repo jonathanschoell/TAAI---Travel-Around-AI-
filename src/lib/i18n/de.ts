@@ -135,6 +135,43 @@ export const de: Dict = {
       failed: "Das hat diesmal nicht geklappt. Bitte versuche es erneut.",
       limit: "Du hast die {n} Wechsel für heute aufgebraucht. Bitte versuche es morgen wieder.",
     },
+    chat: {
+      title: "Chat mit Jovia",
+      greeting: "Hallo! Ich bin Jovia, deine Reiseberaterin. Wohin möchtest du reisen, oder an was für eine Reise denkst du? Erzähl so viel oder so wenig, wie du magst.",
+      you: "Du",
+      thinking: "Jovia überlegt…",
+      tryOne: "Oder starte mit einem Beispiel:",
+      examples: [
+        "Ich wohne in Bern und möchte im August mit meiner Freundin für zehn Tage nach Griechenland. Unser Budget ist CHF 2'500: schöner Strand, gutes Essen, ein gutes Hotel und eine entspannte Anreise.",
+        "Eine Woche Herbstferien mit unseren zwei Kindern (6 und 9). Irgendwo warm, nicht zu weit von Zürich.",
+        "Ich habe noch keine Idee: vier Tage in einer europäischen Stadt im Frühling, Kultur und gutes Essen.",
+      ],
+      inputLabel: "Deine Nachricht",
+      placeholder: "Schreib deine Nachricht…",
+      send: "Senden",
+      hint: "Enter zum Senden, Shift + Enter für eine neue Zeile. Das Gespräch bleibt in diesem Browser-Tab.",
+      restart: "Neu beginnen",
+      readyNote: "Alles Nötige ist da. Erstelle jetzt deinen Reiseplan oder verfeinere ihn im Chat weiter.",
+      create: "Reiseplan erstellen",
+      planning: "Deine Reise wird geplant…",
+      planningNote: "Das dauert meist ein bis zwei Minuten. Bitte lass diese Seite offen.",
+      failed: "Jovia konnte diesmal nicht antworten. Bitte sende deine Nachricht noch einmal.",
+      limit: "Du hast die {n} Nachrichten für heute aufgebraucht. Mach morgen weiter oder nutze den Reiseplaner.",
+      brief: {
+        title: "Deine Reise bisher",
+        destination: "Reiseziel",
+        from: "Ab",
+        dates: "Daten",
+        travellers: "Reisende",
+        budget: "Budget",
+        style: "Stil",
+        interests: "Interessen",
+        stops: "Stationen",
+        wishes: "Wünsche",
+        empty: "Noch nichts. Alles, was du Jovia erzählst, erscheint hier.",
+        needed: "Für den Reiseplan braucht Jovia das Reiseziel, genaue Daten und wer mitreist.",
+      },
+    },
     options: {
       interests: {
         beach: "Strand und Meer",
@@ -175,6 +212,7 @@ export const de: Dict = {
     profile: "Profil",
     myData: "Meine Daten",
     trip: "Dein Reiseplan",
+    chat: "Reiseberater",
   },
 
   site: {
@@ -200,6 +238,7 @@ export const de: Dict = {
   nav: {
     main: "Hauptmenü",
     dashboard: "Dashboard",
+    chat: "Reiseberater",
     plan: "Reise planen",
     holidays: "Ferienfinder",
     profile: "Profil",
@@ -333,6 +372,7 @@ export const de: Dict = {
     planTitle: "Reise planen",
     planLead:
       "Beschreibe, wer reist, was euch gefällt und wie hoch das Budget ist. Jovia erstellt einen Plan Tag für Tag und speichert ihn hier.",
+    chat: "Mit Jovia chatten",
     planNew: "Neue Reise planen",
     findDates: "Beste Daten finden",
     profileTitle: "Dein Profil",
@@ -512,6 +552,12 @@ export const de: Dict = {
     sourceFrom: "Schulferien und Feiertage von der",
     sourceNote:
       "Der Kalender kann unvollständig sein, und Schulferien können je nach Gemeinde abweichen. Prüfe vor dem Buchen den Kalender deiner Schule und die Feiertage deines Arbeitgebers. Jovia hat noch keine Live-Preise und kann darum nicht sagen, welche Daten günstiger sind. In den Schulferien ist die Nachfrage oft am höchsten.",
+  },
+
+  chatPage: {
+    title: "Dein Reiseberater",
+    lead: "Erzähl Jovia in eigenen Worten von deiner Reise, wie im Reisebüro. Jovia fragt nur, was noch fehlt, hält alles in der Reiseübersicht fest und erstellt dann deinen Reiseplan.",
+    form: "Lieber ein Formular? Zum Reiseplaner.",
   },
 
   myData: {

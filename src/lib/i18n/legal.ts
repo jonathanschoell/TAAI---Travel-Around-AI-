@@ -117,7 +117,7 @@ const en: LegalTexts = {
       ["Service providers", [
         "Database and sign-in: Supabase, hosted in Zurich, Switzerland.",
         "Website hosting: Vercel.",
-        "AI trip planning: Anthropic, USA. What you enter in the trip planner (destination, dates, ages, interests, wishes) is sent to Anthropic to create your itinerary. Your email address and password are never sent.",
+        "AI trip planning: Anthropic, USA. What you enter in the trip planner or write in the chat with the travel advisor (destination, dates, ages, interests, wishes) is sent to Anthropic to answer you and create your itinerary. Your email address and password are never sent. Chat messages are not stored by Jovia; they stay in your browser tab until you close it.",
         "Sign-up and password emails are sent by Resend (Resend, Inc., USA) from servers in Ireland. Resend receives your email address and the content of these emails, nothing else.",
         "Holiday calendars and exchange rates are fetched from public services without any personal data.",
         "Maps on itineraries are loaded by your browser from OpenStreetMap (OpenStreetMap Foundation, UK), and destination photos from Wikimedia Commons (Wikimedia Foundation, USA). These services see your IP address when the map or photo loads, as with any website.",
@@ -237,7 +237,7 @@ const de: LegalTexts = {
       ["Dienstleister", [
         "Datenbank und Anmeldung: Supabase, gehostet in Zürich, Schweiz.",
         "Hosting der Website: Vercel.",
-        "KI-Reiseplanung: Anthropic, USA. Was du im Reiseplaner eingibst (Ziel, Daten, Alter, Interessen, Wünsche), wird an Anthropic gesendet, um deinen Reiseplan zu erstellen. Deine E-Mail-Adresse und dein Passwort werden nie gesendet.",
+        "KI-Reiseplanung: Anthropic, USA. Was du im Reiseplaner eingibst oder im Chat mit dem Reiseberater schreibst (Ziel, Daten, Alter, Interessen, Wünsche), wird an Anthropic gesendet, um dir zu antworten und deinen Reiseplan zu erstellen. Deine E-Mail-Adresse und dein Passwort werden nie gesendet. Chat-Nachrichten speichert Jovia nicht; sie bleiben in deinem Browser-Tab, bis du ihn schliesst.",
         "E-Mails zur Registrierung und zum Passwort verschickt Resend (Resend, Inc., USA) über Server in Irland. Resend erhält dafür deine E-Mail-Adresse und den Inhalt dieser E-Mails, sonst nichts.",
         "Ferienkalender und Wechselkurse werden ohne Personendaten von öffentlichen Diensten abgerufen.",
         "Karten in Reiseplänen lädt dein Browser von OpenStreetMap (OpenStreetMap Foundation, Grossbritannien), Fotos der Reiseziele von Wikimedia Commons (Wikimedia Foundation, USA). Diese Dienste sehen dabei deine IP-Adresse, wie bei jeder Website.",
@@ -357,7 +357,7 @@ const fr: LegalTexts = {
       ["Prestataires", [
         "Base de données et connexion : Supabase, hébergé à Zurich, Suisse.",
         "Hébergement du site : Vercel.",
-        "Planification IA : Anthropic, États-Unis. Ce que tu saisis dans le planificateur (destination, dates, âges, centres d'intérêt, souhaits) est envoyé à Anthropic pour créer ton itinéraire. Ton adresse e-mail et ton mot de passe ne sont jamais envoyés.",
+        "Planification IA : Anthropic, États-Unis. Ce que tu saisis dans le planificateur ou écris dans la discussion avec le conseiller voyage (destination, dates, âges, centres d'intérêt, souhaits) est envoyé à Anthropic pour te répondre et créer ton itinéraire. Ton adresse e-mail et ton mot de passe ne sont jamais envoyés. Jovia n'enregistre pas les messages de la discussion ; ils restent dans ton onglet jusqu'à ce que tu le fermes.",
         "Les e-mails d'inscription et de mot de passe sont envoyés par Resend (Resend, Inc., États-Unis) depuis des serveurs en Irlande. Resend reçoit ton adresse e-mail et le contenu de ces e-mails, rien d'autre.",
         "Les calendriers de vacances et les taux de change proviennent de services publics, sans données personnelles.",
         "Les cartes des itinéraires sont chargées par ton navigateur depuis OpenStreetMap (OpenStreetMap Foundation, Royaume-Uni), et les photos des destinations depuis Wikimedia Commons (Wikimedia Foundation, États-Unis). Ces services voient ton adresse IP au chargement, comme pour tout site web.",
@@ -477,7 +477,7 @@ const it: LegalTexts = {
       ["Fornitori di servizi", [
         "Database e accesso: Supabase, ospitato a Zurigo, Svizzera.",
         "Hosting del sito: Vercel.",
-        "Pianificazione con IA: Anthropic, USA. Ciò che inserisci nel pianificatore (destinazione, date, età, interessi, desideri) viene inviato ad Anthropic per creare il tuo itinerario. Indirizzo e-mail e password non vengono mai inviati.",
+        "Pianificazione con IA: Anthropic, USA. Ciò che inserisci nel pianificatore o scrivi nella chat con il consulente di viaggio (destinazione, date, età, interessi, desideri) viene inviato ad Anthropic per risponderti e creare il tuo itinerario. Indirizzo e-mail e password non vengono mai inviati. Jovia non salva i messaggi della chat; restano nella tua scheda del browser finché non la chiudi.",
         "Le e-mail di registrazione e per la password sono inviate da Resend (Resend, Inc., USA) tramite server in Irlanda. Resend riceve il tuo indirizzo e-mail e il contenuto di queste e-mail, nient'altro.",
         "Calendari delle vacanze e tassi di cambio provengono da servizi pubblici, senza dati personali.",
         "Le mappe degli itinerari sono caricate dal tuo browser da OpenStreetMap (OpenStreetMap Foundation, Regno Unito) e le foto delle destinazioni da Wikimedia Commons (Wikimedia Foundation, USA). Questi servizi vedono il tuo indirizzo IP al caricamento, come per qualsiasi sito.",

@@ -65,6 +65,14 @@ async function swissContext(input: TripInput, locale: string): Promise<SwissCont
 }
 
 export async function createTrip(_: PlanFormState, fd: FormData): Promise<PlanFormState> {
+  return planTrip(fd);
+}
+
+/**
+ * Checks the request, creates the itinerary with the AI and saves it, then opens it.
+ * Used by the planner form and by the chat advisor (which turns its brief into the same fields).
+ */
+export async function planTrip(fd: FormData): Promise<PlanFormState> {
   const user = await requireUser();
   const values = keep(fd);
   const { t, locale } = await getI18n();

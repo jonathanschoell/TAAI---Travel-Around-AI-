@@ -135,6 +135,43 @@ export const fr: Dict = {
       failed: "Cela n'a pas fonctionné cette fois. Réessaie.",
       limit: "Tu as utilisé les {n} remplacements du jour. Réessaie demain.",
     },
+    chat: {
+      title: "Discussion avec Jovia",
+      greeting: "Bonjour ! Je suis Jovia, ta conseillère voyage. Où aimerais-tu aller, ou quel genre de voyage as-tu en tête ? Raconte-m'en autant que tu veux.",
+      you: "Toi",
+      thinking: "Jovia réfléchit…",
+      tryOne: "Ou commence par un exemple :",
+      examples: [
+        "J'habite à Berne et je veux partir dix jours en Grèce en août avec ma copine. Notre budget est de CHF 2'500 : belle plage, bonne cuisine, un bon hôtel et un trajet facile.",
+        "Une semaine de vacances d'automne avec nos deux enfants (6 et 9 ans). Quelque part au chaud, pas trop loin de Genève.",
+        "Je n'ai pas encore d'idée : quatre jours dans une ville européenne au printemps, culture et bonne cuisine.",
+      ],
+      inputLabel: "Ton message",
+      placeholder: "Écris ton message…",
+      send: "Envoyer",
+      hint: "Entrée pour envoyer, Maj + Entrée pour une nouvelle ligne. La discussion reste dans cet onglet.",
+      restart: "Recommencer",
+      readyNote: "Tout ce qu'il faut est là. Crée ton itinéraire maintenant ou continue à l'affiner dans la discussion.",
+      create: "Créer mon itinéraire",
+      planning: "Préparation du voyage…",
+      planningNote: "Cela prend en général une à deux minutes. Garde cette page ouverte.",
+      failed: "Jovia n'a pas pu répondre cette fois. Renvoie ton message.",
+      limit: "Tu as utilisé les {n} messages du jour. Continue demain ou utilise le planificateur.",
+      brief: {
+        title: "Ton voyage jusqu'ici",
+        destination: "Destination",
+        from: "Départ de",
+        dates: "Dates",
+        travellers: "Voyageurs",
+        budget: "Budget",
+        style: "Style",
+        interests: "Centres d'intérêt",
+        stops: "Étapes",
+        wishes: "Souhaits",
+        empty: "Rien pour l'instant. Tout ce que tu dis à Jovia apparaît ici.",
+        needed: "Pour créer l'itinéraire, Jovia a besoin de la destination, des dates exactes et de qui voyage.",
+      },
+    },
     options: {
       interests: {
         beach: "Plage et mer",
@@ -175,6 +212,7 @@ export const fr: Dict = {
     profile: "Profil",
     myData: "Mes données",
     trip: "Ton itinéraire",
+    chat: "Conseiller voyage",
   },
 
   site: {
@@ -200,6 +238,7 @@ export const fr: Dict = {
   nav: {
     main: "Menu principal",
     dashboard: "Tableau de bord",
+    chat: "Conseiller voyage",
     plan: "Planifier un voyage",
     holidays: "Trouveur de vacances",
     profile: "Profil",
@@ -333,6 +372,7 @@ export const fr: Dict = {
     planTitle: "Planifier un voyage",
     planLead:
       "Décris qui voyage, ce que vous aimez et votre budget. Jovia crée un itinéraire jour par jour et l'enregistre ici.",
+    chat: "Discuter avec Jovia",
     planNew: "Planifier un nouveau voyage",
     findDates: "Trouver les meilleures dates",
     profileTitle: "Ton profil",
@@ -512,6 +552,12 @@ export const fr: Dict = {
     sourceFrom: "Vacances scolaires et jours fériés :",
     sourceNote:
       "Le calendrier peut être incomplet et les vacances scolaires peuvent varier d'une commune à l'autre. Vérifie le calendrier de ton école et les jours fériés de ton employeur avant de réserver. Jovia n'a pas encore de prix en direct et ne peut donc pas dire quelles dates sont moins chères. La demande est souvent la plus forte pendant les vacances scolaires.",
+  },
+
+  chatPage: {
+    title: "Ton conseiller voyage",
+    lead: "Raconte ton voyage à Jovia avec tes mots, comme dans une agence de voyages. Jovia ne demande que ce qui manque, note tout dans le résumé du voyage, puis crée ton itinéraire.",
+    form: "Tu préfères un formulaire ? Vers le planificateur.",
   },
 
   myData: {

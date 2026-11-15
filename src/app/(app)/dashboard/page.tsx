@@ -39,7 +39,8 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
           <h2 className="text-xl font-bold">{t.planTitle}</h2>
           <p className="text-muted">{t.planLead}</p>
           <div className="flex flex-wrap gap-2">
-            <Link href="/plan" className="btn btn-primary">{t.planNew}</Link>
+            <Link href="/chat" className="btn btn-primary">{t.chat}</Link>
+            <Link href="/plan" className="btn btn-ghost">{t.planNew}</Link>
             <Link href="/holidays" className="btn btn-ghost">{t.findDates}</Link>
           </div>
         </article>

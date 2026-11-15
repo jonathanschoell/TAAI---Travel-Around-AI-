@@ -15,6 +15,7 @@ async function AppNav() {
 
   const links = [
     { href: "/dashboard", label: t.nav.dashboard },
+    { href: "/chat", label: t.nav.chat },
     { href: "/plan", label: t.nav.plan },
     { href: "/holidays", label: t.nav.holidays },
     { href: "/profile", label: t.nav.profile },
