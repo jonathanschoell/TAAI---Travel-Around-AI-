@@ -1,5 +1,5 @@
 /** Languages Jovia is offered in. Safe to import from client and server code. */
-export const LOCALES = ["en", "de", "fr", "it"] as const;
+export const LOCALES = ["en", "de", "fr", "it", "rm"] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = "en";
 export const LOCALE_COOKIE = "jovia-lang";
@@ -9,12 +9,16 @@ export const LANGUAGES: { code: Locale; short: string; name: string; english: st
   { code: "de", short: "DE", name: "Deutsch", english: "German" },
   { code: "fr", short: "FR", name: "Français", english: "French" },
   { code: "it", short: "IT", name: "Italiano", english: "Italian" },
+  { code: "rm", short: "RM", name: "Rumantsch", english: "Romansh (Rumantsch Grischun, the standard written form)" },
 ];
 
 export const isLocale = (v: unknown): v is Locale => typeof v === "string" && (LOCALES as readonly string[]).includes(v);
 
 /** Locale tag for dates and numbers, Swiss conventions. */
 export const intlTag = (l: Locale) => `${l}-CH`;
+
+/** Locale tag for numbers. Romansh texts use the Swiss German style (12'345). */
+export const numberTag = (l: Locale) => (l === "rm" ? "de-CH" : intlTag(l));
 
 /** Fills {placeholders} in a text. */
 export function f(text: string, vars: Record<string, string | number>) {

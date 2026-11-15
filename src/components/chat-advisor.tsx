@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { planFromChat, sendChat } from "@/app/(app)/chat/actions";
-import { f, intlTag } from "@/lib/i18n/config";
+import { f, intlTag, numberTag } from "@/lib/i18n/config";
 import { useI18n } from "@/lib/i18n/client";
 import type { Brief, ChatMessage } from "@/lib/planner/advisor";
 
@@ -102,7 +102,7 @@ export function ChatAdvisor({ maxDays }: { maxDays: number }) {
     [t.brief.travellers, brief.party
       ? `${named(o.party, brief.party)}${travellers ? ` · ${travellers}` : ""}${brief.ages.some((a) => a !== null) ? ` (${brief.ages.map((a) => a ?? "?").join(", ")})` : ""}`
       : null],
-    [t.brief.budget, brief.budget ? `${brief.currency} ${brief.budget.toLocaleString(tag)}` : null],
+    [t.brief.budget, brief.budget ? `${brief.currency} ${brief.budget.toLocaleString(numberTag(locale))}` : null],
     [t.brief.style, [named(o.pace, brief.pace), named(o.level, brief.level), named(o.lodging, brief.lodging), named(o.travelMode, brief.travel_mode)]
       .filter((x) => x && x !== o.lodging.any && x !== o.travelMode.any).join(" · ") || null],
     [t.brief.interests, brief.interests.map((i) => named(o.interests, i)).join(", ") || null],

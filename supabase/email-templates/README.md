@@ -11,7 +11,7 @@ Paste them in Supabase: **Authentication → Emails → Templates**.
 Subject:
 
 ```
-{{ $l := "en" }}{{ with .Data }}{{ with .language }}{{ $l = . }}{{ end }}{{ end }}{{ if eq $l "de" }}Bestätige dein Jovia-Konto{{ else if eq $l "fr" }}Confirme ton compte Jovia{{ else if eq $l "it" }}Conferma il tuo account Jovia{{ else }}Confirm your Jovia account{{ end }}
+{{ $l := "en" }}{{ with .Data }}{{ with .language }}{{ $l = . }}{{ end }}{{ end }}{{ if eq $l "de" }}Bestätige dein Jovia-Konto{{ else if eq $l "fr" }}Confirme ton compte Jovia{{ else if eq $l "it" }}Conferma il tuo account Jovia{{ else if eq $l "rm" }}Conferma tes conto da Jovia{{ else }}Confirm your Jovia account{{ end }}
 ```
 
 Message body: the full content of `confirm-signup.html`.
@@ -21,7 +21,7 @@ Message body: the full content of `confirm-signup.html`.
 Subject:
 
 ```
-{{ $l := "en" }}{{ with .Data }}{{ with .language }}{{ $l = . }}{{ end }}{{ end }}{{ if eq $l "de" }}Neues Passwort für Jovia{{ else if eq $l "fr" }}Nouveau mot de passe pour Jovia{{ else if eq $l "it" }}Nuova password per Jovia{{ else }}Reset your Jovia password{{ end }}
+{{ $l := "en" }}{{ with .Data }}{{ with .language }}{{ $l = . }}{{ end }}{{ end }}{{ if eq $l "de" }}Neues Passwort für Jovia{{ else if eq $l "fr" }}Nouveau mot de passe pour Jovia{{ else if eq $l "it" }}Nuova password per Jovia{{ else if eq $l "rm" }}Nov pled-clav per Jovia{{ else }}Reset your Jovia password{{ end }}
 ```
 
 Message body: the full content of `reset-password.html`.

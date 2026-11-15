@@ -2,7 +2,7 @@ import "server-only";
 import type { Metadata } from "next";
 import { cache } from "react";
 import { cookies, headers } from "next/headers";
-import { fromAcceptLanguage, intlTag, isLocale, LOCALE_COOKIE, type Locale } from "./config";
+import { fromAcceptLanguage, intlTag, numberTag, isLocale, LOCALE_COOKIE, type Locale } from "./config";
 import { DICTS } from "./dictionaries";
 
 /** The visitor's language: their choice (cookie), otherwise the browser language. */
@@ -24,7 +24,7 @@ export async function getI18n() {
       iso ? new Date(iso.length === 10 ? iso + "T00:00:00Z" : iso).toLocaleDateString(tag, { timeZone: "UTC", ...opts }) : "",
     dateTime: (iso: string | null | undefined) =>
       iso ? new Date(iso).toLocaleString(tag, { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Zurich" }) : "—",
-    number: (n: number) => Math.round(n).toLocaleString(tag),
+    number: (n: number) => Math.round(n).toLocaleString(numberTag(locale)),
   };
 }
 

@@ -78,7 +78,7 @@ export function mergeHolidays(raw: RawHoliday[], kind: Holiday["kind"], lang = "
 /** School and public holidays in a canton between two dates. Returns null if the service is unavailable. */
 export async function getHolidays(canton: string, from: string, to: string, locale = "en"): Promise<Holiday[] | null> {
   if (!/^[A-Z]{2}$/.test(canton)) return null;
-  const lang = ["en", "de", "fr", "it"].includes(locale) ? locale.toUpperCase() : "EN";
+  const lang = locale === "rm" ? "DE" : ["en", "de", "fr", "it"].includes(locale) ? locale.toUpperCase() : "EN";
   try {
     const [school, publicDays] = await Promise.all([
       load("SchoolHolidays", canton, from, to, lang),
