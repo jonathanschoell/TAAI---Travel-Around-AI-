@@ -77,14 +77,15 @@ export function nearestAirports(lat: number, lng: number, count = 4): NearbyAirp
 }
 
 /** Canton names in each site language; English uses the names in CANTONS. */
-const CANTON_NAMES: Record<"de" | "fr" | "it", Record<string, string>> = {
+const CANTON_NAMES: Record<"de" | "fr" | "it" | "rm", Record<string, string>> = {
   de: { AG: "Aargau", AI: "Appenzell Innerrhoden", AR: "Appenzell Ausserrhoden", BE: "Bern", BL: "Basel-Landschaft", BS: "Basel-Stadt", FR: "Freiburg", GE: "Genf", GL: "Glarus", GR: "Graubünden", JU: "Jura", LU: "Luzern", NE: "Neuenburg", NW: "Nidwalden", OW: "Obwalden", SG: "St. Gallen", SH: "Schaffhausen", SO: "Solothurn", SZ: "Schwyz", TG: "Thurgau", TI: "Tessin", UR: "Uri", VD: "Waadt", VS: "Wallis", ZG: "Zug", ZH: "Zürich" },
   fr: { AG: "Argovie", AI: "Appenzell Rhodes-Intérieures", AR: "Appenzell Rhodes-Extérieures", BE: "Berne", BL: "Bâle-Campagne", BS: "Bâle-Ville", FR: "Fribourg", GE: "Genève", GL: "Glaris", GR: "Grisons", JU: "Jura", LU: "Lucerne", NE: "Neuchâtel", NW: "Nidwald", OW: "Obwald", SG: "Saint-Gall", SH: "Schaffhouse", SO: "Soleure", SZ: "Schwytz", TG: "Thurgovie", TI: "Tessin", UR: "Uri", VD: "Vaud", VS: "Valais", ZG: "Zoug", ZH: "Zurich" },
   it: { AG: "Argovia", AI: "Appenzello Interno", AR: "Appenzello Esterno", BE: "Berna", BL: "Basilea Campagna", BS: "Basilea Città", FR: "Friburgo", GE: "Ginevra", GL: "Glarona", GR: "Grigioni", JU: "Giura", LU: "Lucerna", NE: "Neuchâtel", NW: "Nidvaldo", OW: "Obvaldo", SG: "San Gallo", SH: "Sciaffusa", SO: "Soletta", SZ: "Svitto", TG: "Turgovia", TI: "Ticino", UR: "Uri", VD: "Vaud", VS: "Vallese", ZG: "Zugo", ZH: "Zurigo" },
+  rm: { AG: "Argovia", AI: "Appenzell Dadens", AR: "Appenzell Dador", BE: "Berna", BL: "Basilea-Champagna", BS: "Basilea-Citad", FR: "Friburg", GE: "Genevra", GL: "Glaruna", GR: "Grischun", JU: "Giura", LU: "Lucerna", NE: "Neuchâtel", NW: "Sutsilvania", OW: "Sursilvania", SG: "Son Gagl", SH: "Schaffusa", SO: "Soloturn", SZ: "Sviz", TG: "Turgovia", TI: "Tessin", UR: "Uri", VD: "Vad", VS: "Vallais", ZG: "Zug", ZH: "Turitg" },
 };
 
 export function cantonName(code: string, locale: string) {
-  const local = locale === "de" || locale === "fr" || locale === "it" ? CANTON_NAMES[locale][code] : undefined;
+  const local = locale === "de" || locale === "fr" || locale === "it" || locale === "rm" ? CANTON_NAMES[locale][code] : undefined;
   return local ?? cantonByCode(code)?.name ?? code;
 }
 

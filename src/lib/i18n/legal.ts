@@ -512,4 +512,11 @@ const it: LegalTexts = {
   },
 };
 
-export const LEGAL: Record<Locale, LegalTexts> = { en, de, fr, it };
+/** Romansh: the legal texts are not translated yet, so the German version is shown with a note. */
+const rm: LegalTexts = {
+  ...de,
+  binding:
+    "Quest text giuridic n'è anc betg disponibel per rumantsch. Qua suonda la versiun tudestga. En cas da divergenzas vala la versiun englaisa.",
+};
+
+export const LEGAL: Record<Locale, LegalTexts> = { en, de, fr, it, rm };

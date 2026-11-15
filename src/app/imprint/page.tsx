@@ -6,7 +6,7 @@ import { OPERATOR, operatorComplete } from "@/lib/operator";
 
 export const generateMetadata = titleFor("imprint");
 
-const COUNTRY: Record<string, string> = { en: "Switzerland", de: "Schweiz", fr: "Suisse", it: "Svizzera" };
+const COUNTRY: Record<string, string> = { en: "Switzerland", de: "Schweiz", fr: "Suisse", it: "Svizzera", rm: "Svizra" };
 
 export default async function ImprintPage() {
   const { locale } = await getI18n();
