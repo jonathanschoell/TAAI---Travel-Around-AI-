@@ -4,6 +4,10 @@ import { Suspense } from "react";
 import { PlacePhoto } from "@/components/place-photo";
 import { ReplaceActivity } from "@/components/replace-activity";
 import { TripMap, type MapPoint } from "@/components/trip-map";
+import { StayCard } from "@/components/stay-card";
+import { TripTravel } from "@/components/trip-travel";
+import { addStays } from "@/app/(app)/trips/[id]/actions";
+import { cleanStays } from "@/lib/planner/ai";
 import { BookingLinks } from "@/components/booking-links";
 import { bookingLinks } from "@/lib/booking-links";
 import { deleteTrip, reportTrip } from "@/app/(app)/actions";
@@ -16,6 +20,9 @@ import { f } from "@/lib/i18n/config";
 import { getI18n, titleFor } from "@/lib/i18n/server";
 
 export const generateMetadata = titleFor("trip");
+
+// Suggesting accommodation or replacing an activity calls the AI from this page.
+export const maxDuration = 120;
 
 type Activity = {
   id: string; trip_day_id: string; slot: string; position: number; name: string;
@@ -61,7 +68,12 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
     airports?: { code: string; name: string; country: string; km: number }[];
     holidays?: { name: string; start: string; end: string; varies: boolean; kind: "school" | "public" }[];
     homeCanton?: string;
+    origin?: string;
+    stays?: unknown;
   };
+  const stays = cleanStays(saved.stays);
+  const input = saved as typeof saved & { ages?: (number | null)[] };
+  const hhmm = (v: unknown, fallback: string) => (typeof v === "string" && /^\d{2}:\d{2}$/.test(v) ? v : fallback);
   const airports = Array.isArray(saved.airports) ? saved.airports : [];
   const holidays = Array.isArray(saved.holidays) ? saved.holidays : [];
   const departure = saved.departure ?? null;
@@ -77,7 +89,11 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
       slot: (t.slots as Record<string, string>)[a.slot] ?? a.slot,
     }))
     .sort((x, y) => x.day - y.day);
-  const input = saved as typeof saved & { ages?: (number | null)[] };
+  for (const st of stays) {
+    if (st.latitude !== null && st.longitude !== null)
+      points.push({ lat: st.latitude, lng: st.longitude, name: st.name, day: 0, slot: t.stays.title });
+  }
+  
   const links = bookingLinks(
     {
       destination: trip.destination,
@@ -96,6 +112,8 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
 
   return (
     <div className="flex flex-col gap-8">
+      {query.notice === "stays-failed" ? <p className="notice notice-error">{t.stays.failed}</p> : null}
+      {query.notice === "edit-limit" ? <p className="notice notice-error">{t.stays.limit}</p> : null}
       {query.notice === "reported" ? (
         <p className="notice notice-ok">{t.reported}</p>
       ) : null}
@@ -201,6 +219,50 @@ export default async function TripPage({ params, searchParams }: PageProps<"/tri
           ))}
         </section>
       ) : null}
+
+      <section id="travel" className="card flex flex-col gap-4">
+        <div>
+          <h2 className="text-xl font-bold">{t.travel.title}</h2>
+          <p className="mt-1 text-sm text-muted">{t.travel.lead}</p>
+        </div>
+        <Suspense fallback={<p className="text-muted">{t.travel.loading}</p>}>
+          <TripTravel
+            tripId={trip.id}
+            destination={trip.destination}
+            startDate={trip.start_date}
+            endDate={trip.end_date}
+            origin={typeof saved.origin === "string" ? saved.origin : ""}
+            homeCanton={typeof saved.homeCanton === "string" ? saved.homeCanton : ""}
+            departure={departure?.code ?? null}
+            stops={stops}
+            outTime={hhmm(query.out, "06:00")}
+            returnTime={hhmm(query.ret, "12:00")}
+          />
+        </Suspense>
+      </section>
+
+      <section className="flex flex-col gap-4" aria-labelledby="stays-title">
+        <div>
+          <h2 id="stays-title" className="text-2xl font-extrabold">{t.stays.title}</h2>
+          <p className="mt-1 text-sm text-muted">{t.stays.lead}</p>
+        </div>
+        {stays.length ? (
+          stays.map((st) => (
+            <StayCard key={st.name + st.check_in} stay={st} money={money}
+              trip={{
+                destination: trip.destination, startDate: trip.start_date, endDate: trip.end_date,
+                ages: Array.isArray(input.ages) ? input.ages : [], travelers: trip.travelers ?? 1,
+                currency: trip.currency ?? "CHF", stops, departure: departure?.code ?? null,
+              }} />
+          ))
+        ) : (
+          <form action={addStays} className="card flex flex-wrap items-center justify-between gap-3">
+            <input type="hidden" name="trip_id" value={trip.id} />
+            <p className="text-muted">{t.stays.none}</p>
+            <button type="submit" className="btn btn-primary">{t.stays.suggest}</button>
+          </form>
+        )}
+      </section>
 
       {points.length ? (
         <section className="card flex flex-col gap-3">

@@ -5,7 +5,8 @@ import { requireUser } from "@/lib/auth";
 import { editsLeftToday, getTier, TIERS } from "@/lib/billing";
 import { f } from "@/lib/i18n/config";
 import { getI18n } from "@/lib/i18n/server";
-import { PlannerError, suggestReplacement } from "@/lib/planner/ai";
+import { PlannerError, suggestReplacement, suggestStays } from "@/lib/planner/ai";
+import { redirect } from "next/navigation";
 import type { TripInput } from "@/lib/planner/options";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -89,4 +90,32 @@ export async function replaceActivity(_: ReplaceState, fd: FormData): Promise<Re
 
   revalidatePath(`/trips/${trip.id}`);
   return { notice: f(T.done, { name: a.name }) };
+}
+
+/** Adds accommodation suggestions to a trip planned before stays were part of every plan. */
+export async function addStays(fd: FormData) {
+  const user = await requireUser();
+  const id = String(fd.get("trip_id") ?? "");
+  if (!isUuid(id)) redirect("/dashboard");
+  const supabase = await createClient();
+  const { data: trip } = await supabase.from("trips").select("id, destination, input").eq("id", id).maybeSingle();
+  if (!trip) redirect("/dashboard");
+  const tier = await getTier(user);
+  if ((await editsLeftToday(user, tier)) <= 0) redirect(`/trips/${id}?notice=edit-limit#stays-title`);
+  const { locale } = await getI18n();
+  const input = (trip.input ?? {}) as TripInput & Record<string, unknown>;
+  try {
+    const { stays, usage } = await suggestStays(
+      { ...input, destination: input.destination ?? trip.destination, stops: Array.isArray(input.stops) ? input.stops : [], ages: input.ages ?? [], interests: input.interests ?? [] },
+      tier,
+      locale,
+    );
+    const admin = createAdminClient();
+    if (admin) await admin.from("ai_usage").insert({ user_id: user.id, kind: "edit", input_tokens: usage.input_tokens, output_tokens: usage.output_tokens });
+    if (stays.length) await supabase.from("trips").update({ input: { ...input, stays } }).eq("id", id);
+  } catch {
+    redirect(`/trips/${id}?notice=stays-failed#stays-title`);
+  }
+  revalidatePath(`/trips/${id}`);
+  redirect(`/trips/${id}#stays-title`);
 }

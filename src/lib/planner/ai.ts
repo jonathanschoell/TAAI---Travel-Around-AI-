@@ -28,8 +28,24 @@ export type SwissContext = {
   holidays: { name: string; start: string; end: string; varies: boolean; kind: "school" | "public" }[] | null;
 };
 
+/** Where the travellers sleep. Suggested by the AI: existence, price and availability are not verified. */
+export type Stay = {
+  place: string;
+  check_in: string;
+  check_out: string;
+  name: string;
+  kind: string;
+  area: string;
+  address: string;
+  latitude: number | null;
+  longitude: number | null;
+  price_per_night: number | null;
+  reason: string;
+};
+
 export type Plan = {
   departure: { code: string; reason: string } | null;
+  stays: Stay[];
   title: string;
   summary: string;
   days: PlanDay[];
@@ -60,6 +76,30 @@ const activitySchema = {
   },
   required: ["slot", "name", "category", "description", "duration_minutes", "cost", "latitude", "longitude"],
   additionalProperties: false,
+};
+
+const staySchema = {
+  type: "object",
+  properties: {
+    place: { type: "string", description: "Town or city where they sleep" },
+    check_in: { type: "string", description: "YYYY-MM-DD" },
+    check_out: { type: "string", description: "YYYY-MM-DD, the day they leave" },
+    name: { type: "string", description: "Real name of the hotel or accommodation" },
+    kind: { type: "string", enum: ["hotel", "apartment", "guesthouse", "resort", "hostel"] },
+    area: { type: "string", description: "Neighbourhood or part of town" },
+    address: { type: "string", description: "Street address if you are sure, otherwise empty" },
+    latitude: { type: "number", description: "0 if you are not reasonably sure" },
+    longitude: { type: "number", description: "0 if you are not reasonably sure" },
+    price_per_night: { type: "number", description: "Estimated price per night for the whole group in the trip currency" },
+    reason: { type: "string", description: "One sentence on why it fits these travellers" },
+  },
+  required: ["place", "check_in", "check_out", "name", "kind", "area", "address", "latitude", "longitude", "price_per_night", "reason"],
+  additionalProperties: false,
+};
+const staysProperty = {
+  type: "array",
+  items: staySchema,
+  description: "One accommodation for each place where the travellers spend nights, in order",
 };
 
 const TOOL = {
@@ -100,8 +140,9 @@ const TOOL = {
         additionalProperties: false,
       },
       tips: { type: "array", items: { type: "string" }, description: "Up to 4 practical tips or hidden gems" },
+      stays: staysProperty,
     },
-    required: ["title", "departure_airport_code", "departure_airport_reason", "summary", "days", "budget", "tips"],
+    required: ["title", "departure_airport_code", "departure_airport_reason", "summary", "days", "budget", "tips", "stays"],
     additionalProperties: false,
   },
 };
@@ -134,8 +175,9 @@ const OUTLINE_TOOL = {
       },
       budget: TOOL.input_schema.properties.budget,
       tips: TOOL.input_schema.properties.tips,
+      stays: staysProperty,
     },
-    required: ["title", "departure_airport_code", "departure_airport_reason", "summary", "days", "budget", "tips"],
+    required: ["title", "departure_airport_code", "departure_airport_reason", "summary", "days", "budget", "tips", "stays"],
     additionalProperties: false,
   },
 };
@@ -216,6 +258,9 @@ function dayRules(input: TripInput) {
 }
 
 /** Rules for the parts of the plan that cover the whole trip. */
+const STAY_RULE =
+  "- Where to stay (stays): for each place where the travellers sleep (each fixed stop, otherwise the destination; split long trips by area if they move), suggest ONE real, specific accommodation that matches the accommodation type, comfort level, ages and budget. Use its real name, the neighbourhood, the street address only if you are sure, coordinates only if reasonably sure (otherwise 0). check_in is the first night, check_out the day they leave; together the stays cover every night from the start date to the end date. price_per_night is your estimate for the whole group. Only suggest places you are confident exist and are open; never claim availability.";
+
 function tripRules(swiss: SwissContext | null) {
   return [
     ...(swiss?.airports.length
@@ -223,6 +268,7 @@ function tripRules(swiss: SwissContext | null) {
           "- Recommend one departure airport from the candidate list. Weigh how easy it is to get there from home (Swiss travellers often take the train), the destination, and that smaller airports have fewer connections. Do not state flight prices, schedules or airlines as facts. On day 1, describe getting to that airport in the transit notes.",
         ]
       : ["- Leave departure_airport_code and departure_airport_reason empty."]),
+    STAY_RULE,
     ...(swiss?.holidays?.length
       ? [
           "- The trip overlaps the holidays listed above. Mention it where it matters (busier places, closures on public holidays). Never claim specific price differences or savings.",
@@ -339,6 +385,35 @@ export function cleanActivity(a: unknown): PlanActivity {
   };
 }
 
+const isDay = (v: unknown): v is string => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+
+/** Accommodation suggestions made safe; drops entries without a name or valid dates. */
+export function cleanStays(raw: unknown): Stay[] {
+  return (Array.isArray(raw) ? raw : [])
+    .map((x) => (x ?? {}) as Record<string, unknown>)
+    .filter((x) => str(x.name, 120) && isDay(x.check_in) && isDay(x.check_out) && String(x.check_out) >= String(x.check_in))
+    .slice(0, 10)
+    .map((x) => {
+      const lat = num(x.latitude);
+      const lng = num(x.longitude);
+      const ok = lat !== null && lng !== null && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && !(lat === 0 && lng === 0);
+      const price = num(x.price_per_night);
+      return {
+        place: str(x.place, 80),
+        check_in: x.check_in as string,
+        check_out: x.check_out as string,
+        name: str(x.name, 120),
+        kind: ["hotel", "apartment", "guesthouse", "resort", "hostel"].includes(String(x.kind)) ? String(x.kind) : "hotel",
+        area: str(x.area, 80),
+        address: str(x.address, 160),
+        latitude: ok ? lat : null,
+        longitude: ok ? lng : null,
+        price_per_night: price !== null && price > 0 ? Math.round(price) : null,
+        reason: str(x.reason, 300),
+      };
+    });
+}
+
 export function normalizePlan(raw: unknown, days: number, allowedAirports: string[] = []): Plan {
   const r = (raw ?? {}) as Record<string, unknown>;
   const rawDays = Array.isArray(r.days) ? r.days : [];
@@ -365,6 +440,7 @@ export function normalizePlan(raw: unknown, days: number, allowedAirports: strin
     BUDGET_PARTS.map(([k]) => [k, Math.max(0, Math.round(num(rb[k]) ?? 0))]),
   );
   return {
+    stays: cleanStays(r.stays),
     departure: allowedAirports.includes(str(r.departure_airport_code, 3).toUpperCase())
       ? { code: str(r.departure_airport_code, 3).toUpperCase(), reason: str(r.departure_airport_reason, 400) }
       : null,
@@ -603,4 +679,35 @@ export async function suggestReplacement(
   const activity = { ...cleanActivity(raw), slot: req.current.slot };
   if (!activity.name) throw new PlannerError("incomplete", "No replacement came back.");
   return { activity, usage };
+}
+
+const STAYS_TOOL = {
+  name: "save_stays",
+  description: "Save where the travellers sleep.",
+  input_schema: {
+    type: "object",
+    properties: { stays: staysProperty },
+    required: ["stays"],
+    additionalProperties: false,
+  },
+};
+
+/** Accommodation suggestions for a trip planned before stays were part of the plan. */
+export async function suggestStays(
+  input: TripInput,
+  tier: "free" | "premium" | "unlimited",
+  locale = "en",
+): Promise<{ stays: Stay[]; usage: Usage }> {
+  const full = { ...input, language: LANGUAGES.find((l) => l.code === locale)?.english ?? "English" };
+  const prompt = [
+    "You are Jovia, a careful travel planner. Suggest where these travellers should stay.",
+    buildContext(full, "", null),
+    "",
+    "Rules:",
+    STAY_RULE,
+    `- Write the reason in ${full.language}.`,
+    "Do not answer in text. Call the save_stays tool exactly once.",
+  ].join("\n");
+  const { input: raw, usage } = await callTool(pickModel(tier), prompt, STAYS_TOOL, 6000);
+  return { stays: cleanStays(raw.stays), usage };
 }
