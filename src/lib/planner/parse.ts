@@ -79,6 +79,7 @@ export function parseTripForm(
     input: {
       destination,
       origin: s("origin", 120),
+      address: s("address", 160),
       homeCanton: cantonByCode(s("home_canton", 2))?.code ?? "",
       homeCoords: coords(fd),
       startDate,

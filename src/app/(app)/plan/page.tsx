@@ -66,6 +66,7 @@ export default async function PlanPage({ searchParams }: PageProps<"/plan">) {
         defaults={{
           currency: profile?.currency ?? "CHF",
           homePlace: profile?.home_place ?? "",
+          homeAddress: profile?.home_address ?? "",
           homeCanton: profile?.home_canton ?? "",
           startDate: isDate(q.start) ? q.start : "",
           endDate: isDate(q.end) ? q.end : "",

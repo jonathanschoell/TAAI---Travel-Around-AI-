@@ -68,6 +68,8 @@ export const MAX_STOPS = 8;
 export type TripInput = {
   destination: string;
   origin: string;
+  /** Street address for door-to-door connections. Never sent to the AI. */
+  address?: string;
   /** Two-letter canton code, or "" when not given. */
   homeCanton: string;
   /** Rounded device location for this trip only; never saved. */

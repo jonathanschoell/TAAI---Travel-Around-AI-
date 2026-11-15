@@ -103,12 +103,15 @@ export async function planTrip(fd: FormData): Promise<PlanFormState> {
   const admin = createAdminClient();
 
   const profile = await getProfile(user.id);
+  // The chat has no address field; use the one from the profile. The address is kept for
+  // the timetable only and removed from what the AI sees.
+  const address = input.address || profile?.home_address || "";
   const context = await loadPersonalContext(user.id, profile?.personalization_enabled ?? false);
   const swiss = await swissContext(input, locale);
 
   let result;
   try {
-    result = await generatePlan(input, context, quota.tier, swiss, locale);
+    result = await generatePlan({ ...input, address: undefined }, context, quota.tier, swiss, locale);
   } catch (e) {
     const kind = e instanceof PlannerError ? e.kind : "failed";
     const messages: Record<string, string> = {
@@ -138,6 +141,7 @@ export async function planTrip(fd: FormData): Promise<PlanFormState> {
     // The device location is used for this plan only and is not stored.
     input: {
       ...input,
+      address,
       homeCoords: null,
       tips: plan.tips,
       stays: plan.stays,

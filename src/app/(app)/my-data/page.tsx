@@ -38,6 +38,7 @@ export default async function MyDataPage() {
           <dt className="text-muted">{t.profileName}</dt><dd>{profile?.display_name ?? "—"}</dd>
           <dt className="text-muted">{t.ageGroup}</dt><dd>{profile?.age_group ?? t.notSet}</dd>
           <dt className="text-muted">{t.currency}</dt><dd>{profile?.currency ?? "—"}</dd>
+          <dt className="text-muted">{t.address}</dt><dd className="break-words">{profile?.home_address || "—"}</dd>
           <dt className="text-muted">{t.language}</dt><dd>{languageName}</dd>
           <dt className="text-muted">{t.lastActive}</dt><dd>{fmt(profile?.last_seen_at)}</dd>
         </dl>

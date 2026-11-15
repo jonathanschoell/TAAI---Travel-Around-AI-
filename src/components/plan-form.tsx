@@ -49,7 +49,7 @@ const PARTY_SIZE: Record<string, [number, number]> = {
 };
 
 type Stop = { place: string; from: string; to: string };
-type Defaults = { currency: string; homePlace: string; homeCanton: string; startDate?: string; endDate?: string };
+type Defaults = { currency: string; homePlace: string; homeAddress?: string; homeCanton: string; startDate?: string; endDate?: string };
 
 /** Home town, canton and optional device location; shows the nearest airports as you type. */
 function HomeFields({ values, defaults }: { values: Values | undefined; defaults: Defaults }) {
@@ -101,6 +101,12 @@ function HomeFields({ values, defaults }: { values: Values | undefined; defaults
         <label htmlFor="pl-origin">{t.homeTown}</label>
         <input id="pl-origin" name="origin" className="input" maxLength={120} autoComplete="address-level2"
           placeholder={t.homeTownPlaceholder} defaultValue={text(values, "origin", defaults.homePlace)} />
+      </div>
+      <div className="field md:col-span-2">
+        <label htmlFor="pl-address">{t.address}</label>
+        <input id="pl-address" name="address" className="input" maxLength={160} autoComplete="street-address"
+          placeholder={t.addressPlaceholder} defaultValue={text(values, "address", defaults.homeAddress ?? "")} />
+        <span className="hint">{t.addressHint}</span>
       </div>
       <div className="field">
         <label htmlFor="pl-canton">{t.canton}</label>

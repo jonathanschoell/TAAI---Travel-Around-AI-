@@ -27,6 +27,7 @@ export function ProfileForm({
     currency: string;
     home_canton?: string | null;
     home_place?: string | null;
+    home_address?: string | null;
   };
 }) {
   const [state, action, pending] = useActionState(updateProfile, empty);
@@ -58,6 +59,12 @@ export function ProfileForm({
         <input id="pf-place" name="home_place" className="input" maxLength={80} autoComplete="address-level2"
           placeholder={t.homeTownPlaceholder} defaultValue={profile.home_place ?? ""} />
         <span className="hint">{t.homeTownHint}</span>
+      </div>
+      <div className="field">
+        <label htmlFor="pf-address">{t.address}</label>
+        <input id="pf-address" name="home_address" className="input" maxLength={160} autoComplete="street-address"
+          placeholder={t.addressPlaceholder} defaultValue={profile.home_address ?? ""} />
+        <span className="hint">{t.addressHint}</span>
       </div>
       <div className="field">
         <label htmlFor="pf-canton">{t.canton}</label>

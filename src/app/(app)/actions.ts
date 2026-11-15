@@ -22,6 +22,7 @@ export async function updateProfile(_: AppFormState, fd: FormData): Promise<AppF
   const currency = String(fd.get("currency") ?? "");
   const canton = String(fd.get("home_canton") ?? "");
   const place = String(fd.get("home_place") ?? "").trim().slice(0, 80);
+  const address = String(fd.get("home_address") ?? "").trim().slice(0, 160);
   const askedLanguage = String(fd.get("language") ?? "");
   const T = (await getI18n()).t.profile;
 
@@ -37,7 +38,13 @@ export async function updateProfile(_: AppFormState, fd: FormData): Promise<AppF
     ...(language ? { language } : {}),
   };
   const home = { home_canton: cantonByCode(canton)?.code ?? null, home_place: place || null };
-  let { error } = await supabase.from("profiles").update({ ...base, ...home }).eq("user_id", user.id);
+  let { error } = await supabase.from("profiles").update({ ...base, ...home, home_address: address || null }).eq("user_id", user.id);
+  let addressMissing = false;
+  if (error && /home_address/.test(error.message)) {
+    // The address column does not exist until migration 0005 has been run.
+    addressMissing = true;
+    ({ error } = await supabase.from("profiles").update({ ...base, ...home }).eq("user_id", user.id));
+  }
   if (error && /home_(canton|place)/.test(error.message)) {
     // The home columns do not exist until migration 0003 has been run.
     ({ error } = await supabase.from("profiles").update(base).eq("user_id", user.id));
@@ -45,6 +52,7 @@ export async function updateProfile(_: AppFormState, fd: FormData): Promise<AppF
       return { notice: T.savedNoHome };
   }
   if (error) return { error: T.errors.failed };
+  if (addressMissing && address) return { notice: T.savedNoAddress };
   if (language) {
     await supabase.auth.updateUser({ data: { language } });
     (await cookies()).set(LOCALE_COOKIE, language, {
