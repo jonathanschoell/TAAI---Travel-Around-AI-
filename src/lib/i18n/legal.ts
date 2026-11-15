@@ -111,8 +111,8 @@ const en: LegalTexts = {
         "To understand overall usage of the service.",
       ]],
       ["What the operator can see", [
-        "The operator can see account email addresses, registration and sign-in times, and overall usage figures.",
-        "Trip contents and AI memory entries of individual users are not shown in the operator's admin area.",
+        "The operator can see all data stored for an account in the admin area: email address, registration and sign-in times, profile (including home town and street address if entered), plan, AI usage, consents, saved trips and AI memory.",
+        "This access is used only to give support, to fix problems and to prevent misuse. Every time an account or trip is opened, this is recorded in an audit log.",
       ]],
       ["Service providers", [
         "Database and sign-in: Supabase, hosted in Zurich, Switzerland.",
@@ -232,8 +232,8 @@ const de: LegalTexts = {
         "Um die Nutzung des Dienstes insgesamt zu verstehen.",
       ]],
       ["Was der Betreiber sieht", [
-        "Der Betreiber sieht die E-Mail-Adressen der Konten, Zeitpunkte von Registrierung und Anmeldung sowie Nutzungszahlen insgesamt.",
-        "Reiseinhalte und KI-Gedächtnis einzelner Nutzer werden im Admin-Bereich nicht angezeigt.",
+        "Der Betreiber kann im Admin-Bereich alle zu einem Konto gespeicherten Daten sehen: E-Mail-Adresse, Zeitpunkte von Registrierung und Anmeldung, Profil (inklusive Wohnort und Adresse, sofern angegeben), Abo, KI-Nutzung, Einwilligungen, gespeicherte Reisen und KI-Gedächtnis.",
+        "Dieser Zugriff dient nur dem Support, der Fehlerbehebung und der Verhinderung von Missbrauch. Jedes Öffnen eines Kontos oder einer Reise wird in einem Protokoll festgehalten.",
       ]],
       ["Dienstleister", [
         "Datenbank und Anmeldung: Supabase, gehostet in Zürich, Schweiz.",
@@ -353,8 +353,8 @@ const fr: LegalTexts = {
         "Comprendre l'utilisation globale du service.",
       ]],
       ["Ce que voit l'exploitant", [
-        "L'exploitant voit les adresses e-mail des comptes, les dates d'inscription et de connexion ainsi que les chiffres d'utilisation globaux.",
-        "Le contenu des voyages et la mémoire de l'IA des utilisateurs ne sont pas affichés dans l'espace d'administration.",
+        "Dans l'espace d'administration, l'exploitant peut voir toutes les données enregistrées pour un compte : adresse e-mail, dates d'inscription et de connexion, profil (y compris domicile et adresse si indiqués), abonnement, utilisation de l'IA, consentements, voyages enregistrés et mémoire de l'IA.",
+        "Cet accès sert uniquement au support, à la correction d'erreurs et à la prévention des abus. Chaque ouverture d'un compte ou d'un voyage est enregistrée dans un journal.",
       ]],
       ["Prestataires", [
         "Base de données et connexion : Supabase, hébergé à Zurich, Suisse.",
@@ -474,8 +474,8 @@ const it: LegalTexts = {
         "Per capire l'utilizzo complessivo del servizio.",
       ]],
       ["Cosa vede il gestore", [
-        "Il gestore vede gli indirizzi e-mail degli account, le date di registrazione e di accesso e i dati di utilizzo complessivi.",
-        "I contenuti dei viaggi e la memoria dell'IA dei singoli utenti non sono mostrati nell'area di amministrazione.",
+        "Nell'area di amministrazione il gestore può vedere tutti i dati salvati per un account: indirizzo e-mail, date di registrazione e di accesso, profilo (compresi luogo di residenza e indirizzo, se indicati), abbonamento, utilizzo dell'IA, consensi, viaggi salvati e memoria dell'IA.",
+        "Questo accesso serve solo per l'assistenza, la correzione di errori e la prevenzione degli abusi. Ogni apertura di un account o di un viaggio viene registrata in un registro.",
       ]],
       ["Fornitori di servizi", [
         "Database e accesso: Supabase, ospitato a Zurigo, Svizzera.",
