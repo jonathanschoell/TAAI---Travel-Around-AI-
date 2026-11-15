@@ -99,3 +99,8 @@ Name, Adresse und Kontakt-E-Mail des Betreibers stehen in `src/lib/operator.ts`.
 **Chat-Reiseberater (`/chat`)**
 - Jede Nachricht ist ein KI-Aufruf (Modell wie beim Reiseplan des Abos). Die KI antwortet und führt eine strukturierte Reiseübersicht („Brief“). Sobald Ziel, genaue Daten und Reisende bekannt sind, erstellt „Reiseplan erstellen“ den Plan über dieselbe Prüfung und Speicherung wie das Formular.
 - Tageslimit pro Abo in `src/lib/billing.ts` (`chatPerDay`: Free 40, Premium 300, Unlimited unbegrenzt). Das Gespräch wird nicht in der Datenbank gespeichert, nur im Browser-Tab.
+
+**Anreise und Unterkunft im Reiseplan**
+- Zugverbindungen (Zeiten, Gleise, Umsteigen) kommen ohne Schlüssel von transport.opendata.ch (Schweizer Fahrplan, auch viele Verbindungen ins nahe Ausland). Ist der Fahrplan für das Reisedatum noch nicht veröffentlicht, werden Beispielverbindungen für denselben Wochentag gezeigt und so gekennzeichnet. Flugzeiten gibt es erst mit einem Flug-Anbieter (z. B. Duffel).
+- Unterkünfte schlägt die KI im Plan vor (`trips.input.stays`). Ältere Pläne haben einen Knopf „Unterkunft vorschlagen“.
+- Echte Hotelfotos, geprüfte Adresse und Bewertung: `GOOGLE_PLACES_API_KEY` in Vercel (Typ Secret) setzen. In der Google Cloud Console ein Projekt mit Zahlungsmittel anlegen, „Places API (New)“ aktivieren, einen API-Schlüssel erstellen und ihn auf „Places API (New)“ beschränken. Ohne Schlüssel zeigt Jovia ein Foto der Umgebung und kennzeichnet die Unterkunft als „nicht geprüft“. Google verrechnet Suchen und Fotos nach Nutzung; Ergebnisse werden einige Stunden zwischengespeichert.

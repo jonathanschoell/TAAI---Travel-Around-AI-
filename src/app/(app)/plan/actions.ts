@@ -140,6 +140,7 @@ export async function planTrip(fd: FormData): Promise<PlanFormState> {
       ...input,
       homeCoords: null,
       tips: plan.tips,
+      stays: plan.stays,
       departure: plan.departure,
       airports: swiss?.airports ?? [],
       holidays: swiss?.holidays ?? [],
